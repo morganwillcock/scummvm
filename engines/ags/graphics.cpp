@@ -436,7 +436,9 @@ void AGSGraphics::loadFonts() {
 		if (stream) {
 			bool antialias = (_vm->_gameFile->_colorDepth != 1) && _vm->getGameOption(OPT_ANTIALIASFONTS);
 			antialias = false; // FIXME: AA causes color-key artifacts at present
-			_fonts[i] = Graphics::loadTTFFont(*stream, fontSize, !antialias);
+			_fonts[i] = Graphics::loadTTFFont(*stream, fontSize, 0, !antialias);
+			if (!_fonts[i])
+				error("loadTTFFont returned NULL for font %d", i);
 			delete stream;
 			continue;
 		}
@@ -455,6 +457,8 @@ void AGSGraphics::loadFonts() {
 Graphics::Font *AGSGraphics::getFont(uint id) {
 	if (id >= _fonts.size())
 		error("game used font %d, but only %d fonts exist", id, _fonts.size());
+	if (!_fonts[id])
+		error("getFont: font is NULL for font %d", id);
 
 	return _fonts[id];
 }
