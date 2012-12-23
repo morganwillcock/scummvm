@@ -7,6 +7,7 @@ MODULE_OBJS := \
 	debugger.o \
 	dialog.o \
 	error.o \
+	EventRecorder.o \
 	gui-manager.o \
 	launcher.o \
 	massadd.o \
@@ -36,6 +37,13 @@ MODULE_OBJS += \
 else
 MODULE_OBJS += \
 	browser.o
+endif
+
+ifdef SDL_BACKEND
+MODULE_OBJS += \
+	editrecorddialog.o \
+	onscreendialog.o \
+	recorderdialog.o
 endif
 
 # Include common rules
