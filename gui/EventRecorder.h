@@ -64,7 +64,7 @@ class WriteStream;
  * TODO: Add more documentation.
  */
 class EventRecorder : private Common::EventSource, public Common::Singleton<EventRecorder>, private Common::DefaultEventMapper {
-	friend class Singleton<SingletonBaseType>;
+	friend class Common::Singleton<SingletonBaseType>;
 	EventRecorder();
 	~EventRecorder();
 public:
