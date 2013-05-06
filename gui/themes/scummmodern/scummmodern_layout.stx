@@ -1060,6 +1060,8 @@
 								height = '25'
 						/>
 					</layout>
+					<widget name = 'Author' height = 'Globals.Line.Height' />
+					<widget name = 'Notes' height = 'Globals.Line.Height' />
 				</layout>
 			</layout>
 			<layout type = 'horizontal' padding = '0, 0, 0, 0'>
@@ -1067,10 +1069,11 @@
 				<widget name = 'Delete'
 						type = 'Button'
 				/>
-				<space size = '32'/>
+				<space size = '16'/>
 				<widget name = 'Cancel'
 						type = 'Button'
 				/>
+				<space size = '16'/>
 				<widget name = 'Edit'
 						type = 'Button'
 				/>
