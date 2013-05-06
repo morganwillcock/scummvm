@@ -49,6 +49,8 @@ private:
 	GUI::StaticTextWidget *_authorText;
 	GUI::StaticTextWidget *_notesText;
 	GUI::ButtonWidget *_editButton;
+	GUI::ButtonWidget *_deleteButton;
+	GUI::ButtonWidget *_playbackButton;
 
 	void updateList();
 	void updateScreenShotsText();

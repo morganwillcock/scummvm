@@ -58,14 +58,18 @@ RecorderDialog::RecorderDialog() : Dialog("RecorderDialog"), _list(0), _currentS
 
 	_list = new GUI::ListWidget(this, "RecorderDialog.List");
 	_list->setNumberingMode(GUI::kListNumberingOff);
-	new GUI::ButtonWidget(this, "RecorderDialog.Delete", _("Delete"), 0, kDeleteCmd);
+
+	_deleteButton = new GUI::ButtonWidget(this, "RecorderDialog.Delete", _("Delete"), 0, kDeleteCmd);
 	new GUI::ButtonWidget(this, "RecorderDialog.Cancel", _("Cancel"), 0, kCloseCmd);
 	new GUI::ButtonWidget(this, "RecorderDialog.Record", _("Record"), 0, kRecordCmd);
-	new GUI::ButtonWidget(this, "RecorderDialog.Playback", _("Playback"), 0, kPlaybackCmd);
+	_playbackButton = new GUI::ButtonWidget(this, "RecorderDialog.Playback", _("Playback"), 0, kPlaybackCmd);
 	
 	_editButton = new GUI::ButtonWidget(this, "RecorderDialog.Edit", _("Edit"), 0, kEditRecordCmd);
 
 	_editButton->setEnabled(false);
+	_deleteButton->setEnabled(false);
+	_playbackButton->setEnabled(false);
+
 	_gfxWidget = new GUI::GraphicsWidget(this, 0, 0, 10, 10);
 	_container = new GUI::ContainerWidget(this, 0, 0, 10, 10);
 	if (g_gui.xmlEval()->getVar("Globals.RecorderDialog.ExtInfo.Visible") == 1) {
@@ -224,11 +228,18 @@ void RecorderDialog::updateSelection(bool redraw) {
 	if (_list->getSelected() >= 0) {
 		_authorText->setLabel(_("Author: ") + _fileHeaders[_list->getSelected()].author);
 		_notesText->setLabel(_("Notes: ") + _fileHeaders[_list->getSelected()].notes);
+
+		_firstScreenshotUpdate = true;
+		updateScreenshot();
 		if ((_screenShotsCount) > 0) {
 			_currentScreenshot = 1;
 		}
 		updateScreenshot();
-		_firstScreenshotUpdate = true;
+
+		_editButton->setEnabled(true);
+		_deleteButton->setEnabled(true);
+		_playbackButton->setEnabled(true);
+
 	} else {
 		_authorText->setLabel(_("Author: "));
 		_notesText->setLabel(_("Notes: "));
