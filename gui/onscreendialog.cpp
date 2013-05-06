@@ -48,34 +48,28 @@ void OnScreenDialog::reflowLayout() {
 void OnScreenDialog::releaseFocus() {
 }
 
-OnScreenDialog::OnScreenDialog(bool isRecord) : Dialog(0, 0, 210, 40) {
+OnScreenDialog::OnScreenDialog(bool isRecord) : Dialog("OnScreenDialog") {
+	_x = _y = 0;
+
 	GUI::PicButtonWidget *btn;
-	int textWidth = 50;
-	int buttonWidth = 32;
-	int buttonHeight = 32;
-	int buttonX = 5;
-	int buttonY = 5;
-	int buttonDistance = 5;
-	btn = new PicButtonWidget(this, buttonX, buttonY, buttonWidth, buttonHeight, 0, kStopCmd, 0);
+	btn = new PicButtonWidget(this, "OnScreenDialog.StopButton", 0, kStopCmd, 0);
 	btn->useThemeTransparency(true);
 	btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageStopbtn));
-	buttonX += buttonHeight + buttonDistance;
+
 	if (isRecord) {
-		btn = new PicButtonWidget(this, buttonX, buttonY, buttonWidth, buttonHeight, 0, kEditCmd, 0);
+		btn = new PicButtonWidget(this, "OnScreenDialog.EditButton", 0, kEditCmd, 0);
 		btn->useThemeTransparency(true);
 		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageEditbtn));
-		buttonX += buttonHeight + buttonDistance;
 	} else {
-		btn = new PicButtonWidget(this, buttonX, buttonY, buttonWidth, buttonHeight, 0, kSwitchModeCmd, 0);
+		btn = new PicButtonWidget(this, "OnScreenDialog.SwitchModeButton", 0, kSwitchModeCmd, 0);
 		btn->useThemeTransparency(true);
 		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageSwitchModebtn));
-		buttonX += buttonHeight + buttonDistance;
-		btn = new PicButtonWidget(this, buttonX, buttonY, buttonWidth, buttonHeight, 0, kFastModeCmd, 0);
+
+		btn = new PicButtonWidget(this, "OnScreenDialog.FastReplayButton", 0, kFastModeCmd, 0);
 		btn->useThemeTransparency(true);
 		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageFastReplaybtn));
-		buttonX += buttonHeight + buttonDistance;
 	}
-	text = new GUI::StaticTextWidget(this, buttonX, buttonY, textWidth, buttonHeight, "00:00:00", Graphics::kTextAlignLeft);
+	text = new GUI::StaticTextWidget(this, "OnScreenDialog.TimeLabel", "00:00:00");
 	_enableDrag = false;
 	_mouseOver = false;
 	_editDlgShown = false;
