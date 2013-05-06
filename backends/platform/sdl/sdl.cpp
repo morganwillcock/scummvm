@@ -97,7 +97,9 @@ OSystem_SDL::~OSystem_SDL() {
 	_audiocdManager = 0;
 	delete _mixerManager;
 	_mixerManager = 0;
-	delete _timerManager;
+
+	delete g_eventRec.getTimerManager();
+
 	_timerManager = 0;
 	delete _mutexManager;
 	_mutexManager = 0;
