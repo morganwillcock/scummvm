@@ -131,8 +131,6 @@ void OSystem_SDL::init() {
 	if (_mutexManager == 0)
 		_mutexManager = new SdlMutexManager();
 
-	g_eventRec.registerTimerManager(new SdlTimerManager());
-
 #if defined(USE_TASKBAR)
 	if (_taskbarManager == 0)
 		_taskbarManager = new Common::TaskbarManager();
@@ -194,6 +192,8 @@ void OSystem_SDL::initBackend() {
 		_mixerManager->init();
 	}
 	g_eventRec.registerMixerManager(_mixerManager);
+
+	g_eventRec.registerTimerManager(new SdlTimerManager());
 
 	if (_audiocdManager == 0) {
 		// Audio CD support was removed with SDL 1.3

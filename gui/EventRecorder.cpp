@@ -76,6 +76,7 @@ EventRecorder::EventRecorder() {
 	_fakeMixerManager = NULL;
 	_initialized = false;
 	_needRedraw = false;
+	_fastPlayback = false;
 	DebugMan.addDebugChannel(kDebugLevelEventRec, "EventRec", "Event recorder debug level");
 #endif
 }
@@ -283,7 +284,6 @@ void EventRecorder::init(Common::String recordFileName, RecordMode mode) {
 	_lastScreenshotTime = 0;
 	_recordMode = mode;
 	_needcontinueGame = false;
-	_fastPlayback = false;
 	if (ConfMan.hasKey("disable_display")) {
 		DebugMan.enableDebugChannel("EventRec");
 		gDebugLevel = 1;
