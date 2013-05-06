@@ -722,11 +722,6 @@ void GfxPalette::kernelRestore(reg_t memoryHandle) {
 }
 
 void GfxPalette::kernelAssertPalette(GuiResourceId resourceId) {
-	// Sometimes invalid viewIds are asked for, ignore those (e.g. qfg1vga)
-	//if (!_resMan->testResource(ResourceId(kResourceTypeView, resourceId)))
-	//	return;
-	// maybe we took the wrong parameter before, if this causes invalid view again, enable to commented out code again
-
 	GfxView *view = g_sci->_gfxCache->getView(resourceId);
 	Palette *viewPalette = view->getPalette();
 	if (viewPalette) {
@@ -856,7 +851,7 @@ int16 GfxPalette::kernelPalVaryReverse(int16 ticks, uint16 stepStop, int16 direc
 
 	if (!_palVaryTicks) {
 		_palVaryDirection = _palVaryStepStop - _palVaryStep;
-		// ffs. see palVaryInit right above, we fix the code here as well
+		// see palVaryInit above, we fix the code here as well
 		//  just in case
 		palVaryProcess(1, true);
 	} else {

@@ -39,7 +39,7 @@
 
 namespace Kyra {
 
-#define RESFILE_VERSION 83
+#define RESFILE_VERSION 84
 
 namespace {
 bool checkKyraDat(Common::SeekableReadStream *file) {
@@ -102,7 +102,7 @@ byte getLanguageID(const GameFlags &flags) {
 }
 
 const IndexTable iPlatformTable[] = {
-	{ Common::kPlatformPC, 0 },
+	{ Common::kPlatformDOS, 0 },
 	{ Common::kPlatformAmiga, 1 },
 	{ Common::kPlatformFMTowns, 2 },
 	{ Common::kPlatformPC98, 3 },
@@ -818,12 +818,12 @@ void KyraEngine_LoK::initStaticResource() {
 		for (int i = 0; i < soundFilesSize; i++)
 			soundFiles[i] = (i < size1) ? soundfiles1[i] : soundfiles2[i - size1];
 	}
-	const char *const *soundFilesIntro = _staticres->loadStrings(k1AudioTracksIntro, temp);
+	const char *const *soundFilesIntro = _staticres->loadStrings(k1AudioTracksIntro, soundFilesIntroSize);
 	const int32 *cdaTable = (const int32 *)_staticres->loadRawData(k1TownsCDATable, cdaTableSize);
 
 	// FIXME: It seems Kyra1 MAC CD includes AdLib and MIDI music and sfx, thus we enable
 	// support for those for now. (Based on patch #2767489 "Support for Mac Kyrandia 1 CD" by satz).
-	if (_flags.platform == Common::kPlatformPC || _flags.platform == Common::kPlatformMacintosh) {
+	if (_flags.platform == Common::kPlatformDOS || _flags.platform == Common::kPlatformMacintosh) {
 		SoundResourceInfo_PC resInfoIntro(soundFilesIntro, soundFilesIntroSize);
 		SoundResourceInfo_PC resInfoIngame(soundFiles, soundFilesSize);
 		_sound->initAudioResourceInfo(kMusicIntro, &resInfoIntro);
@@ -956,7 +956,7 @@ void KyraEngine_LoK::loadButtonShapes() {
 void KyraEngine_LoK::loadMainScreen(int page) {
 	_screen->clearPage(page);
 
-	if (((_flags.lang == Common::EN_ANY || _flags.lang == Common::RU_RUS) && !_flags.isTalkie && _flags.platform == Common::kPlatformPC) || _flags.platform == Common::kPlatformAmiga)
+	if (((_flags.lang == Common::EN_ANY || _flags.lang == Common::RU_RUS) && !_flags.isTalkie && _flags.platform == Common::kPlatformDOS) || _flags.platform == Common::kPlatformAmiga)
 		_screen->loadBitmap("MAIN15.CPS", page, page, &_screen->getPalette(0));
 	else if (_flags.lang == Common::EN_ANY || _flags.lang == Common::JA_JPN || (_flags.isTalkie && _flags.lang == Common::IT_ITA))
 		_screen->loadBitmap("MAIN_ENG.CPS", page, page, 0);
@@ -997,7 +997,7 @@ void KyraEngine_HoF::initStaticResource() {
 	_itemAnimDefinition = _staticres->loadItemAnimDefinition(k2IngameShapeAnimData, _itemAnimDefinitionSize);
 
 	// assign music data
-	if (_flags.platform == Common::kPlatformPC) {
+	if (_flags.platform == Common::kPlatformDOS) {
 		SoundResourceInfo_PC resInfoIntro(_musicFileListIntro, _musicFileListIntroSize);
 		SoundResourceInfo_PC resInfoIngame(_musicFileListIngame, _musicFileListIngameSize);
 		SoundResourceInfo_PC resInfoFinale(_musicFileListFinale, _musicFileListFinaleSize);
@@ -1109,13 +1109,13 @@ const uint8 KyraEngine_LoK::_itemPosY[] = {
 };
 
 void GUI_LoK::initStaticResource() {
-	GUI_V1_BUTTON(_scrollUpButton, 0x12, 1, 1, 1, 0x483, 0, 0, 0, 0x18, 0x0f, 0);
-	GUI_V1_BUTTON(_scrollDownButton, 0x13, 1, 1, 1, 0x483, 0, 0, 0, 0x18, 0x0f, 0);
+	GUI_V1_BUTTON(_scrollUpButton, 0x12, 1, 1, 1, 0x483, 0, 0, 0, 0x18, 0x0F, 0);
+	GUI_V1_BUTTON(_scrollDownButton, 0x13, 1, 1, 1, 0x483, 0, 0, 0, 0x18, 0x0F, 0);
 
-	GUI_V1_BUTTON(_menuButtonData[0], 0x0c, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
-	GUI_V1_BUTTON(_menuButtonData[1], 0x0d, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
-	GUI_V1_BUTTON(_menuButtonData[2], 0x0e, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
-	GUI_V1_BUTTON(_menuButtonData[3], 0x0f, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
+	GUI_V1_BUTTON(_menuButtonData[0], 0x0C, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
+	GUI_V1_BUTTON(_menuButtonData[1], 0x0D, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
+	GUI_V1_BUTTON(_menuButtonData[2], 0x0E, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
+	GUI_V1_BUTTON(_menuButtonData[3], 0x0F, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
 	GUI_V1_BUTTON(_menuButtonData[4], 0x10, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
 	GUI_V1_BUTTON(_menuButtonData[5], 0x11, 1, 1, 1, 0x487, 0, 0, 0, 0, 0, 0);
 

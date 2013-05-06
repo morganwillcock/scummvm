@@ -370,7 +370,7 @@ void String::clear() {
 }
 
 void String::setChar(char c, uint32 p) {
-	assert(p <= _size);
+	assert(p < _size);
 
 	makeUnique();
 	_str[p] = c;
@@ -850,7 +850,7 @@ size_t strlcat(char *dst, const char *src, size_t size) {
 	return dstLength + (src - srcStart);
 }
 
-}	// End of namespace Common
+} // End of namespace Common
 
 // Portable implementation of stricmp / strcasecmp / strcmpi.
 // TODO: Rename this to Common::strcasecmp

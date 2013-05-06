@@ -20,26 +20,31 @@
  *
  */
 
-/*
- * This file is based on WME Lite.
- * http://dead-code.org/redir.php?target=wmelite
- * Copyright (c) 2011 Jan Nedoma
- */
+#ifndef HOPKINS_SCRIPT_H
+#define HOPKINS_SCRIPT_H
 
-#ifndef WINTERMUTE_BASE_RESOURCES_H
-#define WINTERMUTE_BASE_RESOURCES_H
+#include "hopkins/globals.h"
 
-#include "common/stream.h"
+#include "common/scummsys.h"
+#include "common/endian.h"
 #include "common/str.h"
 
-namespace Wintermute {
+namespace Hopkins {
 
-class BaseResources {
+class ScriptManager {
+private:
+	HopkinsEngine *_vm;
+	int checkOpcode(const byte *dataP);
 public:
-	static Common::SeekableReadStream *getFile(const Common::String &filename);
-	static bool hasFile(const Common::String &filename);
+	bool _tempObjectFl;
+
+	ScriptManager(HopkinsEngine *vm);
+
+	int handleOpcode(const byte *dataP);
+	int handleIf(const byte *dataP, int offset);
+	int handleGoto(const byte *dataP);
 };
 
-} // end of namespace Wintermute
+} // End of namespace Hopkins
 
-#endif
+#endif /* HOPKINS_SCRIPT_H */

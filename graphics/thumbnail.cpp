@@ -31,17 +31,17 @@
 namespace Graphics {
 
 namespace {
-#define THMB_VERSION 1
+#define THMB_VERSION 2
 
 struct ThumbnailHeader {
 	uint32 type;
 	uint32 size;
 	byte version;
 	uint16 width, height;
-	byte bpp;
+	PixelFormat format;
 };
 
-#define ThumbnailHeaderSize (4+4+1+2+2+1)
+#define ThumbnailHeaderSize (4+4+1+2+2+(1+4+4))
 
 bool loadHeader(Common::SeekableReadStream &in, ThumbnailHeader &header, bool outputWarnings) {
 	header.type = in.readUint32BE();
@@ -65,7 +65,22 @@ bool loadHeader(Common::SeekableReadStream &in, ThumbnailHeader &header, bool ou
 
 	header.width = in.readUint16BE();
 	header.height = in.readUint16BE();
-	header.bpp = in.readByte();
+	header.format.bytesPerPixel = in.readByte();
+	// Starting from version 2 on we serialize the whole PixelFormat.
+	if (header.version >= 2) {
+		header.format.rLoss = in.readByte();
+		header.format.gLoss = in.readByte();
+		header.format.bLoss = in.readByte();
+		header.format.aLoss = in.readByte();
+
+		header.format.rShift = in.readByte();
+		header.format.gShift = in.readByte();
+		header.format.bShift = in.readByte();
+		header.format.aShift = in.readByte();
+	} else {
+		// Version 1 used a hardcoded RGB565.
+		header.format = createPixelFormat<565>();
+	}
 
 	return true;
 }
@@ -101,37 +116,32 @@ Graphics::Surface *loadThumbnail(Common::SeekableReadStream &in) {
 	if (!loadHeader(in, header, true))
 		return 0;
 
-	if ((header.bpp == 1) || (header.bpp == 3)) {
-		warning("trying to load thumbnail with unsupported bit depth %d", header.bpp);
+	if (header.format.bytesPerPixel != 2 && header.format.bytesPerPixel != 4) {
+		warning("trying to load thumbnail with unsupported bit depth %d", header.format.bytesPerPixel);
 		return 0;
 	}
 
-	Graphics::PixelFormat format = g_system->getOverlayFormat();
 	Graphics::Surface *const to = new Graphics::Surface();
-	to->create(header.width, header.height, format);
-	OverlayColor *pixels2Bpp = (OverlayColor *)to->pixels;
-	uint32 *pixels4Bpp = (uint32 *)to->pixels;
+	to->create(header.width, header.height, header.format);
+
 	for (int y = 0; y < to->h; ++y) {
-		for (int x = 0; x < to->w; ++x) {
-			uint8 a = 0xFF;
-			uint8 r = 0, g = 0, b = 0;
-			switch (header.bpp) {
-			case 2:
-				colorToRGB<ColorMasks<565> >(in.readUint16BE(), r, g, b);
-				break;
-			case 4:
-				colorToARGB<ColorMasks<8888> >(in.readUint32BE(), a, r, g, b);
-				break;
+		switch (header.format.bytesPerPixel) {
+		case 2: {
+			uint16 *pixels = (uint16 *)to->getBasePtr(0, y);
+			for (uint x = 0; x < to->w; ++x) {
+				*pixels++ = in.readUint16BE();
 			}
-			// converting to current OSystem Color
-			switch (format.bytesPerPixel) {
-			case 2:
-				*pixels2Bpp++ = format.RGBToColor(r, g, b);
-				break;
-			case 4:
-				*pixels4Bpp++ = format.ARGBToColor(a, r, g, b);
-				break;
+			} break;
+
+		case 4: {
+			uint32 *pixels = (uint32 *)to->getBasePtr(0, y);
+			for (uint x = 0; x < to->w; ++x) {
+				*pixels++ = in.readUint32BE();
 			}
+			} break;
+
+		default:
+			assert(0);
 		}
 	}
 	return to;
@@ -152,36 +162,55 @@ bool saveThumbnail(Common::WriteStream &out) {
 }
 
 bool saveThumbnail(Common::WriteStream &out, const Graphics::Surface &thumb) {
+	if (thumb.format.bytesPerPixel != 2 && thumb.format.bytesPerPixel != 4) {
+		warning("trying to save thumbnail with bpp %u", thumb.format.bytesPerPixel);
+		return false;
+	}
+
 	ThumbnailHeader header;
 	header.type = MKTAG('T','H','M','B');
 	header.size = ThumbnailHeaderSize + thumb.w*thumb.h*thumb.format.bytesPerPixel;
 	header.version = THMB_VERSION;
 	header.width = thumb.w;
 	header.height = thumb.h;
-	header.bpp = thumb.format.bytesPerPixel;
 
 	out.writeUint32BE(header.type);
 	out.writeUint32BE(header.size);
 	out.writeByte(header.version);
 	out.writeUint16BE(header.width);
 	out.writeUint16BE(header.height);
-	out.writeByte(header.bpp);
 
-	uint16 *pixels16;
-	uint32 *pixels32;
-	switch (thumb.format.bytesPerPixel) {
-	case 2:
-		pixels16 = (uint16 *)thumb.pixels;
-		for (uint32 p = 0; p < (uint32)thumb.w * thumb.h; ++p, ++pixels16) {
-			out.writeUint16BE(*pixels16);
+	// Serialize the PixelFormat
+	out.writeByte(thumb.format.bytesPerPixel);
+	out.writeByte(thumb.format.rLoss);
+	out.writeByte(thumb.format.gLoss);
+	out.writeByte(thumb.format.bLoss);
+	out.writeByte(thumb.format.aLoss);
+	out.writeByte(thumb.format.rShift);
+	out.writeByte(thumb.format.gShift);
+	out.writeByte(thumb.format.bShift);
+	out.writeByte(thumb.format.aShift);
+
+	// Serialize the pixel data
+	for (uint y = 0; y < thumb.h; ++y) {
+		switch (thumb.format.bytesPerPixel) {
+		case 2: {
+			const uint16 *pixels = (const uint16 *)thumb.getBasePtr(0, y);
+			for (uint x = 0; x < thumb.w; ++x) {
+				out.writeUint16BE(*pixels++);
+			}
+			} break;
+
+		case 4: {
+			const uint32 *pixels = (const uint32 *)thumb.getBasePtr(0, y);
+			for (uint x = 0; x < thumb.w; ++x) {
+				out.writeUint32BE(*pixels++);
+			}
+			} break;
+
+		default:
+			assert(0);
 		}
-		break;
-	case 4:
-		pixels32 = (uint32 *)thumb.pixels;
-		for (uint32 p = 0; p < (uint32)thumb.w * thumb.h; ++p, ++pixels32) {
-			out.writeUint32BE(*pixels32);
-		}
-		break;
 	}
 
 	return true;
