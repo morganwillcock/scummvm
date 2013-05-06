@@ -53,21 +53,28 @@ enum {
 
 RecorderDialog::RecorderDialog() : Dialog("RecorderDialog"), _list(0), _currentScreenshot(0) {
 	_backgroundType = ThemeEngine::kDialogBackgroundSpecial;
-	ButtonWidget *recordButton;
-	ButtonWidget *playbackButton;
+
+	new StaticTextWidget(this, "SaveLoadChooser.Title", _("Recorder or Playback Gameplay"));
+
 	_list = new GUI::ListWidget(this, "RecorderDialog.List");
 	_list->setNumberingMode(GUI::kListNumberingOff);
 	new GUI::ButtonWidget(this, "RecorderDialog.Delete", _("Delete"), 0, kDeleteCmd);
 	new GUI::ButtonWidget(this, "RecorderDialog.Cancel", _("Cancel"), 0, kCloseCmd);
-	recordButton = new GUI::ButtonWidget(this, "RecorderDialog.Record", _("Record"), 0, kRecordCmd);
-	playbackButton = new GUI::ButtonWidget(this, "RecorderDialog.Playback", _("Playback"), 0, kPlaybackCmd);
+	new GUI::ButtonWidget(this, "RecorderDialog.Record", _("Record"), 0, kRecordCmd);
+	new GUI::ButtonWidget(this, "RecorderDialog.Playback", _("Playback"), 0, kPlaybackCmd);
+	
+	_editButton = new GUI::ButtonWidget(this, "RecorderDialog.Edit", _("Edit"), 0, kEditRecordCmd);
+
+	_editButton->setEnabled(false);
 	_gfxWidget = new GUI::GraphicsWidget(this, 0, 0, 10, 10);
 	_container = new GUI::ContainerWidget(this, 0, 0, 10, 10);
-	new GUI::ButtonWidget(this,"RecorderDialog.NextScreenShotButton", "<", 0, kPrevScreenshotCmd);
-	new GUI::ButtonWidget(this, "RecorderDialog.PreviousScreenShotButton", ">", 0, kNextScreenshotCmd);	
-	_currentScreenshotText = new StaticTextWidget(this, "RecorderDialog.currentScreenshot", "0/0");
-	_authorText = new StaticTextWidget(this, 0, 0, 10, 10, _("Author: "), Graphics::kTextAlignLeft);;
-	_notesText = new StaticTextWidget(this, 0, 0, 10, 10, _("Notes: "), Graphics::kTextAlignLeft);;
+	if (g_gui.xmlEval()->getVar("Globals.RecorderDialog.ExtInfo.Visible") == 1) {
+		new GUI::ButtonWidget(this,"RecorderDialog.NextScreenShotButton", "<", 0, kPrevScreenshotCmd);
+		new GUI::ButtonWidget(this, "RecorderDialog.PreviousScreenShotButton", ">", 0, kNextScreenshotCmd);	
+		_currentScreenshotText = new StaticTextWidget(this, "RecorderDialog.currentScreenshot", "0/0");
+		_authorText = new StaticTextWidget(this, "RecorderDialog.Author", _("Author: "));
+		_notesText = new StaticTextWidget(this, "RecorderDialog.Notes", _("Notes: "));
+	}
 	if (_gfxWidget)
 		_gfxWidget->setGfx(0);
 }
@@ -207,22 +214,25 @@ RecorderDialog::~RecorderDialog() {
 }
 
 void RecorderDialog::updateSelection(bool redraw) {
+	if (g_gui.xmlEval()->getVar("Globals.RecorderDialog.ExtInfo.Visible") != 1)
+		return;
+
 	_gfxWidget->setGfx(-1, -1, 0, 0, 0);
 	_screenShotsCount = 0;
 	_currentScreenshot = 0;
 	updateScreenShotsText();
 	if (_list->getSelected() >= 0) {
-		_authorText->setLabel("Author: " + _fileHeaders[_list->getSelected()].author);
-		_notesText->setLabel("Notes: " + _fileHeaders[_list->getSelected()].notes);
+		_authorText->setLabel(_("Author: ") + _fileHeaders[_list->getSelected()].author);
+		_notesText->setLabel(_("Notes: ") + _fileHeaders[_list->getSelected()].notes);
 		if ((_screenShotsCount) > 0) {
 			_currentScreenshot = 1;
 		}
 		updateScreenshot();
 		_firstScreenshotUpdate = true;
 	} else {
-		_authorText->setLabel("Author: ");
-		_notesText->setLabel("Notes: ");
-		_screenShotsCount = 0;
+		_authorText->setLabel(_("Author: "));
+		_notesText->setLabel(_("Notes: "));
+		_screenShotsCount = -1;
 		_currentScreenshot = 0;
 		_gfxWidget->setGfx(-1, -1, 0, 0, 0);
 		_gfxWidget->draw();
@@ -259,7 +269,11 @@ void RecorderDialog::updateScreenshot() {
 }
 
 void RecorderDialog::updateScreenShotsText() {
-	_currentScreenshotText->setLabel(Common::String::format("%d / %d", _currentScreenshot, _screenShotsCount));
+	if (_screenShotsCount == -1) {
+		_currentScreenshotText->setLabel(Common::String::format("%d / ?", _currentScreenshot));
+	} else {
+		_currentScreenshotText->setLabel(Common::String::format("%d / %d", _currentScreenshot, _screenShotsCount));
+	}
 }
 
 } // End of namespace GUI

@@ -48,6 +48,7 @@ private:
 	GUI::StaticTextWidget *_currentScreenshotText;
 	GUI::StaticTextWidget *_authorText;
 	GUI::StaticTextWidget *_notesText;
+	GUI::ButtonWidget *_editButton;
 
 	void updateList();
 	void updateScreenShotsText();
