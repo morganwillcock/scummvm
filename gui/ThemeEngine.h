@@ -234,10 +234,14 @@ public:
 	static const char *const kImageDelbtn; ///< Delete characters in the predictive dialog
 	static const char *const kImageList;      ///< List image used in save/load chooser selection
 	static const char *const kImageGrid;      ///< Grid image used in save/load chooser selection
-	static const char *const kImageStopbtn; ///< Delete characters in the predictive dialog
-	static const char *const kImageEditbtn; ///< Delete characters in the predictive dialog
+	static const char *const kImageStopbtn; ///< Stop recording button in recorder onscreen dialog
+	static const char *const kImageEditbtn; ///< Edit recording metadata in recorder onscreen dialog
 	static const char *const kImageSwitchModebtn; ///< Switch mode button in recorder onscreen dialog
-	static const char *const kImageFastReplaybtn; ///< Switch mode button in recorder onscreen dialog
+	static const char *const kImageFastReplaybtn; ///< Fast playback mode button in recorder onscreen dialog
+	static const char *const kImageStopSmallbtn; ///< Stop recording button in recorder onscreen dialog (for 320xY)
+	static const char *const kImageEditSmallbtn; ///< Edit recording metadata in recorder onscreen dialog (for 320xY)
+	static const char *const kImageSwitchModeSmallbtn; ///< Switch mode button in recorder onscreen dialog (for 320xY)
+	static const char *const kImageFastReplaySmallbtn; ///< Fast playback mode button in recorder onscreen dialog (for 320xY)
 
 	/**
 	 * Graphics mode enumeration.

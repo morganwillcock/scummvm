@@ -54,6 +54,10 @@ const char * const ThemeEngine::kImageStopbtn = "stopbtn.bmp";
 const char * const ThemeEngine::kImageEditbtn = "editbtn.bmp";
 const char * const ThemeEngine::kImageSwitchModebtn = "switchbtn.bmp";
 const char * const ThemeEngine::kImageFastReplaybtn = "fastreplay.bmp";
+const char * const ThemeEngine::kImageStopSmallbtn = "stopbtn_small.bmp";
+const char * const ThemeEngine::kImageEditSmallbtn = "editbtn_small.bmp";
+const char * const ThemeEngine::kImageSwitchModeSmallbtn = "switchbtn_small.bmp";
+const char * const ThemeEngine::kImageFastReplaySmallbtn = "fastreplay_small.bmp";
 
 struct TextDrawData {
 	const Graphics::Font *_fontPtr;

@@ -1071,7 +1071,7 @@
 	</dialog>
 
 	<dialog name = 'OnScreenDialog' overlays = 'screen_center'>
-		<layout type = 'horizontal'  spacing = '5' padding = '0, 3, 0, 3' center = 'true'>
+		<layout type = 'horizontal'  spacing = '5' padding = '3, 2, 3, 2' center = 'true'>
 			<widget name = 'StopButton'
 				width = '16'
 				height = '16'

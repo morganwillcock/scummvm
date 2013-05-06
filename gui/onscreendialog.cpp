@@ -54,20 +54,34 @@ OnScreenDialog::OnScreenDialog(bool isRecord) : Dialog("OnScreenDialog") {
 	GUI::PicButtonWidget *btn;
 	btn = new PicButtonWidget(this, "OnScreenDialog.StopButton", 0, kStopCmd, 0);
 	btn->useThemeTransparency(true);
-	btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageStopbtn));
+
+	if (g_system->getOverlayWidth() > 320)
+		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageStopbtn));
+	else
+		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageStopSmallbtn));
 
 	if (isRecord) {
 		btn = new PicButtonWidget(this, "OnScreenDialog.EditButton", 0, kEditCmd, 0);
 		btn->useThemeTransparency(true);
-		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageEditbtn));
+
+		if (g_system->getOverlayWidth() > 320)
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageEditbtn));
+		else
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageEditSmallbtn));
 	} else {
 		btn = new PicButtonWidget(this, "OnScreenDialog.SwitchModeButton", 0, kSwitchModeCmd, 0);
 		btn->useThemeTransparency(true);
-		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageSwitchModebtn));
+		if (g_system->getOverlayWidth() > 320)
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageSwitchModebtn));
+		else
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageSwitchModeSmallbtn));
 
 		btn = new PicButtonWidget(this, "OnScreenDialog.FastReplayButton", 0, kFastModeCmd, 0);
 		btn->useThemeTransparency(true);
-		btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageFastReplaybtn));
+		if (g_system->getOverlayWidth() > 320)
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageFastReplaybtn));
+		else
+			btn->setGfx(g_gui.theme()->getImageSurface(ThemeEngine::kImageFastReplaySmallbtn));
 	}
 	text = new GUI::StaticTextWidget(this, "OnScreenDialog.TimeLabel", "00:00:00");
 	_enableDrag = false;
