@@ -66,6 +66,12 @@
 		<widget name = 'PopUp'
 				size = '-1, 15'
 		/>
+		<widget name = 'EditRecordLabel'
+				size = '60, Globals.Line.Height'
+		/>
+		<widget name = 'EditRecord'
+				size = '120, 15'
+		/>
 		<widget name = 'Checkbox'
 				size = '-1, Globals.Line.Height'
 		/>
@@ -1035,24 +1041,26 @@
 	</dialog>
 
 	<dialog name = 'RecorderDialog' overlays = 'screen' inset = '8' shading = 'dim'>
-		<layout type = 'vertical' padding = '8, 8, 8, 8' center = 'true'>
+		<layout type = 'vertical' padding = '8, 8, 8, 4' center = 'true'>
 			<widget name = 'Title'
 					height = 'Globals.Line.Height'
 			/>
 			<widget name = 'List' />
 			<layout type = 'horizontal' padding = '0, 0, 0, 0' spacing = '2'>
-			  <widget name = 'Delete'
+			  <widget name = 'Edit'
 					  type = 'Button'
 					  />
-			  <widget name = 'Cancel'
+			  <space />
+			  <widget name = 'Record'
 					  type = 'Button'
 					  />
 			</layout>
 			<layout type = 'horizontal' padding = '0, 0, 0, 0' spacing = '2'>
-			  <widget name = 'Edit'
+			  <widget name = 'Delete'
 					  type = 'Button'
 					  />
-			  <widget name = 'Record'
+			  <space />
+			  <widget name = 'Cancel'
 					  type = 'Button'
 					  />
 			  <widget name = 'Playback'
@@ -1065,24 +1073,24 @@
 	<dialog name = 'OnScreenDialog' overlays = 'screen_center'>
 		<layout type = 'horizontal'  spacing = '5' padding = '0, 3, 0, 3' center = 'true'>
 			<widget name = 'StopButton'
-				width = '32'
-				height = '32'
+				width = '16'
+				height = '16'
 			/>
 			<widget name = 'EditButton'
-				width = '32'
-				height = '32'
+				width = '16'
+				height = '16'
 			/>
 			<widget name = 'SwitchModeButton'
-				width = '32'
-				height = '32'
+				width = '16'
+				height = '16'
 			/>
 			<widget name = 'FastReplayButton'
-				width = '32'
-				height = '32'
+				width = '16'
+				height = '16'
 			/>
 			<widget name = 'TimeLabel'
 				width = '50'
-				height = '30'
+				height = '16'
 			/>
 		</layout>
 	</dialog>
@@ -1090,40 +1098,33 @@
 	<dialog name = 'EditRecordDialog' overlays = 'screen_center'>
 		<layout type = 'vertical' padding = '8, 8, 8, 8' center = 'true'>
 			<widget name = 'Title'
-					width = '320'
 					height = 'Globals.Line.Height'
 			/>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'AuthorLable'
-						width = '60'
-						height = '25'
+				<widget name = 'AuthorLabel'
+						type = 'EditRecordLabel'
 				/>		
 				<widget name = 'AuthorEdit'
-						width = '240'
-						height = '25'
+						type = 'EditRecord'
 				/>		
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'NameLable'
-						width = '60'
-						height = '25'
+				<widget name = 'NameLabel'
+						type = 'EditRecordLabel'
 				/>		
 				<widget name = 'NameEdit'
-						width = '240'
-						height = '25'
+							type = 'EditRecord'
 				/>
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'NotesLable'
-						width = '60'
-						height = '25'
+				<widget name = 'NotesLabel'
+						type = 'EditRecordLabel'
 				/>
 				<widget name = 'NotesEdit'
-						width = '240'
-						height = '25'
+							type = 'EditRecord'
 				/>
 			</layout>
-			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
+			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 0'>
 				<widget name = 'Cancel'
 						type = 'Button'
 				/>

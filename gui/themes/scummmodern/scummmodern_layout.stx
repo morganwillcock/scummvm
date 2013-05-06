@@ -1119,7 +1119,7 @@
 					height = 'Globals.Line.Height'
 			/>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'AuthorLable'
+				<widget name = 'AuthorLabel'
 						width = '60'
 						height = '25'
 				/>		
@@ -1129,17 +1129,16 @@
 				/>		
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'NameLable'
+				<widget name = 'NameLabel'
 						width = '60'
 						height = '25'
 				/>		
 				<widget name = 'NameEdit'
-						width = '240'
-						height = '25'
+						type = 'PopUp'
 				/>
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
-				<widget name = 'NotesLable'
+				<widget name = 'NotesLabel'
 						width = '60'
 						height = '25'
 				/>

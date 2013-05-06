@@ -218,6 +218,12 @@ RecorderDialog::~RecorderDialog() {
 }
 
 void RecorderDialog::updateSelection(bool redraw) {
+	if (_list->getSelected() >= 0) {
+		_editButton->setEnabled(true);
+		_deleteButton->setEnabled(true);
+		_playbackButton->setEnabled(true);
+	}
+
 	if (g_gui.xmlEval()->getVar("Globals.RecorderDialog.ExtInfo.Visible") != 1)
 		return;
 
@@ -235,11 +241,6 @@ void RecorderDialog::updateSelection(bool redraw) {
 			_currentScreenshot = 1;
 		}
 		updateScreenshot();
-
-		_editButton->setEnabled(true);
-		_deleteButton->setEnabled(true);
-		_playbackButton->setEnabled(true);
-
 	} else {
 		_authorText->setLabel(_("Author: "));
 		_notesText->setLabel(_("Notes: "));

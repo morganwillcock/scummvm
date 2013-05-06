@@ -55,9 +55,9 @@ EditRecordDialog::~EditRecordDialog() {
 }
 
 EditRecordDialog::EditRecordDialog(const Common::String author, const Common::String name, const Common::String notes) : Dialog("EditRecordDialog") {
-	new StaticTextWidget(this,"EditRecordDialog.AuthorLable",_("Author:"));
-	new StaticTextWidget(this,"EditRecordDialog.NameLable",_("Name:"));
-	new StaticTextWidget(this,"EditRecordDialog.NotesLable",_("Notes:"));
+	new StaticTextWidget(this,"EditRecordDialog.AuthorLabel",_("Author:"));
+	new StaticTextWidget(this,"EditRecordDialog.NameLabel",_("Name:"));
+	new StaticTextWidget(this,"EditRecordDialog.NotesLabel",_("Notes:"));
 	_authorEdit = new EditTextWidget(this, "EditRecordDialog.AuthorEdit","");
 	_notesEdit = new EditTextWidget(this, "EditRecordDialog.NotesEdit","");
 	_nameEdit = new EditTextWidget(this, "EditRecordDialog.NameEdit","");
