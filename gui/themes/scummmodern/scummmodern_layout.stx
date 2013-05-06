@@ -45,6 +45,8 @@
 		<def var = 'SaveLoadChooser.ExtInfo.Visible' value = '1'/>
 		<def var = 'RecorderDialog.ExtInfo.Visible' value = '1'/>
 
+		<def var = 'OnScreenDialog.ShowPics' value = '1'/>
+
 		<def var = 'KeyMapper.Spacing' value = '10'/>
 		<def var = 'KeyMapper.LabelWidth' value = '100'/>
 		<def var = 'KeyMapper.ButtonWidth' value = '80'/>
@@ -106,6 +108,13 @@
 		<widget name = 'TabWidget.NavButton'
 				size = '15, 18'
 				padding = '0, 3, 4, 0'
+		/>
+
+		<widget name = 'EditRecordLabel'
+				size = '60, 25'
+		/>
+		<widget name = 'EditRecord'
+				size = '240, 25'
 		/>
 	</globals>
 
@@ -1120,31 +1129,26 @@
 			/>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
 				<widget name = 'AuthorLabel'
-						width = '60'
-						height = '25'
+						type = 'EditRecordLabel'
 				/>		
 				<widget name = 'AuthorEdit'
-						width = '240'
-						height = '25'
+						type = 'EditRecord'
 				/>		
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
 				<widget name = 'NameLabel'
-						width = '60'
-						height = '25'
+						type = 'EditRecordLabel'
 				/>		
 				<widget name = 'NameEdit'
-						type = 'PopUp'
+						type = 'EditRecord'
 				/>
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>
 				<widget name = 'NotesLabel'
-						width = '60'
-						height = '25'
+						type = 'EditRecordLabel'
 				/>
 				<widget name = 'NotesEdit'
-						width = '240'
-						height = '25'
+						type = 'EditRecord'
 				/>
 			</layout>
 			<layout type = 'horizontal'  spacing = '5' padding = '0, 0, 0, 10'>

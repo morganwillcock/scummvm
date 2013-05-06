@@ -37,6 +37,8 @@
 		<def var = 'SaveLoadChooser.ExtInfo.Visible' value = '0'/>
 		<def var = 'RecorderDialog.ExtInfo.Visible' value = '0'/>
 
+		<def var = 'OnScreenDialog.ShowPics' value = '1'/>
+
 		<def var = 'Predictive.Button.Width' value = '45' />
 		<def var = 'Predictive.Button.Height' value = '15' />
 
@@ -65,12 +67,6 @@
 		/>
 		<widget name = 'PopUp'
 				size = '-1, 15'
-		/>
-		<widget name = 'EditRecordLabel'
-				size = '60, Globals.Line.Height'
-		/>
-		<widget name = 'EditRecord'
-				size = '120, 15'
 		/>
 		<widget name = 'Checkbox'
 				size = '-1, Globals.Line.Height'
@@ -103,6 +99,12 @@
 		<widget name = 'TabWidget.NavButton'
 				size = '32, 18'
 				padding = '0, 0, 2, 0'
+		/>
+		<widget name = 'EditRecordLabel'
+				size = '60, Globals.Line.Height'
+		/>
+		<widget name = 'EditRecord'
+				size = '120, 15'
 		/>
 	</globals>
 
