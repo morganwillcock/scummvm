@@ -39,7 +39,7 @@
 #include "gui/message.h"
 #include "gui/gui-manager.h"
 #include "gui/options.h"
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 #include "gui/recorderdialog.h"
 #endif
 #include "gui/saveload.h"
@@ -979,7 +979,7 @@ void LauncherDialog::editGame(int item) {
 }
 
 void LauncherDialog::loadGameButtonPressed(int item) {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	const bool shiftPressed = checkModifier(Common::KBD_SHIFT);
 	if (shiftPressed) {
 		recordGame(item);
@@ -992,7 +992,7 @@ void LauncherDialog::loadGameButtonPressed(int item) {
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 void LauncherDialog::recordGame(int item) {
 	RecorderDialog recorderDialog;
 	MessageDialog alert(_("Do you want to load savegame?"),
@@ -1156,7 +1156,7 @@ void LauncherDialog::updateButtons() {
 		_loadButton->draw();
 	}
 	switchButtonsText(_addButton, "~A~dd Game...", "Mass Add...");
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	switchButtonsText(_loadButton, "~L~oad...", "Record...");
 #endif
 }

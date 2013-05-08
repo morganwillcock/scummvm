@@ -19,12 +19,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
-#ifdef SDL_BACKEND
+
+#include "common/system.h"
+
+#ifdef ENABLE_EVENTRECORDER
 
 #include "onscreendialog.h"
 #include "gui/gui-manager.h"
 #include "common/rect.h"
-#include "common/system.h"
 #include "common/translation.h"
 
 #include "graphics/cursorman.h"

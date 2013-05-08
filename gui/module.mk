@@ -39,7 +39,7 @@ MODULE_OBJS += \
 	browser.o
 endif
 
-ifdef SDL_BACKEND
+ifdef ENABLE_EVENTRECORDER
 MODULE_OBJS += \
 	editrecorddialog.o \
 	onscreendialog.o \

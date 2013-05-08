@@ -44,7 +44,7 @@
 #include "common/events.h"
 #include "gui/EventRecorder.h"
 #include "common/fs.h"
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 #include "common/recorderfile.h"
 #endif
 #include "common/system.h"
@@ -453,7 +453,7 @@ extern "C" int scummvm_main(int argc, const char * const argv[]) {
 			// to save memory
 			PluginManager::instance().unloadPluginsExcept(PLUGIN_TYPE_ENGINE, plugin);
 
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 			Common::String recordMode = ConfMan.get("record_mode");
 			Common::String recordFileName = ConfMan.get("record_file_name");
 
@@ -471,7 +471,7 @@ extern "C" int scummvm_main(int argc, const char * const argv[]) {
 			// Try to run the game
 			Common::Error result = runGame(plugin, system, specialDebug);
 
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 			// Flush Event recorder file. The recorder does not get reinitialized for next game
 			// which is intentional. Only single game per session is allowed.
 			g_eventRec.deinit();

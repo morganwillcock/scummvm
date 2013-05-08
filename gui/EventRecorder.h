@@ -38,7 +38,7 @@
 #include "backends/timer/default/default-timer.h"
 #include "engines/advancedDetector.h"
 #include "common/config-manager.h"
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 #include "common/recorderfile.h"
 #include "backends/saves/recorder/recorder-saves.h"
 #include "backends/mixer/nullmixer/nullsdl-mixer.h"
@@ -87,7 +87,7 @@ public:
 	void preDrawOverlayGui();
 	void postDrawOverlayGui();
 
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	void setAuthor(const Common::String &author) {
 		_author = author;
 	}
@@ -121,14 +121,14 @@ public:
 	bool checkForContinueGame();
 
 	void suspendRecording() {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 		_savedState = _initialized;
 		_initialized = false;
 #endif
 	}
 
 	void resumeRecording() {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 		_initialized = _savedState;
 #endif
 	}
@@ -143,7 +143,7 @@ public:
 	bool grabScreenAndComputeMD5(Graphics::Surface &screen, uint8 md5[16]);
 
 	void updateSubsystems();
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	bool switchMode();
 	void switchFastMode();
 #endif
@@ -151,7 +151,7 @@ private:
 	virtual Common::List<Common::Event> mapEvent(const Common::Event &ev, Common::EventSource *source);
 	bool notifyPoll();
 	bool pollEvent(Common::Event &ev);
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	bool _initialized;
 	volatile uint32 _fakeTimer;
 	bool _savedState;
@@ -164,7 +164,7 @@ private:
 	Common::SaveFileManager *_realSaveManager;
 	SdlMixerManager *_realMixerManager;
 	DefaultTimerManager *_timerManager;
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	RecorderSaveFileManager _fakeSaveManager;
 	NullSdlMixerManager *_fakeMixerManager;
 	GUI::OnScreenDialog *controlPanel;

@@ -29,7 +29,7 @@
 #include "common/md5.h"
 #include "gui/gui-manager.h"
 #include "gui/widget.h"
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 #include "gui/onscreendialog.h"
 #endif
 #include "common/random.h"
@@ -70,7 +70,7 @@ void writeTime(Common::WriteStream *outFile, uint32 d) {
 }
 
 EventRecorder::EventRecorder() {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	_recordMode = kPassthrough;
 	_timerManager = NULL;
 	_fakeMixerManager = NULL;
@@ -82,7 +82,7 @@ EventRecorder::EventRecorder() {
 }
 
 EventRecorder::~EventRecorder() {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	if (_timerManager != NULL) {
 		delete _timerManager;
 	}
@@ -90,7 +90,7 @@ EventRecorder::~EventRecorder() {
 }
 
 void EventRecorder::deinit() {
-#ifdef SDL_BACKEND
+#ifdef ENABLE_EVENTRECORDER
 	if (!_initialized) {
 		return;
 	}
@@ -114,7 +114,7 @@ void EventRecorder::deinit() {
 }
 
 void EventRecorder::processMillis(uint32 &millis, bool skipRecord) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	if (!_initialized) {
 		return;
 	}
@@ -168,14 +168,14 @@ void EventRecorder::processMillis(uint32 &millis, bool skipRecord) {
 }
 
 bool EventRecorder::processDelayMillis() {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	return _fastPlayback;
 #else
 	return false;
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::checkForKeyCode(const Common::Event &event) {
 	if ((event.type == Common::EVENT_KEYDOWN) && (event.kbd.flags & Common::KBD_CTRL) && (event.kbd.keycode == Common::KEYCODE_p) && (!event.synthetic)) {
 		togglePause();
@@ -236,13 +236,13 @@ void EventRecorder::togglePause() {
 #endif
 
 void EventRecorder::RegisterEventSource() {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	g_system->getEventManager()->getEventDispatcher()->registerMapper(this, false);
 #endif
 }
 
 uint32 EventRecorder::getRandomSeed(const Common::String &name) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	uint32 result = g_system->getMillis();
 	if (_recordMode == kRecorderRecord) {
 		_playbackFile->getHeader().randomSourceRecords[name] = result;
@@ -256,7 +256,7 @@ uint32 EventRecorder::getRandomSeed(const Common::String &name) {
 }
 
 Common::String EventRecorder::generateRecordFileName(const Common::String &target) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	Common::String pattern(target+".r??");
 	Common::StringArray files = g_system->getSavefileManager()->listSavefiles(pattern);
 	for (int i = 0; i < kMaxRecordsNames; ++i) {
@@ -274,7 +274,7 @@ Common::String EventRecorder::generateRecordFileName(const Common::String &targe
 
 
 void EventRecorder::init(Common::String recordFileName, RecordMode mode) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	_fakeMixerManager = new NullSdlMixerManager();
 	_fakeMixerManager->init();
 	_fakeMixerManager->suspendAudio();
@@ -327,7 +327,7 @@ void EventRecorder::init(Common::String recordFileName, RecordMode mode) {
  *@return true in case of success, false in case of error
  *
  */
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 bool EventRecorder::openRecordFile(const Common::String &fileName) {
 	bool result;
 	switch (_recordMode) {
@@ -370,7 +370,7 @@ void EventRecorder::registerMixerManager(SdlMixerManager *mixerManager) {
 	_realMixerManager = mixerManager;
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::switchMixer() {
 	if (_recordMode == kPassthrough) {
 		_realMixerManager->resumeAudio();
@@ -382,7 +382,7 @@ void EventRecorder::switchMixer() {
 #endif
 
 SdlMixerManager *EventRecorder::getMixerManager() {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	if (_recordMode == kPassthrough) {
 		return _realMixerManager;
 	} else {
@@ -393,7 +393,7 @@ SdlMixerManager *EventRecorder::getMixerManager() {
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::getConfigFromDomain(Common::ConfigManager::Domain *domain) {
 	for (Common::ConfigManager::Domain::iterator entry = domain->begin(); entry!= domain->end(); ++entry) {
 		_playbackFile->getHeader().settingsRecords[entry->_key] = entry->_value;
@@ -439,7 +439,7 @@ void EventRecorder::registerTimerManager(DefaultTimerManager *timerManager) {
 	_timerManager = timerManager;
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::switchTimerManagers() {
 	delete _timerManager;
 	if (_recordMode == kPassthrough) {
@@ -461,7 +461,7 @@ void EventRecorder::updateSubsystems() {
 #endif
 
 Common::List<Common::Event> EventRecorder::mapEvent(const Common::Event &ev, Common::EventSource *source) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	if ((!_initialized) && (_recordMode != kRecorderPlaybackPause)) {
 		return DefaultEventMapper::mapEvent(ev, source);
 	}
@@ -512,7 +512,7 @@ Common::List<Common::Event> EventRecorder::mapEvent(const Common::Event &ev, Com
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::setGameMd5(const ADGameDescription *gameDesc) {
 	for (const ADGameFileDescription *fileDesc = gameDesc->filesDescriptions; fileDesc->fileName; fileDesc++) {
 		if (fileDesc->md5 != NULL) {
@@ -523,7 +523,7 @@ void EventRecorder::setGameMd5(const ADGameDescription *gameDesc) {
 #endif
 
 void EventRecorder::processGameDescription(const ADGameDescription *desc) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	if (_recordMode == kRecorderRecord) {
 		setGameMd5(desc);
 	}
@@ -534,7 +534,7 @@ void EventRecorder::processGameDescription(const ADGameDescription *desc) {
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 void EventRecorder::deleteRecord(const Common::String& fileName) {
 	g_system->getSavefileManager()->removeSavefile(fileName);
 }
@@ -582,7 +582,7 @@ Common::SeekableReadStream *EventRecorder::processSaveStream(const Common::Strin
 #endif
 
 Common::SaveFileManager *EventRecorder::getSaveManager(Common::SaveFileManager *realSaveManager) {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 	_realSaveManager = realSaveManager;
 	if (_recordMode != kPassthrough) {
 		return &_fakeSaveManager;
@@ -595,7 +595,7 @@ Common::SaveFileManager *EventRecorder::getSaveManager(Common::SaveFileManager *
 }
 
 void EventRecorder::preDrawOverlayGui() {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
     if ((_initialized) || (_needRedraw)) {
 		RecordMode oldMode = _recordMode;
 		_recordMode = kPassthrough;
@@ -611,7 +611,7 @@ void EventRecorder::preDrawOverlayGui() {
 }
 
 void EventRecorder::postDrawOverlayGui() {
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
     if ((_initialized) || (_needRedraw)) {
 		RecordMode oldMode = _recordMode;
 		_recordMode = kPassthrough;
@@ -621,7 +621,7 @@ void EventRecorder::postDrawOverlayGui() {
 #endif
 }
 
-#ifdef SDL_BACKEND
+#ifdef EVENT_RECORDER
 Common::StringArray EventRecorder::listSaveFiles(const Common::String &pattern) {
 	if (_recordMode == kRecorderPlayback) {
 		Common::StringArray result;

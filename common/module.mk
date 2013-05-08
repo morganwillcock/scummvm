@@ -50,7 +50,7 @@ MODULE_OBJS += \
 	rdft.o \
 	sinetables.o
 
-ifdef SDL_BACKEND
+ifdef ENABLE_EVENTRECORDER
 MODULE_OBJS += \
 	recorderfile.o
 endif
