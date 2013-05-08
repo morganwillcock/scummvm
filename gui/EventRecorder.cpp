@@ -181,8 +181,10 @@ void EventRecorder::checkForKeyCode(const Common::Event &event) {
 		togglePause();
 	}
 }
+#endif
 
 bool EventRecorder::pollEvent(Common::Event &ev) {
+#ifdef EVENT_RECORDER
 	if ((_recordMode != kRecorderPlayback) || !_initialized)
 		return false;
 	
@@ -206,8 +208,12 @@ bool EventRecorder::pollEvent(Common::Event &ev) {
 	ev = _nextEvent;
 	_nextEvent = _playbackFile->getNextEvent();
 	return true;
+#else
+	return false;
+#endif
 }
 
+#ifdef EVENT_RECORDER
 void EventRecorder::switchFastMode() {
 	if (_recordMode == kRecorderPlaybackPause) {
 		_fastPlayback = !_fastPlayback;
@@ -448,8 +454,10 @@ void EventRecorder::switchTimerManagers() {
 		_timerManager = new DefaultTimerManager();
 	}
 }
+#endif
 
 void EventRecorder::updateSubsystems() {
+#ifdef EVENT_RECORDER
 	if (_recordMode == kPassthrough) {
 		return;
 	}
@@ -457,8 +465,8 @@ void EventRecorder::updateSubsystems() {
 	_recordMode = kPassthrough;
 	_fakeMixerManager->update();
 	_recordMode = oldRecordMode;
-}
 #endif
+}
 
 Common::List<Common::Event> EventRecorder::mapEvent(const Common::Event &ev, Common::EventSource *source) {
 #ifdef EVENT_RECORDER

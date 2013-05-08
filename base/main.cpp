@@ -500,9 +500,11 @@ extern "C" int scummvm_main(int argc, const char * const argv[]) {
 			#ifdef FORCE_RTL
 			g_system->getEventManager()->resetQuit();
 			#endif
+			#ifdef ENABLE_EVENTRECORDER
 			if (g_eventRec.checkForContinueGame()) {
 				continue;
 			}
+			#endif
 
 			// Discard any command line options. It's unlikely that the user
 			// wanted to apply them to *all* games ever launched.
