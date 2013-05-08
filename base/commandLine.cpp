@@ -235,8 +235,6 @@ void registerDefaults() {
 	ConfMan.registerDefault("disable_display", false);
 	ConfMan.registerDefault("record_mode", "none");
 	ConfMan.registerDefault("record_file_name", "record.bin");
-	ConfMan.registerDefault("record_temp_file_name", "record.tmp");
-	ConfMan.registerDefault("record_time_file_name", "record.time");
 
 	ConfMan.registerDefault("gui_saveload_chooser", "grid");
 	ConfMan.registerDefault("gui_saveload_last_pos", "0");
@@ -425,8 +423,16 @@ Common::String parseCommandLine(Common::StringMap &settings, int argc, const cha
 			DO_OPTION_BOOL('f', "fullscreen")
 			END_OPTION
 
+#ifdef ENABLE_EVENTRECORDER
 			DO_LONG_OPTION_INT("disable-display")
 			END_OPTION
+
+			DO_LONG_OPTION("record-mode")
+			END_OPTION
+
+			DO_LONG_OPTION("record-file-name")
+			END_OPTION
+#endif
 
 			DO_LONG_OPTION("opl-driver")
 			END_OPTION
@@ -572,12 +578,6 @@ Common::String parseCommandLine(Common::StringMap &settings, int argc, const cha
 			DO_LONG_OPTION_BOOL("alt-intro")
 			END_OPTION
 #endif
-
-			DO_LONG_OPTION("record-mode")
-			END_OPTION
-
-			DO_LONG_OPTION("record-file-name")
-			END_OPTION
 
 #ifdef IPHONE
 			// This is automatically set when launched from the Springboard.

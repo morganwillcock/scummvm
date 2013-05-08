@@ -112,7 +112,7 @@ void EventRecorder::deinit() {
 }
 
 void EventRecorder::processMillis(uint32 &millis, bool skipRecord) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if (!_initialized) {
 		return;
 	}
@@ -166,14 +166,14 @@ void EventRecorder::processMillis(uint32 &millis, bool skipRecord) {
 }
 
 bool EventRecorder::processDelayMillis() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	return _fastPlayback;
 #else
 	return false;
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::checkForKeyCode(const Common::Event &event) {
 	if ((event.type == Common::EVENT_KEYDOWN) && (event.kbd.flags & Common::KBD_CTRL) && (event.kbd.keycode == Common::KEYCODE_p) && (!event.synthetic)) {
 		togglePause();
@@ -182,7 +182,7 @@ void EventRecorder::checkForKeyCode(const Common::Event &event) {
 #endif
 
 bool EventRecorder::pollEvent(Common::Event &ev) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if ((_recordMode != kRecorderPlayback) || !_initialized)
 		return false;
 	
@@ -211,7 +211,7 @@ bool EventRecorder::pollEvent(Common::Event &ev) {
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::switchFastMode() {
 	if (_recordMode == kRecorderPlaybackPause) {
 		_fastPlayback = !_fastPlayback;
@@ -240,13 +240,13 @@ void EventRecorder::togglePause() {
 #endif
 
 void EventRecorder::RegisterEventSource() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	g_system->getEventManager()->getEventDispatcher()->registerMapper(this, false);
 #endif
 }
 
 uint32 EventRecorder::getRandomSeed(const Common::String &name) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	uint32 result = g_system->getMillis();
 	if (_recordMode == kRecorderRecord) {
 		_playbackFile->getHeader().randomSourceRecords[name] = result;
@@ -260,7 +260,7 @@ uint32 EventRecorder::getRandomSeed(const Common::String &name) {
 }
 
 Common::String EventRecorder::generateRecordFileName(const Common::String &target) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	Common::String pattern(target+".r??");
 	Common::StringArray files = g_system->getSavefileManager()->listSavefiles(pattern);
 	for (int i = 0; i < kMaxRecordsNames; ++i) {
@@ -278,7 +278,7 @@ Common::String EventRecorder::generateRecordFileName(const Common::String &targe
 
 
 void EventRecorder::init(Common::String recordFileName, RecordMode mode) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	_fakeMixerManager = new NullSdlMixerManager();
 	_fakeMixerManager->init();
 	_fakeMixerManager->suspendAudio();
@@ -331,7 +331,7 @@ void EventRecorder::init(Common::String recordFileName, RecordMode mode) {
  *@return true in case of success, false in case of error
  *
  */
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 bool EventRecorder::openRecordFile(const Common::String &fileName) {
 	bool result;
 	switch (_recordMode) {
@@ -374,7 +374,7 @@ void EventRecorder::registerMixerManager(SdlMixerManager *mixerManager) {
 	_realMixerManager = mixerManager;
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::switchMixer() {
 	if (_recordMode == kPassthrough) {
 		_realMixerManager->resumeAudio();
@@ -386,7 +386,7 @@ void EventRecorder::switchMixer() {
 #endif
 
 SdlMixerManager *EventRecorder::getMixerManager() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if (_recordMode == kPassthrough) {
 		return _realMixerManager;
 	} else {
@@ -397,7 +397,7 @@ SdlMixerManager *EventRecorder::getMixerManager() {
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::getConfigFromDomain(Common::ConfigManager::Domain *domain) {
 	for (Common::ConfigManager::Domain::iterator entry = domain->begin(); entry!= domain->end(); ++entry) {
 		_playbackFile->getHeader().settingsRecords[entry->_key] = entry->_value;
@@ -443,7 +443,7 @@ void EventRecorder::registerTimerManager(DefaultTimerManager *timerManager) {
 	_timerManager = timerManager;
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::switchTimerManagers() {
 	delete _timerManager;
 	if (_recordMode == kPassthrough) {
@@ -455,7 +455,7 @@ void EventRecorder::switchTimerManagers() {
 #endif
 
 void EventRecorder::updateSubsystems() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if (_recordMode == kPassthrough) {
 		return;
 	}
@@ -467,7 +467,7 @@ void EventRecorder::updateSubsystems() {
 }
 
 Common::List<Common::Event> EventRecorder::mapEvent(const Common::Event &ev, Common::EventSource *source) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if ((!_initialized) && (_recordMode != kRecorderPlaybackPause)) {
 		return DefaultEventMapper::mapEvent(ev, source);
 	}
@@ -518,7 +518,7 @@ Common::List<Common::Event> EventRecorder::mapEvent(const Common::Event &ev, Com
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::setGameMd5(const ADGameDescription *gameDesc) {
 	for (const ADGameFileDescription *fileDesc = gameDesc->filesDescriptions; fileDesc->fileName; fileDesc++) {
 		if (fileDesc->md5 != NULL) {
@@ -529,7 +529,7 @@ void EventRecorder::setGameMd5(const ADGameDescription *gameDesc) {
 #endif
 
 void EventRecorder::processGameDescription(const ADGameDescription *desc) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	if (_recordMode == kRecorderRecord) {
 		setGameMd5(desc);
 	}
@@ -540,7 +540,7 @@ void EventRecorder::processGameDescription(const ADGameDescription *desc) {
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 void EventRecorder::deleteRecord(const Common::String& fileName) {
 	g_system->getSavefileManager()->removeSavefile(fileName);
 }
@@ -588,7 +588,7 @@ Common::SeekableReadStream *EventRecorder::processSaveStream(const Common::Strin
 #endif
 
 Common::SaveFileManager *EventRecorder::getSaveManager(Common::SaveFileManager *realSaveManager) {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 	_realSaveManager = realSaveManager;
 	if (_recordMode != kPassthrough) {
 		return &_fakeSaveManager;
@@ -601,7 +601,7 @@ Common::SaveFileManager *EventRecorder::getSaveManager(Common::SaveFileManager *
 }
 
 void EventRecorder::preDrawOverlayGui() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
     if ((_initialized) || (_needRedraw)) {
 		RecordMode oldMode = _recordMode;
 		_recordMode = kPassthrough;
@@ -617,7 +617,7 @@ void EventRecorder::preDrawOverlayGui() {
 }
 
 void EventRecorder::postDrawOverlayGui() {
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
     if ((_initialized) || (_needRedraw)) {
 		RecordMode oldMode = _recordMode;
 		_recordMode = kPassthrough;
@@ -627,7 +627,7 @@ void EventRecorder::postDrawOverlayGui() {
 #endif
 }
 
-#ifdef EVENT_RECORDER
+#ifdef ENABLE_EVENTRECORDER
 Common::StringArray EventRecorder::listSaveFiles(const Common::String &pattern) {
 	if (_recordMode == kRecorderPlayback) {
 		Common::StringArray result;
