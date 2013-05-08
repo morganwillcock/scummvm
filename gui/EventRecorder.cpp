@@ -70,9 +70,9 @@ void writeTime(Common::WriteStream *outFile, uint32 d) {
 }
 
 EventRecorder::EventRecorder() {
+	_timerManager = NULL;
 #ifdef ENABLE_EVENTRECORDER
 	_recordMode = kPassthrough;
-	_timerManager = NULL;
 	_fakeMixerManager = NULL;
 	_initialized = false;
 	_needRedraw = false;
@@ -82,11 +82,9 @@ EventRecorder::EventRecorder() {
 }
 
 EventRecorder::~EventRecorder() {
-#ifdef ENABLE_EVENTRECORDER
 	if (_timerManager != NULL) {
 		delete _timerManager;
 	}
-#endif
 }
 
 void EventRecorder::deinit() {
