@@ -31,14 +31,14 @@
 #include "common/memstream.h"
 #include "common/savefile.h"
 #include "backends/keymapper/keymapper.h"
-#include "backends/mixer/sdl/sdl-mixer.h"
 #include "common/hashmap.h"
 #include "common/hash-str.h"
-#include "backends/timer/sdl/sdl-timer.h"
 #include "backends/timer/default/default-timer.h"
 #include "engines/advancedDetector.h"
 #include "common/config-manager.h"
 #ifdef ENABLE_EVENTRECORDER
+#include "backends/mixer/sdl/sdl-mixer.h"
+#include "backends/timer/sdl/sdl-timer.h"
 #include "common/recorderfile.h"
 #include "backends/saves/recorder/recorder-saves.h"
 #include "backends/mixer/nullmixer/nullsdl-mixer.h"
@@ -75,19 +75,21 @@ public:
 		kRecorderPlaybackPause = 3
 	};
 
+#ifdef ENABLE_EVENTRECORDER
 	void init(Common::String recordFileName, RecordMode mode);
 	void deinit();
-	bool processDelayMillis();
+#endif
 	uint32 getRandomSeed(const Common::String &name);
+#ifdef ENABLE_EVENTRECORDER
+	bool processDelayMillis();
 	void processMillis(uint32 &millis, bool skipRecord);
-	bool processAudio(uint32 &samples, bool paused);
+	//bool processAudio(uint32 &samples, bool paused);
 	void processGameDescription(const ADGameDescription *desc);
 	Common::SeekableReadStream *processSaveStream(const Common::String & fileName);
 
 	void preDrawOverlayGui();
 	void postDrawOverlayGui();
 
-#ifdef ENABLE_EVENTRECORDER
 	void setAuthor(const Common::String &author) {
 		_author = author;
 	}
@@ -109,7 +111,6 @@ public:
 	void setRedraw(bool redraw) {
 		_needRedraw = redraw;
 	}
-#endif
 
 	void registerMixerManager(SdlMixerManager *mixerManager);
 	void registerTimerManager(DefaultTimerManager *timerManager);
@@ -121,16 +122,12 @@ public:
 	bool checkForContinueGame();
 
 	void suspendRecording() {
-#ifdef ENABLE_EVENTRECORDER
 		_savedState = _initialized;
 		_initialized = false;
-#endif
 	}
 
 	void resumeRecording() {
-#ifdef ENABLE_EVENTRECORDER
 		_initialized = _savedState;
-#endif
 	}
 
 	Common::StringArray listSaveFiles(const Common::String &pattern);
@@ -138,12 +135,12 @@ public:
 
 	Common::SaveFileManager *getSaveManager(Common::SaveFileManager *realSaveManager);
 	SDL_Surface *getSurface(int width, int height);
+	bool grabScreenAndComputeMD5(Graphics::Surface &screen, uint8 md5[16]);
+#endif
 	void RegisterEventSource();
 
-	bool grabScreenAndComputeMD5(Graphics::Surface &screen, uint8 md5[16]);
-
-	void updateSubsystems();
 #ifdef ENABLE_EVENTRECORDER
+	void updateSubsystems();
 	bool switchMode();
 	void switchFastMode();
 #endif
@@ -160,11 +157,9 @@ private:
 	Common::String _author;
 	Common::String _desc;
 	Common::String _name;
-#endif
 	Common::SaveFileManager *_realSaveManager;
 	SdlMixerManager *_realMixerManager;
 	DefaultTimerManager *_timerManager;
-#ifdef ENABLE_EVENTRECORDER
 	RecorderSaveFileManager _fakeSaveManager;
 	NullSdlMixerManager *_fakeMixerManager;
 	GUI::OnScreenDialog *controlPanel;
