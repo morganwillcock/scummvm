@@ -416,8 +416,8 @@ void PlaybackFile::dumpRecordsToFile() {
 
 void PlaybackFile::dumpHeaderToFile() {
 	_writeStream->writeUint32LE(kFormatIdTag);
-	//NULL  size for first tag cause we can't calculate
-	//size of file in moment of header dumping
+	// Specify size for first tag as NULL since we cannot calculate
+	// size of the file at time of the header dumping
 	_writeStream->writeUint32LE(0);
 	_writeStream->writeUint32LE(kVersionTag);
 	_writeStream->writeUint32LE(4);

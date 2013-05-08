@@ -232,7 +232,7 @@ protected:
 	int _scalerType;
 	int _transactionMode;
 
-	//shows is it needed to free _hwsurface in destructor
+	// Indicates whether it is needed to free _hwsurface in destructor
 	bool _displayDisabled;
 
 	bool _screenIsLocked;

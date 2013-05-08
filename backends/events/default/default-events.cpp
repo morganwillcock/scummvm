@@ -84,7 +84,7 @@ void DefaultEventManager::init() {
 }
 
 bool DefaultEventManager::pollEvent(Common::Event &event) {
-	//skip recording of this events
+	// Skip recording of these events
 	uint32 time = g_system->getMillis(true);
 	bool result = false;
 

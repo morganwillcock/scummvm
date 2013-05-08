@@ -258,7 +258,7 @@ void GuiManager::runLoop() {
 	if (activeDialog == 0)
 		return;
 
-	//suspend recording while gui is showed
+	// Suspend recording while GUI is shown
 	g_eventRec.suspendRecording();
 
 	if (!_stateIsSaved) {
@@ -361,7 +361,7 @@ void GuiManager::runLoop() {
 		_useStdCursor = false;
 	}
 
-	//resume recording after gui showed
+	// Resume recording once GUI is shown
 	g_eventRec.resumeRecording();
 }
 

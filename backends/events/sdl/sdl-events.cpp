@@ -106,8 +106,9 @@ void SdlEventSource::processMouseEvent(Common::Event &event, int x, int y) {
 }
 
 void SdlEventSource::handleKbdMouse() {
-	//skip recording of this events
+	// Skip recording of these events
 	uint32 curTime = g_system->getMillis(true);
+
 	if (curTime >= _km.last_time + _km.delay_time) {
 		_km.last_time = curTime;
 		if (_km.x_down_count == 1) {
