@@ -78,6 +78,14 @@ class Talk;
 #define kMapZCnt    20
 #define kMapTop     80
 
+#define kSayTheEnd  41
+
+enum GameType {
+	kGameTypeNone = 0,
+	kGameTypeSoltys,
+	kGameTypeSfinx
+};
+
 // our engine debug channels
 enum {
 	kCGEDebugBitmap = 1 << 0,
@@ -147,7 +155,6 @@ public:
 
 	const   ADGameDescription *_gameDescription;
 	int    _startupMode;
-	int    _demoText;
 	int    _oldLev;
 	int    _pocPtr;
 	bool   _music;
@@ -157,7 +164,7 @@ public:
 	bool   _flag[4];
 	bool   _dark;
 	bool   _game;
-	bool   _finis;
+	bool   _endGame;
 	int    _now;
 	int    _lev;
 	int    _mode;

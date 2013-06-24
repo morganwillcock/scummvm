@@ -35,6 +35,7 @@
 #include "graphics/palette.h"
 #include "graphics/surface.h"
 
+#include "dreamweb/sound.h"
 #include "dreamweb/dreamweb.h"
 
 namespace DreamWeb {
@@ -46,31 +47,29 @@ DreamWebEngine::DreamWebEngine(OSystem *syst, const DreamWebGameDescription *gam
 	_roomDesc(kNumRoomTexts), _freeDesc(kNumFreeTexts),
 	_personText(kNumPersonTexts) {
 
-	// Setup mixer
-	_mixer->setVolumeForSoundType(Audio::Mixer::kSFXSoundType, ConfMan.getInt("sfx_volume"));
-	_mixer->setVolumeForSoundType(Audio::Mixer::kMusicSoundType, ConfMan.getInt("music_volume"));
-	_mixer->setVolumeForSoundType(Audio::Mixer::kSpeechSoundType, ConfMan.getInt("speech_volume"));
-
 	_vSyncInterrupt = false;
 
 	_console = 0;
+	_sound = 0;
 	DebugMan.addDebugChannel(kDebugAnimation, "Animation", "Animation Debug Flag");
 	DebugMan.addDebugChannel(kDebugSaveLoad, "SaveLoad", "Track Save/Load Function");
 	_speed = 1;
 	_turbo = false;
 	_oldMouseState = 0;
-	_channel0 = 0;
-	_channel1 = 0;
 
 	_datafilePrefix = "DREAMWEB.";
+	_speechDirName = "SPEECH";
 	// ES and FR CD release use a different data file prefix
+	// and speech directory naming.
 	if (isCD()) {
 		switch(getLanguage()) {
 		case Common::ES_ESP:
 			_datafilePrefix = "DREAMWSP.";
+			_speechDirName = "SPANISH";
 			break;
 		case Common::FR_FRA:
 			_datafilePrefix = "DREAMWFR.";
+			_speechDirName = "FRENCH";
 			break;
 		default:
 			// Nothing to do
@@ -80,16 +79,6 @@ DreamWebEngine::DreamWebEngine(OSystem *syst, const DreamWebGameDescription *gam
 
 	_openChangeSize = kInventx+(4*kItempicsize);
 	_quitRequested = false;
-
-	_currentSample = 0xff;
-	_channel0Playing = 0;
-	_channel0Repeat = 0;
-	_channel1Playing = 0xff;
-
-	_volume = 0;
-	_volumeTo = 0;
-	_volumeDirection = 0;
-	_volumeCount = 0;
 
 	_speechLoaded = false;
 
@@ -219,7 +208,7 @@ DreamWebEngine::DreamWebEngine(OSystem *syst, const DreamWebGameDescription *gam
 	_addToRed = 0;
 	_addToBlue = 0;
 	_lastSoundReel = 0;
-	_lastHardKey = 0;
+	_lastHardKey = Common::KEYCODE_INVALID;
 	_bufferIn = 0;
 	_bufferOut = 0;
 	_blinkFrame = 23;
@@ -242,6 +231,7 @@ DreamWebEngine::DreamWebEngine(OSystem *syst, const DreamWebGameDescription *gam
 DreamWebEngine::~DreamWebEngine() {
 	DebugMan.clearAllDebugChannels();
 	delete _console;
+	delete _sound;
 }
 
 static void vSyncInterrupt(void *refCon) {
@@ -273,7 +263,7 @@ void DreamWebEngine::waitForVSync() {
 
 void DreamWebEngine::quit() {
 	_quitRequested = true;
-	_lastHardKey = 1;
+	_lastHardKey = Common::KEYCODE_ESCAPE;
 }
 
 void DreamWebEngine::processEvents() {
@@ -282,9 +272,9 @@ void DreamWebEngine::processEvents() {
 		return;
 	}
 
-	soundHandler();
+	_sound->soundHandler();
 	Common::Event event;
-	int softKey, hardKey;
+	int softKey;
 	while (_eventMan->pollEvent(event)) {
 		switch(event.type) {
 		case Common::EVENT_RTL:
@@ -319,27 +309,20 @@ void DreamWebEngine::processEvents() {
 				return; //do not pass ctrl + key to the engine
 			}
 
-			// Some parts of the ASM code uses the hardware key
-			// code directly. We don't have that code, so we fake
-			// it for the keys where it's needed and assume it's
-			// 0 (which is actually an invalid value, as far as I
-			// know) otherwise.
-
-			hardKey = 0;
+			// Some parts of the code uses the hardware key
+			// code directly.
 
 			switch (event.kbd.keycode) {
 			case Common::KEYCODE_ESCAPE:
-				hardKey = 1;
+				_lastHardKey = Common::KEYCODE_ESCAPE;
 				break;
 			case Common::KEYCODE_SPACE:
-				hardKey = 57;
+				_lastHardKey = Common::KEYCODE_SPACE;
 				break;
 			default:
-				hardKey = 0;
+				_lastHardKey = Common::KEYCODE_INVALID;
 				break;
 			}
-
-			_lastHardKey = hardKey;
 
 			// The rest of the keys are converted to ASCII. This
 			// is fairly restrictive, and eventually we may want
@@ -348,11 +331,13 @@ void DreamWebEngine::processEvents() {
 
 			softKey = 0;
 
-			if (event.kbd.keycode >= Common::KEYCODE_a && event.kbd.keycode <= Common::KEYCODE_z) {
-				softKey = event.kbd.ascii & ~0x20;
-			} else if (event.kbd.keycode == Common::KEYCODE_MINUS ||
-				event.kbd.keycode == Common::KEYCODE_SPACE ||
-				(event.kbd.keycode >= Common::KEYCODE_0 && event.kbd.keycode <= Common::KEYCODE_9)) {
+			debug(1, "DreamWebEngine::processEvents() KeyDown keycode:%d ascii:0x%02x", event.kbd.keycode, event.kbd.ascii);
+			if ((event.kbd.ascii >= 'a' && event.kbd.ascii <= 'z') ||
+				(event.kbd.ascii >= 'A' && event.kbd.ascii <= 'Z')) {
+				softKey = event.kbd.ascii & ~0x20; // (& ~0x20) forces ascii codes for a-z to map to A-Z
+			} else if (event.kbd.ascii == '-' ||
+				event.kbd.ascii == ' ' ||
+				(event.kbd.ascii >= '0' && event.kbd.ascii <= '9')) {
 				softKey = event.kbd.ascii;
 			} else if (event.kbd.keycode >= Common::KEYCODE_KP0 && event.kbd.keycode <= Common::KEYCODE_KP9) {
 				softKey = event.kbd.keycode - Common::KEYCODE_KP0 + '0';
@@ -378,11 +363,13 @@ void DreamWebEngine::processEvents() {
 Common::Error DreamWebEngine::run() {
 	syncSoundSettings();
 	_console = new DreamWebConsole(this);
+	_sound = new DreamWebSound(this);
 
 	ConfMan.registerDefault("originalsaveload", "false");
 	ConfMan.registerDefault("bright_palette", true);
-	_hasSpeech = Common::File::exists("speech/r01c0000.raw") && !ConfMan.getBool("speech_mute");
+	_hasSpeech = Common::File::exists(_speechDirName + "/r01c0000.raw") && !ConfMan.getBool("speech_mute");
 	_brightPalette = ConfMan.getBool("bright_palette");
+	_copyProtection = ConfMan.getBool("copy_protection");
 
 	_timer->installTimerProc(vSyncInterrupt, 1000000 / 70, this, "dreamwebVSync");
 	dreamweb();
@@ -412,33 +399,14 @@ Common::String DreamWebEngine::getSavegameFilename(int slot) const {
 
 void DreamWebEngine::keyPressed(uint16 ascii) {
 	debug(2, "key pressed = %04x", ascii);
-	uint16 in = (_bufferIn + 1) & 0x0f;
+	uint16 in = (_bufferIn + 1) % ARRAYSIZE(_keyBuffer);
 	uint16 out = _bufferOut;
 	if (in == out) {
 		warning("keyboard buffer is full");
 		return;
 	}
 	_bufferIn = in;
-	DreamWeb::g_keyBuffer[in] = ascii;
-}
-
-void DreamWebEngine::mouseCall(uint16 *x, uint16 *y, uint16 *state) {
-	processEvents();
-	Common::Point pos = _eventMan->getMousePos();
-	if (pos.x > 298)
-		pos.x = 298;
-	if (pos.x < 15)
-		pos.x = 15;
-	if (pos.y < 15)
-		pos.y = 15;
-	if (pos.y > 184)
-		pos.y = 184;
-	*x = pos.x;
-	*y = pos.y;
-
-	unsigned newState = _eventMan->getButtonState();
-	*state = (newState == _oldMouseState? 0 : newState);
-	_oldMouseState = newState;
+	_keyBuffer[in] = ascii;
 }
 
 void DreamWebEngine::getPalette(uint8 *data, uint start, uint count) {
@@ -449,7 +417,7 @@ void DreamWebEngine::getPalette(uint8 *data, uint start, uint count) {
 
 void DreamWebEngine::setPalette(const uint8 *data, uint start, uint count) {
 	assert(start + count <= 256);
-	uint8 fixed[768];
+	uint8 fixed[3*256];
 	for (uint i = 0; i < count * 3; ++i) {
 		fixed[i] = data[i] << 2;
 	}
@@ -457,10 +425,10 @@ void DreamWebEngine::setPalette(const uint8 *data, uint start, uint count) {
 }
 
 void DreamWebEngine::blit(const uint8 *src, int pitch, int x, int y, int w, int h) {
-	if (y + h > 200)
-		h = 200 - y;
-	if (x + w > 320)
-		w = 320 - x;
+	if (y + h > (int)kScreenheight)
+		h = kScreenheight - y;
+	if (x + w > (int)kScreenwidth)
+		w = kScreenwidth - x;
 	if (h <= 0 || w <= 0)
 		return;
 	_system->copyRectToScreen(src, pitch, x, y, w, h);
@@ -541,9 +509,10 @@ uint8 DreamWebEngine::modifyChar(uint8 c) const {
 			return c;
 		}
 	case Common::FR_FRA:
+	case Common::IT_ITA:
 		switch(c) {
 		case 133:
-			return 'Z' + 1;	
+			return 'Z' + 1;
 		case 130:
 			return 'Z' + 2;
 		case 138:
@@ -575,10 +544,10 @@ uint8 DreamWebEngine::modifyChar(uint8 c) const {
 		return c;
 	}
 }
-	
+
 Common::String DreamWebEngine::modifyFileName(const char *name) {
 	Common::String fileName(name);
-	
+
 	// Sanity check
 	if (!fileName.hasPrefix("DREAMWEB."))
 		return fileName;

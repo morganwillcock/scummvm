@@ -755,7 +755,7 @@ void ScummEngine::drawStripToScreen(VirtScreen *vs, int x, int width, int top, i
 					memset(blackbuf, 0, 16 * 240); // Prepare a buffer 16px wide and 240px high, to fit on a lateral strip
 
 					width = 240; // Fix right strip
-					_system->copyRectToScreen((const byte *)blackbuf, 16, 0, 0, 16, 240); // Fix left strip
+					_system->copyRectToScreen(blackbuf, 16, 0, 0, 16, 240); // Fix left strip
 				}
 			}
 
@@ -763,7 +763,7 @@ void ScummEngine::drawStripToScreen(VirtScreen *vs, int x, int width, int top, i
 	}
 
 	// Finally blit the whole thing to the screen
-	_system->copyRectToScreen((const byte *)src, pitch, x, y, width, height);
+	_system->copyRectToScreen(src, pitch, x, y, width, height);
 }
 
 // CGA
@@ -3609,7 +3609,7 @@ void Gdi::unkDecode9(byte *dst, int dstPitch, const byte *src, int height) const
 	int i;
 	uint buffer = 0, mask = 128;
 	int h = height;
-	i = run = 0;
+	run = 0;
 
 	int x = 8;
 	for (;;) {

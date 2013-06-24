@@ -20,6 +20,7 @@
  *
  */
 
+#include "dreamweb/sound.h"
 #include "dreamweb/dreamweb.h"
 
 namespace DreamWeb {
@@ -41,16 +42,16 @@ void DreamWebEngine::showRain() {
 		uint16 offset = (rain.w3 - rain.b5) & 511;
 		rain.w3 = offset;
 		const uint8 *src = frameData + offset;
-		uint8 *dst = workspace() + y * 320 + x;
+		uint8 *dst = workspace() + y * kScreenwidth + x;
 		for (uint16 j = 0; j < size; ++j) {
 			uint8 v = src[j];
 			if (v != 0)
 				*dst = v;
-			dst += 320-1; // advance diagonally
+			dst += kScreenwidth-1; // advance diagonally
 		}
 	}
 
-	if (_channel1Playing != 255)
+	if (_sound->isChannel1Playing())
 		return;
 	if (_realLocation == 2 && _vars._beenMugged != 1)
 		return;
@@ -61,11 +62,11 @@ void DreamWebEngine::showRain() {
 		return;
 
 	uint8 soundIndex;
-	if (_channel0Playing != 6)
+	if (_sound->getChannel0Playing() != 6)
 		soundIndex = 4;
 	else
 		soundIndex = 7;
-	playChannel1(soundIndex);
+	_sound->playChannel1(soundIndex);
 }
 
 uint8 DreamWebEngine::getBlockOfPixel(uint8 x, uint8 y) {

@@ -20,6 +20,7 @@
  *
  */
 
+#include "dreamweb/sound.h"
 #include "dreamweb/dreamweb.h"
 
 namespace DreamWeb {
@@ -55,7 +56,7 @@ void DreamWebEngine::selectLocation() {
 	_pointerFrame = 0;
 	showPointer();
 	workToScreen();
-	playChannel0(9, 255);
+	_sound->playChannel0(9, 255);
 	_newLocation = 255;
 
 	while (_newLocation == 255) {
@@ -65,7 +66,7 @@ void DreamWebEngine::selectLocation() {
 		delPointer();
 		readMouse();
 		showPointer();
-		vSync();
+		waitForVSync();
 		dumpPointer();
 		dumpTextLine();
 
@@ -139,7 +140,7 @@ void DreamWebEngine::putUnderCentre() {
 }
 
 void DreamWebEngine::locationPic() {
-	const int roomPics[] = { 5, 0, 3, 2, 4, 1, 10, 9, 8, 6, 11, 4, 7, 7, 0 };
+	const int roomPics[] = { 5, 0, 3, 2, 4, 1, 10, 9, 8, 6, 11, 4, 7, 7, 0, 0 };
 	byte picture = roomPics[_destPos];
 
 	if (picture >= 6)

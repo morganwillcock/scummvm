@@ -65,6 +65,10 @@ OSystem_IPHONE::OSystem_IPHONE() :
 	_touchpadModeEnabled = !iPhone_isHighResDevice();
 	_fsFactory = new POSIXFilesystemFactory();
 	initVideoContext();
+
+	memset(_gamePalette, 0, sizeof(_gamePalette));
+	memset(_gamePaletteRGBA5551, 0, sizeof(_gamePaletteRGBA5551));
+	memset(_mouseCursorPalette, 0, sizeof(_mouseCursorPalette));
 }
 
 OSystem_IPHONE::~OSystem_IPHONE() {
@@ -235,6 +239,7 @@ void OSystem_IPHONE::getTimeAndDate(TimeDate &td) const {
 	td.tm_mday = t.tm_mday;
 	td.tm_mon = t.tm_mon;
 	td.tm_year = t.tm_year;
+	td.tm_wday = t.tm_wday;
 }
 
 Audio::Mixer *OSystem_IPHONE::getMixer() {

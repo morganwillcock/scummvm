@@ -30,6 +30,7 @@
 #include "tinsel/dw.h"
 #include "tinsel/handle.h"
 #include "tinsel/heapmem.h"			// heap memory manager
+#include "tinsel/scn.h"		// for the DW1 Mac resource handler
 #include "tinsel/timers.h"	// for DwGetCurrentTime()
 #include "tinsel/tinsel.h"
 #include "tinsel/scene.h"
@@ -85,7 +86,6 @@ static char g_szCdPlayFile[100];
 
 static void LoadFile(MEMHANDLE *pH);	// load a memory block as a file
 
-
 /**
  * Loads the graphics handle table index file and preloads all the
  * permanent graphics etc.
@@ -99,14 +99,16 @@ void SetupHandleTable() {
 	MEMHANDLE *pH;
 	TinselFile f;
 
-	if (f.open(TinselV1PSX? PSX_INDEX_FILENAME : INDEX_FILENAME)) {
+	const char *indexFileName = TinselV1PSX ? PSX_INDEX_FILENAME : INDEX_FILENAME;
+
+	if (f.open(indexFileName)) {
 		// get size of index file
 		len = f.size();
 
 		if (len > 0) {
 			if ((len % RECORD_SIZE) != 0) {
 				// index file is corrupt
-				error(FILE_IS_CORRUPT, TinselV1PSX? PSX_INDEX_FILENAME : INDEX_FILENAME);
+				error(FILE_IS_CORRUPT, indexFileName);
 			}
 
 			// calc number of handles
@@ -132,16 +134,16 @@ void SetupHandleTable() {
 
 			if (f.eos() || f.err()) {
 				// index file is corrupt
-				error(FILE_IS_CORRUPT, (TinselV1PSX? PSX_INDEX_FILENAME : INDEX_FILENAME));
+				error(FILE_IS_CORRUPT, indexFileName);
 			}
 
 			// close the file
 			f.close();
 		} else {	// index file is corrupt
-			error(FILE_IS_CORRUPT, (TinselV1PSX? PSX_INDEX_FILENAME : INDEX_FILENAME));
+			error(FILE_IS_CORRUPT, indexFileName);
 		}
 	} else {	// cannot find the index file
-		error(CANNOT_FIND_FILE, (TinselV1PSX? PSX_INDEX_FILENAME : INDEX_FILENAME));
+		error(CANNOT_FIND_FILE, indexFileName);
 	}
 
 	// allocate memory nodes and load all permanent graphics
@@ -298,7 +300,7 @@ void LoadFile(MEMHANDLE *pH) {
 
 		// discardable - unlock the memory
 		MemoryUnlock(pH->_node);
-
+		
 		// set the loaded flag
 		pH->filesize |= fLoaded;
 
@@ -320,6 +322,7 @@ void LoadFile(MEMHANDLE *pH) {
  */
 byte *LockMem(SCNHANDLE offset) {
 	uint32 handle = offset >> SCNHANDLE_SHIFT;	// calc memory handle to use
+	//debug("Locking offset of type %d (%x), offset %d, handle %d", (offset & HANDLEMASK) >> SCNHANDLE_SHIFT, (offset & HANDLEMASK) >> SCNHANDLE_SHIFT, offset & OFFSETMASK, handle);
 	MEMHANDLE *pH;			// points to table entry
 
 	// range check the memory handle
@@ -361,7 +364,7 @@ byte *LockMem(SCNHANDLE offset) {
 
 			if (TinselV2) {
 				SetCD(pH->flags2 & fAllCds);
-				CdCD(nullContext);
+				CdCD(Common::nullContext);
 			}
 			LoadFile(pH);
 		}

@@ -109,8 +109,8 @@ static Scene g_NextScene = { 0, 0, 0 };
 static Scene g_HookScene = { 0, 0, 0 };
 static Scene g_DelayedScene = { 0, 0, 0 };
 
-static PROCESS *g_pMouseProcess = 0;
-static PROCESS *g_pKeyboardProcess = 0;
+static Common::PROCESS *g_pMouseProcess = 0;
+static Common::PROCESS *g_pKeyboardProcess = 0;
 
 static SCNHANDLE g_hCdChangeScene;
 
@@ -324,7 +324,7 @@ static void MouseProcess(CORO_PARAM, const void *) {
 
 				if (TinselV2) {
 					// Kill off the button process and fire off the action command
-					g_scheduler->killMatchingProcess(PID_BTN_CLICK, -1);
+					CoroScheduler.killMatchingProcess(PID_BTN_CLICK, -1);
 					PlayerEvent(PLR_ACTION, _ctx->clickPos);
 				} else {
 					// signal left drag start
@@ -368,7 +368,7 @@ static void MouseProcess(CORO_PARAM, const void *) {
 				// will activate a single button click
 				if (TinselV2 && ControlIsOn()) {
 					_ctx->clickPos = mousePos;
-					g_scheduler->createProcess(PID_BTN_CLICK, SingleLeftProcess, &_ctx->clickPos, sizeof(Common::Point));
+					CoroScheduler.createProcess(PID_BTN_CLICK, SingleLeftProcess, &_ctx->clickPos, sizeof(Common::Point));
 				}
 			} else
 				_ctx->lastLeftClick -= _vm->_config->_dclickSpeed;
@@ -428,6 +428,14 @@ static void MouseProcess(CORO_PARAM, const void *) {
 			else
 				// signal right drag end
 				ProcessButEvent(PLR_DRAG2_END);
+			break;
+
+		case Common::EVENT_WHEELUP:
+			PlayerEvent(PLR_WHEEL_UP, mousePos);
+			break;
+
+		case Common::EVENT_WHEELDOWN:
+			PlayerEvent(PLR_WHEEL_DOWN, mousePos);
 			break;
 
 		default:
@@ -616,11 +624,11 @@ static void RestoredProcess(CORO_PARAM, const void *param) {
 }
 
 void RestoreProcess(INT_CONTEXT *pic) {
-	g_scheduler->createProcess(PID_TCODE, RestoredProcess, &pic, sizeof(pic));
+	CoroScheduler.createProcess(PID_TCODE, RestoredProcess, &pic, sizeof(pic));
 }
 
 void RestoreMasterProcess(INT_CONTEXT *pic) {
-	g_scheduler->createProcess(PID_MASTER_SCR, RestoredProcess, &pic, sizeof(pic));
+	CoroScheduler.createProcess(PID_MASTER_SCR, RestoredProcess, &pic, sizeof(pic));
 }
 
 // FIXME: CountOut is used by ChangeScene
@@ -658,7 +666,7 @@ bool ChangeScene(bool bReset) {
 			default:
 				// Trigger pre-load and fade and start countdown
 				CountOut = COUNTOUT_COUNT;
-				FadeOutFast(NULL);
+				FadeOutFast();
 				if (TinselV2)
 					_vm->_pcmMusic->startFadeOut(COUNTOUT_COUNT);
 				break;
@@ -722,21 +730,20 @@ void LoadBasicChunks() {
 
 	cptr = FindChunk(INV_OBJ_SCNHANDLE, CHUNK_OBJECTS);
 
-#ifdef SCUMM_BIG_ENDIAN
-	//convert to native endianness
+	// Convert to native endianness
 	INV_OBJECT *io = (INV_OBJECT *)cptr;
 	for (int i = 0; i < numObjects; i++, io++) {
-		io->id        = FROM_LE_32(io->id);
-		io->hIconFilm = FROM_LE_32(io->hIconFilm);
-		io->hScript   = FROM_LE_32(io->hScript);
-		io->attribute = FROM_LE_32(io->attribute);
+		io->id        = FROM_32(io->id);
+		io->hIconFilm = FROM_32(io->hIconFilm);
+		io->hScript   = FROM_32(io->hScript);
+		io->attribute = FROM_32(io->attribute);
 	}
-#endif
 
 	RegisterIcons(cptr, numObjects);
 
 	cptr = FindChunk(MASTER_SCNHANDLE, CHUNK_TOTAL_POLY);
-	if (cptr != NULL)
+	// Max polygons are 0 in DW1 Mac (both in the demo and the full version)
+	if (cptr != NULL && *cptr != 0)
 		MaxPolygons(*cptr);
 
 	if (TinselV2) {
@@ -878,7 +885,6 @@ TinselEngine::~TinselEngine() {
 	FreeObjectList();
 	FreeGlobalProcesses();
 	FreeGlobals();
-	delete _scheduler;
 
 	delete _config;
 
@@ -905,7 +911,7 @@ Common::Error TinselEngine::run() {
 
 	_console = new Console();
 
-	_scheduler = new Scheduler();
+	CoroScheduler.reset();
 
 	InitSysVars();
 
@@ -1022,7 +1028,7 @@ void TinselEngine::NextGameCycle() {
 	ResetEcount();
 
 	// schedule process
-	_scheduler->schedule();
+	CoroScheduler.schedule();
 
 	if (_bmv->MoviePlaying())
 		_bmv->CopyMovieToScreen();
@@ -1047,6 +1053,8 @@ bool TinselEngine::pollEvent() {
 	case Common::EVENT_LBUTTONUP:
 	case Common::EVENT_RBUTTONDOWN:
 	case Common::EVENT_RBUTTONUP:
+	case Common::EVENT_WHEELUP:
+	case Common::EVENT_WHEELDOWN:
 		// Add button to queue for the mouse process
 		_mouseButtons.push_back(event.type);
 		break;
@@ -1054,7 +1062,7 @@ bool TinselEngine::pollEvent() {
 	case Common::EVENT_MOUSEMOVE:
 		{
 			// This fragment takes care of Tinsel 2 when it's been compiled with
-			// blank areas at the top and bottom of thes creen
+			// blank areas at the top and bottom of the screen
 			int ySkip = TinselV2 ? (g_system->getHeight() - _vm->screen().h) / 2 : 0;
 			if ((event.mouse.y >= ySkip) && (event.mouse.y < (g_system->getHeight() - ySkip)))
 				_mousePos = Common::Point(event.mouse.x, event.mouse.y - ySkip);
@@ -1078,11 +1086,11 @@ bool TinselEngine::pollEvent() {
  */
 void TinselEngine::CreateConstProcesses() {
 	// Process to run the master script
-	_scheduler->createProcess(PID_MASTER_SCR, MasterScriptProcess, NULL, 0);
+	CoroScheduler.createProcess(PID_MASTER_SCR, MasterScriptProcess, NULL, 0);
 
 	// Processes to run the cursor and inventory,
-	_scheduler->createProcess(PID_CURSOR, CursorProcess, NULL, 0);
-	_scheduler->createProcess(PID_INVENTORY, InventoryProcess, NULL, 0);
+	CoroScheduler.createProcess(PID_CURSOR, CursorProcess, NULL, 0);
+	CoroScheduler.createProcess(PID_INVENTORY, InventoryProcess, NULL, 0);
 }
 
 /**
@@ -1132,11 +1140,11 @@ void TinselEngine::RestartDrivers() {
 	KillAllObjects();
 
 	// init the process scheduler
-	_scheduler->reset();
+	CoroScheduler.reset();
 
 	// init the event handlers
-	g_pMouseProcess = _scheduler->createProcess(PID_MOUSE, MouseProcess, NULL, 0);
-	g_pKeyboardProcess = _scheduler->createProcess(PID_KEYBOARD, KeyboardProcess, NULL, 0);
+	g_pMouseProcess = CoroScheduler.createProcess(PID_MOUSE, MouseProcess, NULL, 0);
+	g_pKeyboardProcess = CoroScheduler.createProcess(PID_KEYBOARD, KeyboardProcess, NULL, 0);
 
 	// open MIDI files
 	OpenMidiFiles();
@@ -1164,8 +1172,8 @@ void TinselEngine::ChopDrivers() {
 	DeleteMidiBuffer();
 
 	// remove event drivers
-	_scheduler->killProcess(g_pMouseProcess);
-	_scheduler->killProcess(g_pKeyboardProcess);
+	CoroScheduler.killProcess(g_pMouseProcess);
+	CoroScheduler.killProcess(g_pKeyboardProcess);
 }
 
 /**
