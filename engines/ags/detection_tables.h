@@ -33,7 +33,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"Version 1.3",
 			AD_ENTRY1s("5days.exe", "e88fd6a23a5e498d7b0d50e3bb914085", 4440143),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -46,7 +46,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"Special Edition",
 			AD_ENTRY1s("5days.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 4614351),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -59,7 +59,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"",
 			AD_ENTRY1s("7days.exe", "465f972675db2da6040518221af5b0ba", 4693374),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -72,7 +72,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"Special Edition",
 			AD_ENTRY1s("7days.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 4863356),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -85,7 +85,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"",
 			AD_ENTRY1s("notes.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 5736960),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -98,7 +98,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"Special Edition",
 			AD_ENTRY1s("notes se.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 5880445),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -111,7 +111,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"",
 			AD_ENTRY1s("6days.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 7993899),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -124,7 +124,7 @@ static const AGSGameDescription gameDescriptions[] = {
 			"Special Edition",
 			AD_ENTRY1s("6das se.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 8173314),
 			Common::EN_USA,
-			Common::kPlatformPC,
+			Common::kPlatformWindows,
 			ADGF_NO_FLAGS,
 			GUIO1(GUIO_NOASPECT)
 		},
@@ -141,7 +141,7 @@ static const AGSGameDescription fallbackDescs[] = {
 			"unknown",
 			AD_ENTRY1(0, 0),
 			Common::UNK_LANG,
-			Common::kPlatformPC,
+			Common::kPlatformUnknown,
 			ADGF_NO_FLAGS,
 			GUIO_NONE
 		},

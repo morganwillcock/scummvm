@@ -119,7 +119,7 @@ static char s_fallbackFilenameBuffer[51];
 static char s_fallbackTitleBuffer[51];
 
 const ADGameDescription *AGSMetaEngine::fallbackDetect(const FileMap &allFiles, const Common::FSList &fslist) const {
-	const ADGameDescription *d = detectGameFilebased(allFiles, AGS::fileBased);
+	const ADGameDescription *d = detectGameFilebased(allFiles, fslist, AGS::fileBased);
 	if (d)
 		return d;
 
