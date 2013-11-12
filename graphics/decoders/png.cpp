@@ -163,7 +163,9 @@ bool PNGDecoder::loadStream(Common::SeekableReadStream &stream) {
 		_outputSurface->create(width, height, Graphics::PixelFormat::createFormatCLUT8());
 		png_set_packing(pngPtr);
 	} else {
-		_outputSurface->create(width, height, Graphics::PixelFormat(4, 8, 8, 8, 8, 24, 16, 8, 0));
+		_outputSurface->create(width, height, Graphics::PixelFormat(4,
+		                       8, 8, 8, ((colorType & PNG_COLOR_MASK_ALPHA) ? 8 : 0),
+		                       24, 16, 8, 0));
 		if (!_outputSurface->getPixels()) {
 			error("Could not allocate memory for output image.");
 		}
