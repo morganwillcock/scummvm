@@ -35,12 +35,9 @@
 
 namespace Hopkins {
 
-HopkinsEngine *g_vm;
-
 HopkinsEngine::HopkinsEngine(OSystem *syst, const HopkinsGameDescription *gameDesc) : Engine(syst),
 		_gameDescription(gameDesc), _randomSource("Hopkins") {
 	DebugMan.addDebugChannel(kDebugPath, "Path", "Pathfinding debug level");
-	g_vm = this;
 	_animMan = new AnimationManager(this);
 	_computer = new ComputerManager(this);
 	_dialog = new DialogsManager(this);
@@ -95,7 +92,7 @@ bool HopkinsEngine::canLoadGameStateCurrently() {
  * Returns true if it is currently okay to save the game
  */
 bool HopkinsEngine::canSaveGameStateCurrently() {
-	return !_globals->_exitId && !_globals->_cityMapEnabledFl && _events->_mouseFl 
+	return !_globals->_exitId && !_globals->_cityMapEnabledFl && _events->_mouseFl
 		&& _globals->_curRoomNum != 0 && !isUnderwaterSubScene();
 }
 
@@ -114,8 +111,6 @@ Common::Error HopkinsEngine::saveGameState(int slot, const Common::String &desc)
 }
 
 Common::Error HopkinsEngine::run() {
-	_saveLoad->initSaves();
-
 	_globals->setConfig();
 	_fileIO->initCensorship();
 	initializeSystem();
@@ -171,7 +166,7 @@ bool HopkinsEngine::runWin95Demo() {
 
 	_globals->_characterType = CHARACTER_HOPKINS;
 	_objectsMan->_mapCarPosX = _objectsMan->_mapCarPosY = 0;
-	memset(_globals->_saveData, 0, 2000);
+	memset(_globals->_saveData, 0, sizeof(Savegame));
 	_globals->_exitId = 0;
 
 	if (getLanguage() != Common::PL_POL)
@@ -215,12 +210,17 @@ bool HopkinsEngine::runWin95Demo() {
 				if (getPlatform() == Common::kPlatformOS2 || getPlatform() == Common::kPlatformBeOS)
 					_graphicsMan->loadImage("fond");
 				else {
-					if (_globals->_language == LANG_FR)
+					switch (_globals->_language) {
+					case LANG_FR:
 						_graphicsMan->loadImage("fondfr");
-					else if (_globals->_language == LANG_EN)
+						break;
+					case LANG_EN:
 						_graphicsMan->loadImage("fondan");
-					else if (_globals->_language == LANG_SP)
+						break;
+					case LANG_SP:
 						_graphicsMan->loadImage("fondes");
+						break;
+					}
 				}
 				_graphicsMan->fadeInLong();
 				_events->delay(500);
@@ -232,7 +232,7 @@ bool HopkinsEngine::runWin95Demo() {
 				if (!_globals->_censorshipFl)
 					_animMan->playAnim("BANQUE.ANM", "BANKUK.ANM", 200, 28, 200);
 				else
-					_animMan->playAnim("BANQUE.ANM", "BANKUK.ANM", 200, 28, 200);
+					_animMan->playAnim("BANKUK.ANM", "BANQUE.ANM", 200, 28, 200);
 				_soundMan->_specialSoundNum = 0;
 				_soundMan->removeSample(1);
 				_soundMan->removeSample(2);
@@ -470,7 +470,7 @@ bool HopkinsEngine::runLinuxDemo() {
 	_globals->_characterSpriteBuf = _fileIO->loadFile("PERSO.SPR");
 	_globals->_characterType = CHARACTER_HOPKINS;
 	_objectsMan->_mapCarPosX = _objectsMan->_mapCarPosY = 0;
-	memset(_globals->_saveData, 0, 2000);
+	memset(_globals->_saveData, 0, sizeof(Savegame));
 	_globals->_exitId = 0;
 
 	if (_startGameSlot != -1)
@@ -526,12 +526,17 @@ bool HopkinsEngine::runLinuxDemo() {
 				if (getPlatform() == Common::kPlatformOS2 || getPlatform() == Common::kPlatformBeOS)
 					_graphicsMan->loadImage("fond");
 				else {
-					if (_globals->_language == LANG_FR)
+					switch (_globals->_language) {
+					case LANG_FR:
 						_graphicsMan->loadImage("fondfr");
-					else if (_globals->_language == LANG_EN)
+						break;
+					case LANG_EN:
 						_graphicsMan->loadImage("fondan");
-					else if (_globals->_language == LANG_SP)
+						break;
+					case LANG_SP:
 						_graphicsMan->loadImage("fondes");
+						break;
+					}
 				}
 				_graphicsMan->fadeInLong();
 				_events->delay(500);
@@ -831,7 +836,7 @@ bool HopkinsEngine::runFull() {
 	_globals->_characterSpriteBuf = _fileIO->loadFile("PERSO.SPR");
 	_globals->_characterType = CHARACTER_HOPKINS;
 	_objectsMan->_mapCarPosX = _objectsMan->_mapCarPosY = 0;
-	memset(_globals->_saveData, 0, 2000);
+	memset(_globals->_saveData, 0, sizeof(Savegame));
 
 	_globals->_exitId = 0;
 
@@ -872,12 +877,17 @@ bool HopkinsEngine::runFull() {
 				if (getPlatform() == Common::kPlatformOS2 || getPlatform() == Common::kPlatformBeOS)
 					_graphicsMan->loadImage("fond");
 				else {
-					if (_globals->_language == LANG_FR)
+					switch (_globals->_language) {
+					case LANG_FR:
 						_graphicsMan->loadImage("fondfr");
-					else if (_globals->_language == LANG_EN)
+						break;
+					case LANG_EN:
 						_graphicsMan->loadImage("fondan");
-					else if (_globals->_language == LANG_SP)
+						break;
+					case LANG_SP:
 						_graphicsMan->loadImage("fondes");
+						break;
+					}
 				}
 				_graphicsMan->fadeInLong();
 				_events->delay(500);
@@ -1138,12 +1148,14 @@ bool HopkinsEngine::runFull() {
 			break;
 
 		case 30:
+			// Shooting
 			_linesMan->setMaxLineIdx(15);
 			_globals->_characterMaxPosY = 440;
 			_objectsMan->sceneControl2("IM30", "IM30", "ANIM30", "IM30", 24, false);
 			break;
 
 		case 31:
+			// Shooting target
 			_objectsMan->sceneControl("IM31", "IM31", "ANIM31", "IM31", 10, true);
 			break;
 
@@ -1911,7 +1923,6 @@ void HopkinsEngine::bombExplosion() {
 }
 
 void HopkinsEngine::restoreSystem() {
-	quitGame();
 	_events->refreshEvents();
 }
 

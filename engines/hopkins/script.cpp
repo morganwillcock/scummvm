@@ -148,12 +148,18 @@ int ScriptManager::handleOpcode(const byte *dataP) {
 					_vm->_soundMan->mixVoice(635, 4, displayedTxtFl);
 			} else {
 				int textPosX = READ_LE_INT16(dataP + 9);
-				if (_vm->_globals->_language == LANG_FR && !_vm->_soundMan->_textOffFl)
-					_vm->_fontMan->initTextBuffers(9, mesgId, "OBJET1.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
-				else if (_vm->_globals->_language == LANG_EN && !_vm->_soundMan->_textOffFl)
-					_vm->_fontMan->initTextBuffers(9, mesgId, "OBJETAN.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
-				else if (_vm->_globals->_language == LANG_SP && !_vm->_soundMan->_textOffFl) {
-					_vm->_fontMan->initTextBuffers(9, mesgId, "OBJETES.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
+				if (!_vm->_soundMan->_textOffFl) {
+					switch (_vm->_globals->_language) {
+					case LANG_FR:
+						_vm->_fontMan->initTextBuffers(9, mesgId, "OBJET1.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
+						break;
+					case LANG_EN:
+						_vm->_fontMan->initTextBuffers(9, mesgId, "OBJETAN.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
+						break;
+					case LANG_SP:
+						_vm->_fontMan->initTextBuffers(9, mesgId, "OBJETES.TXT", 2 * textPosX, 60, 6, dataP[7], 253);
+						break;
+					}
 				}
 
 				bool displayedTxtFl = false;
@@ -1217,6 +1223,7 @@ int ScriptManager::handleOpcode(const byte *dataP) {
 			break;
 
 		case 88:
+			// Shooting target - Shooting at target
 			if (_vm->_globals->_saveData->_data[svField183] == 1) {
 				_vm->_objectsMan->setBobAnimDataIdx(1, 0);
 				_vm->_objectsMan->setBobAnimDataIdx(2, 0);
@@ -1294,6 +1301,7 @@ int ScriptManager::handleOpcode(const byte *dataP) {
 			break;
 
 		case 90:
+			// Shooting target - Using the level
 			_vm->_soundMan->playSoundFile("SOUND52.WAV");
 			if (!_vm->_globals->_saveData->_data[svField186]) {
 				_vm->_animMan->playSequence("CIB5A.SEQ", 1, 12, 1, false, false);

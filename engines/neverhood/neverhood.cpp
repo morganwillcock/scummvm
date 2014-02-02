@@ -45,7 +45,7 @@
 
 namespace Neverhood {
 
-NeverhoodEngine::NeverhoodEngine(OSystem *syst, const NeverhoodGameDescription *gameDesc) : Engine(syst), _gameDescription(gameDesc) {
+NeverhoodEngine::NeverhoodEngine(OSystem *syst, const NeverhoodGameDescription *gameDesc) : Engine(syst), _gameDescription(gameDesc), _console(nullptr) {
 	// Setup mixer
 	if (!_mixer->isReady()) {
 		warning("Sound initialization failed.");
@@ -77,6 +77,10 @@ Common::Error NeverhoodEngine::run() {
 	_gameState.sceneNum = 0;
 	_gameState.which = 0;
 
+	// Assign default values to the config manager, in case settings are missing
+	ConfMan.registerDefault("originalsaveload", "false");
+	ConfMan.registerDefault("skiphallofrecordsscenes", "false");
+
 	_staticData = new StaticData();
 	_staticData->load("neverhood.dat");
 	_gameVars = new GameVars();
@@ -101,11 +105,13 @@ Common::Error NeverhoodEngine::run() {
 
 	_soundMan = new SoundMan(this);
 	_audioResourceMan = new AudioResourceMan(this);
-	
+
 	_gameModule = new GameModule(this);
-	
+
 	_isSaveAllowed = true;
-	
+	_updateSound = true;
+	_enableMusic = !_mixer->isSoundTypeMuted(Audio::Mixer::kMusicSoundType);
+
 	if (isDemo()) {
 		// Adjust this navigation list for the demo version
 		NavigationList *navigationList = _staticData->getNavigationList(0x004B67E8);
@@ -118,14 +124,15 @@ Common::Error NeverhoodEngine::run() {
 		(*navigationList)[5].middleSmackerFileHash = 0;
 		(*navigationList)[5].middleFlag = 1;
 	}
-	
-	if (ConfMan.hasKey("save_slot"))
-		loadGameState(ConfMan.getInt("save_slot"));
-	else
+
+	if (ConfMan.hasKey("save_slot")) {
+		if (loadGameState(ConfMan.getInt("save_slot")).getCode() != Common::kNoError)
+			_gameModule->startup();
+	} else
 		_gameModule->startup();
-	
+
 	mainLoop();
-	
+
 	delete _gameModule;
 	delete _soundMan;
 	delete _audioResourceMan;
@@ -136,7 +143,7 @@ Common::Error NeverhoodEngine::run() {
 
 	delete _gameVars;
 	delete _staticData;
-	
+
 	return Common::kNoError;
 }
 
@@ -171,6 +178,12 @@ void NeverhoodEngine::mainLoop() {
 			case Common::EVENT_RBUTTONUP:
 				_gameModule->handleMouseUp(event.mouse.x, event.mouse.y);
 				break;
+			case Common::EVENT_WHEELUP:
+				_gameModule->handleWheelUp();
+				break;
+			case Common::EVENT_WHEELDOWN:
+				_gameModule->handleWheelDown();
+				break;
 			case Common::EVENT_QUIT:
 				_system->quit();
 				break;
@@ -184,10 +197,13 @@ void NeverhoodEngine::mainLoop() {
 			_gameModule->draw();
 			_console->onFrame();
 			_screen->update();
+			if (_updateSound)
+				_soundMan->update();
 			nextFrameTime = _screen->getNextFrameTime();
 		};
-		_soundMan->update();
+
 		_audioResourceMan->updateMusic();
+
 		_system->updateScreen();
 		_system->delayMillis(10);
 	}
