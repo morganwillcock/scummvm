@@ -28,7 +28,7 @@
 #include "common/debug-channels.h"
 #include "common/error.h"
 #include "common/random.h"
-#include "common/EventRecorder.h"
+#include "common/events.h"
 
 #include "engines/advancedDetector.h"
 

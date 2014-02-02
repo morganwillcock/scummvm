@@ -127,7 +127,7 @@ static Graphics::Surface readLZSSImage(Common::SeekableReadStream *stream, Graph
 	}
 
 	surf.create(widthBytes / imageBpp, height, imgFormat);
-	memcpy(surf.pixels, buffer + 8, uncompressedSize - 8);
+	memcpy(surf.getPixels(), buffer + 8, uncompressedSize - 8);
 
 	if (imgFormat != format) {
 		// Convert to correct format
@@ -529,7 +529,7 @@ void Room::updateWalkBehinds() {
 
 		uint width = wb._right - wb._left + 1;
 		uint height = wb._bottom - wb._top + 1;
-		if (!wb._surface.pixels)
+		if (!wb._surface.getPixels())
 			wb._surface.create(width, height, background.format);
 		else
 			assert(wb._surface.w == width && wb._surface.h == height);

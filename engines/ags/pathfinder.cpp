@@ -207,12 +207,12 @@ bool PathFinder::findPath(bool onlyIfDestAllowed) {
 
 	// if the new pathfinder failed, try the old one..
 	_pathBackPositions.clear();
-	memset(_beenHere.pixels, 0, _beenHere.w * _beenHere.h * 2);
+	memset(_beenHere.getPixels(), 0, _beenHere.w * _beenHere.h * 2);
 	if (tryThisSquare(from, _dest, true))
 		return true;
 	// .. and again, in the other direction.
 	_pathBackPositions.clear();
-	memset(_beenHere.pixels, 0, _beenHere.w * _beenHere.h * 2);
+	memset(_beenHere.getPixels(), 0, _beenHere.w * _beenHere.h * 2);
 	if (tryThisSquare(from, _dest, false))
 		return true;
 
@@ -448,13 +448,13 @@ bool PathFinder::findRouteDijkstra() {
 	if (from == roundDownCoordinates(_dest))
 		return true;
 
-	memset(_beenHere.pixels, 0xff, _beenHere.w * _beenHere.h * 2);
+	memset(_beenHere.getPixels(), 0xff, _beenHere.w * _beenHere.h * 2);
 	*(int16 *)_beenHere.getBasePtr(from.x, from.y) = 0;
 
 	// We store the previously-visited 'parent' cells here, for later tracing back.
 	Graphics::Surface parent;
 	parent.create(_beenHere.w, _beenHere.h, Graphics::PixelFormat(4, 0, 0, 0, 0, 0, 0, 0, 0));
-	uint *parentVals = (uint *)parent.pixels;
+	uint *parentVals = (uint *)parent.getPixels();
 
 	// This is a list of the visited cell positions, in order.
 	uint visited[5000];

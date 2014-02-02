@@ -1002,7 +1002,7 @@ GUIGroup::~GUIGroup() {
 }
 
 void GUIGroup::setSize(uint32 width, uint32 height) {
-	if (_surface.pixels && width == _width && height == _height)
+	if (_surface.getPixels() && width == _width && height == _height)
 		return;
 
 	_width = width;
@@ -1271,7 +1271,7 @@ void GUIGroup::setVisible(bool visible) {
 }
 
 const Graphics::Surface *GUIGroup::getDrawSurface() {
-	assert(_surface.pixels);
+	assert(_surface.getPixels());
 
 	if (_needsUpdate)
 		draw();

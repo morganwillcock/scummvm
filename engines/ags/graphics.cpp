@@ -91,9 +91,13 @@ public:
 
 	int getFontHeight() const { return _maxCharHeight * _multiplier; }
 	int getMaxCharWidth() const { return _maxCharWidth * _multiplier; }
-	int getCharWidth(byte chr) const { return _glyphs[chr].width * _multiplier; }
+	int getCharWidth(uint32 chr) const {
+		if (chr >= 128)
+			return getCharWidth('?');
+		return _glyphs[chr].width * _multiplier;
+	}
 
-	void drawChar(Graphics::Surface *surface, byte chr, int x, int y, uint32 color) const {
+	void drawChar(Graphics::Surface *surface, uint32 chr, int x, int y, uint32 color) const {
 		if (chr >= 128)
 			chr = '?';
 
@@ -609,7 +613,7 @@ void AGSGraphics::draw() {
 	}
 
 	for (uint i = 0; i < room->_walkBehinds.size(); ++i) {
-		if (!room->_walkBehinds[i]._surface.pixels)
+		if (!room->_walkBehinds[i]._surface.getPixels())
 			continue;
 
 		drawables.push_back(&room->_walkBehinds[i]);
@@ -662,7 +666,7 @@ void AGSGraphics::draw() {
 
 	// finally, update the screen
 	// FIXME: add dirty rectangling
-	g_system->copyRectToScreen((byte *)_backBuffer.pixels, _width * _vm->_gameFile->_colorDepth, 0, 0, _width, _height);
+	g_system->copyRectToScreen((const byte *)_backBuffer.getPixels(), _width * _vm->_gameFile->_colorDepth, 0, 0, _width, _height);
 	g_system->updateScreen();
 }
 

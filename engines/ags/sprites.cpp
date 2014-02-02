@@ -214,17 +214,17 @@ Sprite *SpriteSet::getSprite(uint32 spriteId) {
 		_stream->skip(4); // data size, FIXME: use this
 		switch (colorDepth) {
 		case 1:
-			unpackSpriteBits(_stream, (byte *)surface->pixels, surface->w * surface->h);
+			unpackSpriteBits(_stream, (byte *)surface->getPixels(), surface->w * surface->h);
 			break;
 		case 2:
-			unpackSpriteBits16(_stream, (uint16 *)surface->pixels, surface->w * surface->h);
+			unpackSpriteBits16(_stream, (uint16 *)surface->getPixels(), surface->w * surface->h);
 			break;
 		case 4:
-			unpackSpriteBits32(_stream, (uint32 *)surface->pixels, surface->w * surface->h);
+			unpackSpriteBits32(_stream, (uint32 *)surface->getPixels(), surface->w * surface->h);
 			break;
 		}
 	} else {
-		_stream->read((byte *)surface->pixels, surface->w * surface->h * colorDepth);
+		_stream->read((byte *)surface->getPixels(), surface->w * surface->h * colorDepth);
 	}
 
 	Graphics::PixelFormat nativeFormat = _vm->_graphics->getPixelFormat();
