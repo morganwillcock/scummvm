@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 
@@ -80,7 +81,9 @@ Player::Player() :
 	_isMIDI(false),
 	_supportsPercussion(false),
 	_se(0),
-	_vol_chan(0) {
+	_vol_chan(0),
+	_abort(false),
+	_music_tick(0) {
 }
 
 Player::~Player() {

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -66,6 +66,18 @@ Insane::Insane(ScummEngine_v7 *scumm) {
 		readFileToMem("minefite.flu", &_smush_minefiteFlu);
 		_smush_bensgoggNut = new NutRenderer(_vm, "bensgogg.nut");
 		_smush_bencutNut = new NutRenderer(_vm, "bencut.nut");
+	} else {
+		_smush_roadrashRip = NULL;
+		_smush_roadrsh2Rip = NULL;
+		_smush_roadrsh3Rip = NULL;
+		_smush_goglpaltRip = NULL;
+		_smush_tovista1Flu = NULL;
+		_smush_tovista2Flu = NULL;
+		_smush_toranchFlu = NULL;
+		_smush_minedrivFlu = NULL;
+		_smush_minefiteFlu = NULL;
+		_smush_bensgoggNut = NULL;
+		_smush_bencutNut = NULL;
 	}
 
 	_smush_iconsNut = new NutRenderer(_vm, "icons.nut");
@@ -1406,7 +1418,7 @@ int32 Insane::smush_setupSanWithFlu(const char *filename, int32 setupsan2, int32
 	int32 offset;
 
 	debugC(DEBUG_INSANE, "smush_setupSanWithFlu(%s, %d, %d, %d, %d, %p, %d)", filename, setupsan2,
-		  step1, step2, setupsan1, fluPtr, numFrames);
+		  step1, step2, setupsan1, (void *)fluPtr, numFrames);
 
 	_smush_setupsan1 = setupsan1;
 

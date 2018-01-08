@@ -8,20 +8,20 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef BACKENDS_UPDATES_ABSTRACT_H
-#define BACKENDS_UPDATES_ABSTRACT_H
+#ifndef COMMON_UPDATES_H
+#define COMMON_UPDATES_H
 
 #if defined(USE_UPDATES)
 
@@ -85,18 +85,50 @@ public:
 	 *
 	 * @param  interval    The interval.
 	 */
-	virtual void setUpdateCheckInterval(UpdateInterval interval) {}
+	virtual void setUpdateCheckInterval(int interval) {}
 
 	/**
 	 * Gets the update check interval.
 	 *
 	 * @return  the update check interval.
 	 */
-	virtual UpdateInterval getUpdateCheckInterval() { return kUpdateIntervalNotSupported; }
+	virtual int getUpdateCheckInterval() { return kUpdateIntervalNotSupported; }
+
+	/**
+	 * Gets last update check time
+	 *
+	 * @param  t    TimeDate struct to fill out
+	 * @return flag indicating success
+	 */
+	virtual bool getLastUpdateCheckTimeAndDate(TimeDate &t) { return false; }
+
+	/**
+	 * Returns list of supported uptate intervals.
+	 * Ending with '-1' which is not acceptable value.
+	 *
+	 * @return  list of integer values representing update intervals in seconds.
+	 */
+	static const int *getUpdateIntervals();
+
+	/**
+	 * Returns string representation of a given interval.
+	 *
+	 * @param  interval    The interval.
+	 * @return  pointer to localized string of given interval.
+	 */
+	static const char *updateIntervalToString(int interval);
+
+	/**
+	 * Rounds up the given interval to acceptable value.
+	 *
+	 * @param  interval    The interval.
+	 * @return  rounded up interval
+	 */
+	static int normalizeInterval(int interval);
 };
 
 } // End of namespace Common
 
 #endif
 
-#endif // BACKENDS_UPDATES_ABSTRACT_H
+#endif // COMMON_UPDATES_H

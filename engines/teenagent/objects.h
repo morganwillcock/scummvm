@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 
@@ -164,7 +165,7 @@ struct Object {
 	//19
 	Common::String name, description;
 
-	Object(): _base(NULL) {}
+	Object(): _base(NULL) { id = 0; actorOrientation = 0; enabled = 0;  }
 	void dump(int level = 0) const;
 	void setName(const Common::String &newName);
 	void load(byte *addr);
@@ -204,7 +205,7 @@ struct Walkbox {
 	Rect rect;
 	byte sideHint[4];
 
-	Walkbox() : _base(NULL) {}
+	Walkbox() : _base(NULL) { memset(this, 0, sizeof(Walkbox)); }
 	void dump(int level = 0) const;
 	void load(byte *src);
 	void save() const;

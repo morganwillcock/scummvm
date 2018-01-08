@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1160,7 +1160,7 @@ void Scene4000::signal() {
 	case 4010:
 		g_globals->setFlag(38);
 		_olo.remove();
-		// Deliberate fall-through
+		// fall through
 	case 4001:
 		g_globals->_player.enableControl();
 		break;
@@ -1173,7 +1173,7 @@ void Scene4000::signal() {
 		break;
 	case 4004:
 		RING_INVENTORY._ladder._sceneNumber = 4000;
-		// Deliberate fall-through
+		// fall through
 	case 4007:
 		g_globals->_player._uiEnabled = true;
 		g_globals->_events.setCursor(CURSOR_USE);
@@ -2813,7 +2813,7 @@ void Scene4150::Action1::signal() {
 	case 4: {
 		for (int idx = 100; idx >= 0; idx -= 5) {
 			g_globals->_scenePalette.fade(adjustData, false, idx);
-			GLOBALS._screenSurface.updateScreen();
+			GLOBALS._screen.update();
 			g_system->delayMillis(10);
 		}
 
@@ -2841,7 +2841,7 @@ void Scene4150::Action1::signal() {
 	case 7:
 		for (int idx = 100; idx >= 0; idx -= 5) {
 			g_globals->_scenePalette.fade(adjustData, false, idx);
-			GLOBALS._screenSurface.updateScreen();
+			GLOBALS._screen.update();
 			g_system->delayMillis(10);
 		}
 

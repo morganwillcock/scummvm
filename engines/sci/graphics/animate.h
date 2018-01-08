@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -87,8 +87,12 @@ class GfxView;
  */
 class GfxAnimate {
 public:
-	GfxAnimate(EngineState *state, GfxCache *cache, GfxPorts *ports, GfxPaint16 *paint16, GfxScreen *screen, GfxPalette *palette, GfxCursor *cursor, GfxTransitions *transitions);
+	GfxAnimate(EngineState *state, ScriptPatcher *scriptPatcher, GfxCache *cache, GfxPorts *ports, GfxPaint16 *paint16, GfxScreen *screen, GfxPalette *palette, GfxCursor *cursor, GfxTransitions *transitions);
 	virtual ~GfxAnimate();
+
+	bool isFastCastEnabled() {
+		return _fastCastEnabled;
+	}
 
 	void disposeLastCast();
 	bool invoke(List *list, int argc, reg_t *argv);
@@ -110,6 +114,7 @@ public:
 
 private:
 	void init();
+	bool detectFastCast();
 
 	void addToPicSetPicNotValid();
 	void animateShowPic();
@@ -119,6 +124,7 @@ private:
 	void setNsRect(GfxView *view, AnimateList::iterator it);
 
 	EngineState *_s;
+	ScriptPatcher *_scriptPatcher;
 	GfxCache *_cache;
 	GfxPorts *_ports;
 	GfxPaint16 *_paint16;
@@ -130,7 +136,7 @@ private:
 	AnimateList _list;
 	AnimateArray _lastCastData;
 
-	bool _ignoreFastCast;
+	bool _fastCastEnabled;
 };
 
 } // End of namespace Sci

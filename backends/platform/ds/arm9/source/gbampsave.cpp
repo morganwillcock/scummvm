@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -45,6 +45,17 @@ static Common::String getSavePath() {
 // GBAMP Save File Manager
 //////////////////////////
 
+void GBAMPSaveFileManager::updateSavefilesList(Common::StringArray &lockedFiles) {
+	// TODO: implement this
+	// in this method manager should remember lockedFiles
+	// these files must not be opened for loading or saving, or listed by listSavefiles()
+}
+
+Common::InSaveFile *GBAMPSaveFileManager::openRawFile(const Common::String &filename) {
+	// TODO: make sure it returns raw file, not uncompressed save contents
+	return openForLoading(filename);
+}
+
 Common::OutSaveFile *GBAMPSaveFileManager::openForSaving(const Common::String &filename, bool compress) {
 	Common::String fileSpec = getSavePath();
 	if (fileSpec.lastChar() != '/')
@@ -56,7 +67,7 @@ Common::OutSaveFile *GBAMPSaveFileManager::openForSaving(const Common::String &f
 	Common::WriteStream *stream = DS::DSFileStream::makeFromPath(fileSpec, true);
 	// Use a write buffer
 	stream = Common::wrapBufferedWriteStream(stream, SAVE_BUFFER_SIZE);
-	return stream;
+	return new Common::OutSaveFile(stream);
 }
 
 Common::InSaveFile *GBAMPSaveFileManager::openForLoading(const Common::String &filename) {

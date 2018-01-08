@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -86,28 +86,26 @@ bool MaemoSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 				return true;
 			} else if (ev.key.keysym.sym == SDLK_F6) {
 				if (!model.hasHwKeyboard) {
-					event.type = Common::EVENT_KEYDOWN;
-					event.kbd.keycode = Common::KEYCODE_F7;
-					event.kbd.ascii = Common::ASCII_F7;
-					event.kbd.flags = 0;
-					debug(9, "remapping to F7 down (virtual keyboard)");
+#ifdef ENABLE_VKEYBD
+					event.type = Common::EVENT_VIRTUAL_KEYBOARD;
+					debug(9, "remapping to virtual keyboard trigger");
 					return true;
+#endif
 				} else {
 					// handled in keyup
 				}
 			} else if (ev.key.keysym.sym == SDLK_F7) {
 				event.type = Common::EVENT_RBUTTONDOWN;
-				processMouseEvent(event, _km.x, _km.y);
+				processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 				 debug(9, "remapping to right click down");
 				return true;
 			} else if (ev.key.keysym.sym == SDLK_F8) {
 				if (ev.key.keysym.mod & KMOD_CTRL) {
-					event.type = Common::EVENT_KEYDOWN;
-					event.kbd.keycode = Common::KEYCODE_F7;
-					event.kbd.ascii = Common::ASCII_F7;
-					event.kbd.flags = 0;
-					debug(9, "remapping to F7 down (virtual keyboard)");
+#ifdef ENABLE_VKEYBD
+					event.type = Common::EVENT_VIRTUAL_KEYBOARD;
+					debug(9, "remapping to virtual keyboard trigger");
 					return true;
+#endif
 				} else {
 					// handled in keyup
 					return true;
@@ -125,12 +123,7 @@ bool MaemoSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 				return true;
 			} else if (ev.key.keysym.sym == SDLK_F6) {
 				if (!model.hasHwKeyboard) {
-					event.type = Common::EVENT_KEYUP;
-					event.kbd.keycode = Common::KEYCODE_F7;
-					event.kbd.ascii = Common::ASCII_F7;
-					event.kbd.flags = 0;
-					debug(9, "remapping to F7 down (virtual keyboard)");
-					return true;
+					// handled in keydown
 				} else {
 					bool currentState = ((OSystem_SDL *)g_system)->getGraphicsManager()->getFeatureState(OSystem::kFeatureFullscreenMode);
 					g_system->beginGFXTransaction();
@@ -141,17 +134,12 @@ bool MaemoSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 				}
 			} else if (ev.key.keysym.sym == SDLK_F7) {
 				event.type = Common::EVENT_RBUTTONUP;
-				processMouseEvent(event, _km.x, _km.y);
+				processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 					debug(9, "remapping to right click up");
 				return true;
 			} else if (ev.key.keysym.sym == SDLK_F8) {
 				if (ev.key.keysym.mod & KMOD_CTRL) {
-					event.type = Common::EVENT_KEYUP;
-					event.kbd.keycode = Common::KEYCODE_F7;
-					event.kbd.ascii = Common::ASCII_F7;
-					event.kbd.flags = 0;
-					debug(9, "remapping to F7 up (virtual keyboard)");
-					return true;
+					// handled in key down
 				} else {
 					toggleClickMode();
 					debug(9, "remapping to click toggle");

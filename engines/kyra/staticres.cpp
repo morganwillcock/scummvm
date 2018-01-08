@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -39,7 +39,7 @@
 
 namespace Kyra {
 
-#define RESFILE_VERSION 84
+#define RESFILE_VERSION 89
 
 namespace {
 bool checkKyraDat(Common::SeekableReadStream *file) {
@@ -161,7 +161,7 @@ bool StaticResource::loadStaticResourceFile() {
 	}
 
 	if (!foundWorkingKyraDat) {
-		Common::String errorMessage = "You're missing the '" + StaticResource::staticDataFilename() + "' file or it got corrupted, (re)get it from the ScummVM website";
+		Common::String errorMessage = "You're missing the '" + StaticResource::staticDataFilename() + "' engine data file or it got corrupted.";
 		GUIErrorMessage(errorMessage);
 		error("%s", errorMessage.c_str());
 	}
@@ -805,19 +805,11 @@ void KyraEngine_LoK::initStaticResource() {
 	}
 
 	// audio resource assignment
-	int size1, size2;
-	const char *const *soundfiles1 = _staticres->loadStrings(k1AudioTracks, size1);
-	const char *const *soundfiles2 = _staticres->loadStrings(k1AudioTracks2, size2);
-	int soundFilesSize = size1 + size2;
+	int soundFilesSize;
+	const char *const *soundFiles = _staticres->loadStrings(k1AudioTracks, soundFilesSize);
 	int soundFilesIntroSize = 0;
 	int cdaTableSize = 0;
-	const char **soundFiles = 0;
 
-	if (soundFilesSize) {
-		soundFiles = new const char*[soundFilesSize];
-		for (int i = 0; i < soundFilesSize; i++)
-			soundFiles[i] = (i < size1) ? soundfiles1[i] : soundfiles2[i - size1];
-	}
 	const char *const *soundFilesIntro = _staticres->loadStrings(k1AudioTracksIntro, soundFilesIntroSize);
 	const int32 *cdaTable = (const int32 *)_staticres->loadRawData(k1TownsCDATable, cdaTableSize);
 

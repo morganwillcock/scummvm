@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -41,7 +41,7 @@ uint32 HugoEngine::getFeatures() const {
 }
 
 const char *HugoEngine::getGameId() const {
-	return _gameDescription->desc.gameid;
+	return _gameDescription->desc.gameId;
 }
 
 
@@ -177,20 +177,18 @@ SaveStateList HugoMetaEngine::listSaves(const char *target) const {
 	Common::SaveFileManager *saveFileMan = g_system->getSavefileManager();
 	Common::StringArray filenames;
 	Common::String pattern = target;
-	pattern += "-??.SAV";
+	pattern += "-##.SAV";
 
 	filenames = saveFileMan->listSavefiles(pattern);
-	sort(filenames.begin(), filenames.end());   // Sort (hopefully ensuring we are sorted numerically..)
 
 	SaveStateList saveList;
 	char slot[3];
-	int slotNum = 0;
 	for (Common::StringArray::const_iterator filename = filenames.begin(); filename != filenames.end(); ++filename) {
 		slot[0] = filename->c_str()[filename->size() - 6];
 		slot[1] = filename->c_str()[filename->size() - 5];
 		slot[2] = '\0';
 		// Obtain the last 2 digits of the filename (without extension), since they correspond to the save slot
-		slotNum = atoi(slot);
+		int slotNum = atoi(slot);
 		if (slotNum >= 0 && slotNum <= getMaximumSaveSlot()) {
 			Common::InSaveFile *file = saveFileMan->openForLoading(*filename);
 			if (file) {
@@ -218,6 +216,8 @@ SaveStateList HugoMetaEngine::listSaves(const char *target) const {
 		}
 	}
 
+	// Sort saves based on slot number.
+	Common::sort(saveList.begin(), saveList.end(), SaveStateDescriptorSlotComparator());
 	return saveList;
 }
 
@@ -276,9 +276,9 @@ void HugoMetaEngine::removeSaveState(const char *target, int slot) const {
 } // End of namespace Hugo
 
 #if PLUGIN_ENABLED_DYNAMIC(HUGO)
-REGISTER_PLUGIN_DYNAMIC(HUGO, PLUGIN_TYPE_ENGINE, Hugo::HugoMetaEngine);
+	REGISTER_PLUGIN_DYNAMIC(HUGO, PLUGIN_TYPE_ENGINE, Hugo::HugoMetaEngine);
 #else
-REGISTER_PLUGIN_STATIC(HUGO, PLUGIN_TYPE_ENGINE, Hugo::HugoMetaEngine);
+	REGISTER_PLUGIN_STATIC(HUGO, PLUGIN_TYPE_ENGINE, Hugo::HugoMetaEngine);
 #endif
 
 namespace Hugo {

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -43,7 +43,7 @@
 
 #include "common/util.h"
 
-#include "graphics/decoders/iff.h"
+#include "image/iff.h"
 
 namespace Saga {
 
@@ -463,7 +463,7 @@ void Scene::changeScene(int16 sceneNumber, int actorsEntrance, SceneTransitionTy
 				_vm->_interface->setMode(kPanelSceneSubstitute);
 
 				if (file.open(sceneSubstitutes[i].image)) {
-					Graphics::IFFDecoder decoder;
+					Image::IFFDecoder decoder;
 					decoder.loadStream(file);
 					pal = decoder.getPalette();
 					rect.setWidth(decoder.getSurface()->w);
@@ -789,13 +789,7 @@ void Scene::loadScene(LoadSceneParams &loadSceneParams) {
 
 		if (_vm->getGameId() == GID_ITE) {
 			if (_sceneDescription.musicResourceId >= 0) {
-				event.type = kEvTOneshot;
-				event.code = kMusicEvent;
-				event.param = _sceneDescription.musicResourceId;
-				event.param2 = MUSIC_DEFAULT;
-				event.op = kEventPlay;
-				event.time = 0;
-				_vm->_events->queue(event);
+				_vm->_events->queueMusic(_sceneDescription.musicResourceId);
 			} else {
 				event.type = kEvTOneshot;
 				event.code = kMusicEvent;
@@ -841,13 +835,14 @@ void Scene::loadScene(LoadSceneParams &loadSceneParams) {
 		loadSceneParams.sceneProc(SCENE_BEGIN, this);
 	}
 
-	// We probably don't want "followers" to go into scene -1 , 0. At the very
-	// least we don't want garbage to be drawn that early in the ITE intro.
-	if (_sceneNumber > 0 && _sceneNumber != ITE_SCENE_PUZZLE)
-		_vm->_actor->updateActorsScene(loadSceneParams.actorsEntrance);
-
-	if (_sceneNumber == ITE_SCENE_PUZZLE)
+	if (_vm->getGameId() == GID_ITE && _sceneNumber == ITE_SCENE_PUZZLE) {
 		_vm->_puzzle->execute();
+	} else {
+		// We probably don't want "followers" to go into scene -1 , 0. At the very
+		// least we don't want garbage to be drawn that early in the ITE intro.
+		if (_sceneNumber > 0)
+			_vm->_actor->updateActorsScene(loadSceneParams.actorsEntrance);
+	}
 
 	if (getFlags() & kSceneFlagShowCursor) {
 		// Activate user interface
@@ -871,15 +866,13 @@ void Scene::loadSceneDescriptor(uint32 resourceId) {
 
 	_sceneDescription.reset();
 
-	if (resourceId == 0) {
+	if (resourceId == 0)
 		return;
-	}
 
 	_vm->_resource->loadResource(_sceneContext, resourceId, sceneDescriptorData);
+	ByteArrayReadStreamEndian readS(sceneDescriptorData, _sceneContext->isBigEndian());
 
-	if (sceneDescriptorData.size() == 16) {
-		ByteArrayReadStreamEndian readS(sceneDescriptorData, _sceneContext->isBigEndian());
-
+	if (sceneDescriptorData.size() == 14 || sceneDescriptorData.size() == 16) {
 		_sceneDescription.flags = readS.readSint16();
 		_sceneDescription.resourceListResourceId = readS.readSint16();
 		_sceneDescription.endSlope = readS.readSint16();
@@ -887,7 +880,10 @@ void Scene::loadSceneDescriptor(uint32 resourceId) {
 		_sceneDescription.scriptModuleNumber = readS.readUint16();
 		_sceneDescription.sceneScriptEntrypointNumber = readS.readUint16();
 		_sceneDescription.startScriptEntrypointNumber = readS.readUint16();
-		_sceneDescription.musicResourceId = readS.readSint16();
+		if (sceneDescriptorData.size() == 16)
+			_sceneDescription.musicResourceId = readS.readSint16();
+	} else {
+		warning("Scene::loadSceneDescriptor: Unknown scene descriptor data size (%d)", sceneDescriptorData.size());
 	}
 }
 
@@ -973,9 +969,8 @@ void Scene::processSceneResources(SceneResourceDataArray &resourceList) {
 		case SAGA_OBJECT:
 			break;
 		case SAGA_BG_IMAGE: // Scene background resource
-			if (_bg.loaded) {
+			if (_bg.loaded)
 				error("Scene::processSceneResources() Multiple background resources encountered");
-			}
 
 			debug(3, "Loading background resource.");
 
@@ -991,9 +986,9 @@ void Scene::processSceneResources(SceneResourceDataArray &resourceList) {
 			memcpy(_bg.pal, palPointer, sizeof(_bg.pal));
 			break;
 		case SAGA_BG_MASK: // Scene background mask resource
-			if (_bgMask.loaded) {
+			if (_bgMask.loaded)
 				error("Scene::ProcessSceneResources(): Duplicate background mask resource encountered");
-			}
+
 			debug(3, "Loading BACKGROUND MASK resource.");
 			_vm->decodeBGImage(resourceData, _bgMask.buffer, &_bgMask.w, &_bgMask.h, true);
 			_bgMask.loaded = true;
@@ -1018,47 +1013,38 @@ void Scene::processSceneResources(SceneResourceDataArray &resourceList) {
 			_actionMap->load(resourceData);
 			break;
 		case SAGA_ISO_IMAGES:
-			if (!(_sceneDescription.flags & kSceneFlagISO)) {
+			if (!(_sceneDescription.flags & kSceneFlagISO))
 				error("Scene::ProcessSceneResources(): not Iso mode");
-			}
 
 			debug(3, "Loading isometric images resource.");
 
 			_vm->_isoMap->loadImages(resourceData);
 			break;
 		case SAGA_ISO_MAP:
-			if (!(_sceneDescription.flags & kSceneFlagISO)) {
+			if (!(_sceneDescription.flags & kSceneFlagISO))
 				error("Scene::ProcessSceneResources(): not Iso mode");
-			}
 
 			debug(3, "Loading isometric map resource.");
-
 			_vm->_isoMap->loadMap(resourceData);
 			break;
 		case SAGA_ISO_PLATFORMS:
-			if (!(_sceneDescription.flags & kSceneFlagISO)) {
+			if (!(_sceneDescription.flags & kSceneFlagISO))
 				error("Scene::ProcessSceneResources(): not Iso mode");
-			}
 
 			debug(3, "Loading isometric platforms resource.");
-
 			_vm->_isoMap->loadPlatforms(resourceData);
 			break;
 		case SAGA_ISO_METATILES:
-			if (!(_sceneDescription.flags & kSceneFlagISO)) {
+			if (!(_sceneDescription.flags & kSceneFlagISO))
 				error("Scene::ProcessSceneResources(): not Iso mode");
-			}
 
 			debug(3, "Loading isometric metatiles resource.");
-
 			_vm->_isoMap->loadMetaTiles(resourceData);
 			break;
 		case SAGA_ANIM:
 			{
 				uint16 animId = resource->resourceType - 14;
-
 				debug(3, "Loading animation resource animId=%i", animId);
-
 				_vm->_anim->load(animId, resourceData);
 			}
 			break;
@@ -1067,9 +1053,8 @@ void Scene::processSceneResources(SceneResourceDataArray &resourceList) {
 			loadSceneEntryList(resourceData);
 			break;
 		case SAGA_ISO_MULTI:
-			if (!(_sceneDescription.flags & kSceneFlagISO)) {
+			if (!(_sceneDescription.flags & kSceneFlagISO))
 				error("Scene::ProcessSceneResources(): not Iso mode");
-			}
 
 			debug(3, "Loading isometric multi resource.");
 
@@ -1220,7 +1205,7 @@ void Scene::cmdSceneChange(int argc, const char **argv) {
 	scene_num = atoi(argv[1]);
 
 	if ((scene_num < 1) || (uint(scene_num) >= _sceneLUT.size())) {
-		_vm->_console->DebugPrintf("Invalid scene number.\n");
+		_vm->_console->debugPrintf("Invalid scene number.\n");
 		return;
 	}
 

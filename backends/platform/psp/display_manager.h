@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -105,8 +105,8 @@ class DisplayManager {
 public:
 	enum GraphicsModeID {			///> Possible output formats onscreen
 		ORIGINAL_RESOLUTION,
-		KEEP_ASPECT_RATIO,
-		STRETCHED_FULL_SCREEN
+		FIT_TO_SCREEN,
+		STRETCH_TO_SCREEN
 	};
 	DisplayManager() : _screen(0), _cursor(0), _overlay(0), _keyboard(0),
 					  _imageViewer(0), _lastUpdateTime(0), _graphicsMode(0) {}
@@ -118,7 +118,7 @@ public:
 	bool setGraphicsMode(int mode);
 	bool setGraphicsMode(const char *name);
 	int getGraphicsMode() const { return _graphicsMode; }
-	uint32 getDefaultGraphicsMode() const { return STRETCHED_FULL_SCREEN; }
+	uint32 getDefaultGraphicsMode() const { return FIT_TO_SCREEN; }
 	const OSystem::GraphicsMode* getSupportedGraphicsModes() const { return _supportedModes; }
 
 	// Setters for pointers

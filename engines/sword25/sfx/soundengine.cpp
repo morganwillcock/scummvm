@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -36,6 +36,7 @@
 #include "sword25/kernel/inputpersistenceblock.h"
 #include "sword25/kernel/outputpersistenceblock.h"
 
+#include "audio/audiostream.h"
 #include "audio/decoders/vorbis.h"
 
 #include "common/system.h"
@@ -64,9 +65,6 @@ SoundEngine::SoundEngine(Kernel *pKernel) : ResourceService(pKernel) {
 	_mixer = g_system->getMixer();
 
 	_maxHandleId = 1;
-
-	for (int i = 0; i < SOUND_HANDLES; i++)
-		_handles[i].type = kFreeHandle;
 }
 
 bool SoundEngine::init(uint sampleRate, uint channels) {
@@ -114,7 +112,7 @@ float SoundEngine::getVolume(SOUND_TYPES type) {
 		error("Unknown SOUND_TYPE");
 	}
 
-	return (float)val / 255.0;
+	return (float)val / 255.0f;
 }
 
 void SoundEngine::pauseAll() {
@@ -302,7 +300,7 @@ float SoundEngine::getSoundVolume(uint handle) {
 	SndHandle* sndHandle = findHandle(handle);
 	if (sndHandle == NULL)
 		return 0.f;
-	return (float)_mixer->getChannelVolume(sndHandle->handle) / 255.0;
+	return (float)_mixer->getChannelVolume(sndHandle->handle) / 255.0f;
 }
 
 float SoundEngine::getSoundPanning(uint handle) {
@@ -311,7 +309,7 @@ float SoundEngine::getSoundPanning(uint handle) {
 	SndHandle* sndHandle = findHandle(handle);
 	if (sndHandle == NULL)
 		return 0.f;
-	return (float)_mixer->getChannelBalance(sndHandle->handle) / 127.0;
+	return (float)_mixer->getChannelBalance(sndHandle->handle) / 127.0f;
 }
 
 Resource *SoundEngine::loadResource(const Common::String &fileName) {
@@ -393,5 +391,16 @@ bool SoundEngine::unpersist(InputPersistenceBlock &reader) {
 	return reader.isGood();
 }
 
+SndHandle::SndHandle() :
+		type(kFreeHandle),
+		id(0),
+		sndType(-1),
+		volume(0),
+		pan(0),
+		loop(false),
+		loopStart(0),
+		loopEnd(0),
+		layer(0) {
+}
 
 } // End of namespace Sword25

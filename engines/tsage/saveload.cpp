@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -141,8 +141,8 @@ Common::Error Saver::save(int slot, const Common::String &saveName) {
 
 	// Write out the savegame header
 	tSageSavegameHeader header;
-	header.saveName = saveName;
-	header.version = TSAGE_SAVEGAME_VERSION;
+	header._saveName = saveName;
+	header._version = TSAGE_SAVEGAME_VERSION;
 	writeSavegameHeader(saveFile, header);
 
 	// Save out objects that need to come at the start of the savegame
@@ -190,11 +190,11 @@ Common::Error Saver::restore(int slot) {
 	// Read in the savegame header
 	tSageSavegameHeader header;
 	readSavegameHeader(saveFile, header);
-	if (header.thumbnail)
-		header.thumbnail->free();
-	delete header.thumbnail;
+	if (header._thumbnail)
+		header._thumbnail->free();
+	delete header._thumbnail;
 
-	serializer.setSaveVersion(header.version);
+	serializer.setSaveVersion(header._version);
 
 	// Load in data for objects that need to come at the start of the savegame
 	for (Common::List<SaveListener *>::iterator i = _listeners.begin(); i != _listeners.end(); ++i) {
@@ -211,12 +211,14 @@ Common::Error Saver::restore(int slot) {
 	// Note: I don't store pointers to instantiated objects here, because it's not necessary - the mere act
 	// of instantiating a saved object registers it with the saver, and will then be resolved to whatever
 	// object originally had a pointer to it as part of the post-processing step
+	DynObjects dynObjects;
 	Common::String className;
 	serializer.syncString(className);
 	while (className != "END") {
 		SavedObject *savedObject;
 		if (!_factoryPtr || ((savedObject = _factoryPtr(className)) == NULL))
 			error("Unknown class name '%s' encountered trying to restore savegame", className.c_str());
+		dynObjects.push_back(savedObject);
 
 		// Populate the contents of the object
 		savedObject->synchronize(serializer);
@@ -226,7 +228,12 @@ Common::Error Saver::restore(int slot) {
 	}
 
 	// Post-process any unresolved pointers to get the correct pointer
-	resolveLoadPointers();
+	resolveLoadPointers(dynObjects);
+
+	// Post-process safety check: if any dynamically created objects didn't get any
+	// references, then delete them, since they'd never be freed otherwise
+	for (DynObjects::iterator i = dynObjects.begin(); i != dynObjects.end(); ++i)
+		delete *i;
 
 	delete saveFile;
 
@@ -242,34 +249,34 @@ const char *SAVEGAME_STR = "SCUMMVM_TSAGE";
 
 bool Saver::readSavegameHeader(Common::InSaveFile *in, tSageSavegameHeader &header) {
 	char saveIdentBuffer[SAVEGAME_STR_SIZE + 1];
-	header.thumbnail = NULL;
+	header._thumbnail = NULL;
 
 	// Validate the header Id
 	in->read(saveIdentBuffer, SAVEGAME_STR_SIZE + 1);
 	if (strncmp(saveIdentBuffer, SAVEGAME_STR, SAVEGAME_STR_SIZE))
 		return false;
 
-	header.version = in->readByte();
-	if (header.version > TSAGE_SAVEGAME_VERSION)
+	header._version = in->readByte();
+	if (header._version > TSAGE_SAVEGAME_VERSION)
 		return false;
 
 	// Read in the string
-	header.saveName.clear();
+	header._saveName.clear();
 	char ch;
-	while ((ch = (char)in->readByte()) != '\0') header.saveName += ch;
+	while ((ch = (char)in->readByte()) != '\0') header._saveName += ch;
 
 	// Get the thumbnail
-	header.thumbnail = Graphics::loadThumbnail(*in);
-	if (!header.thumbnail)
+	header._thumbnail = Graphics::loadThumbnail(*in);
+	if (!header._thumbnail)
 		return false;
 
 	// Read in save date/time
-	header.saveYear = in->readSint16LE();
-	header.saveMonth = in->readSint16LE();
-	header.saveDay = in->readSint16LE();
-	header.saveHour = in->readSint16LE();
-	header.saveMinutes = in->readSint16LE();
-	header.totalFrames = in->readUint32LE();
+	header._saveYear = in->readSint16LE();
+	header._saveMonth = in->readSint16LE();
+	header._saveDay = in->readSint16LE();
+	header._saveHour = in->readSint16LE();
+	header._saveMinutes = in->readSint16LE();
+	header._totalFrames = in->readUint32LE();
 
 	return true;
 }
@@ -281,7 +288,7 @@ void Saver::writeSavegameHeader(Common::OutSaveFile *out, tSageSavegameHeader &h
 	out->writeByte(TSAGE_SAVEGAME_VERSION);
 
 	// Write savegame name
-	out->write(header.saveName.c_str(), header.saveName.size() + 1);
+	out->write(header._saveName.c_str(), header._saveName.size() + 1);
 
 	// Get the active palette
 	uint8 thumbPalette[256 * 3];
@@ -289,10 +296,10 @@ void Saver::writeSavegameHeader(Common::OutSaveFile *out, tSageSavegameHeader &h
 
 	// Create a thumbnail and save it
 	Graphics::Surface *thumb = new Graphics::Surface();
-	Graphics::Surface s = g_globals->_screenSurface.lockSurface();
+	Graphics::Surface s = g_globals->_screen.lockSurface();
 	::createThumbnail(thumb, (const byte *)s.getPixels(), SCREEN_WIDTH, SCREEN_HEIGHT, thumbPalette);
 	Graphics::saveThumbnail(*out, *thumb);
-	g_globals->_screenSurface.unlockSurface();
+	g_globals->_screen.unlockSurface();
 	thumb->free();
 	delete thumb;
 
@@ -392,7 +399,7 @@ void Saver::listObjects() {
 /**
  * Returns the pointer associated with the specified object index
  */
-void Saver::resolveLoadPointers() {
+void Saver::resolveLoadPointers(DynObjects &dynObjects) {
 	if (_unresolvedPtrs.size() == 0)
 		// Nothing to resolve
 		return;
@@ -410,6 +417,9 @@ void Saver::resolveLoadPointers() {
 				SavedObject **objPP = r._savedObject;
 				*objPP = pObj;
 				iPtr = _unresolvedPtrs.erase(iPtr);
+
+				// If it's a dynamic object, remove it from the dynamic objects list
+				dynObjects.remove(pObj);
 			} else {
 				++iPtr;
 			}

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -53,7 +53,6 @@ public:
 	 * @param compartment The compartment
 	 */
 	DECLARE_FUNCTION_2(enterExitCompartment, const char *sequence, ObjectIndex compartment)
-
 
 	/**
 	 * Draws the entity
@@ -103,19 +102,15 @@ public:
 	 */
 	DECLARE_FUNCTION_2(savegame, SavegameType savegameType, uint32 param)
 
-	DECLARE_FUNCTION(function11)
+	DECLARE_FUNCTION(homeAlone)
 
 	/**
 	 * Setup Chapter 1
 	 */
 	DECLARE_FUNCTION(chapter1)
 
-	/**
-	 * Handle Chapter 1 events
-	 */
-	DECLARE_FUNCTION(chapter1Handler)
-
-	DECLARE_FUNCTION(function14)
+	DECLARE_FUNCTION(withMilos)
+	DECLARE_FUNCTION(homeTogether)
 	DECLARE_FUNCTION(function15)
 
 	/**
@@ -128,29 +123,25 @@ public:
 	 */
 	DECLARE_FUNCTION(chapter2Handler)
 
-	DECLARE_FUNCTION(function18)
+	DECLARE_FUNCTION(checkTrain)
 
 	/**
 	 * Setup Chapter 3
 	 */
 	DECLARE_FUNCTION(chapter3)
 
-	/**
-	 * Handle Chapter 3 events
-	 */
-	DECLARE_FUNCTION(chapter3Handler)
-
-	DECLARE_FUNCTION(function21)
-	DECLARE_FUNCTION(function22)
-	DECLARE_FUNCTION(function23)
+	DECLARE_FUNCTION(inCompartment)
+	DECLARE_FUNCTION(takeAWalk)
+	DECLARE_FUNCTION(killAnna)
+	DECLARE_FUNCTION(killedAnna)
 
 	/**
 	 * Setup Chapter 4
 	 */
 	DECLARE_FUNCTION(chapter4)
 
-	DECLARE_FUNCTION(function25)
-	DECLARE_FUNCTION(function26)
+	DECLARE_FUNCTION(exitLocation)
+	DECLARE_FUNCTION(done)
 	DECLARE_FUNCTION(function27)
 
 	/**
@@ -158,12 +149,8 @@ public:
 	 */
 	DECLARE_FUNCTION(chapter5)
 
-	/**
-	 * Handle Chapter 5 events
-	 */
-	DECLARE_FUNCTION(chapter5Handler)
-
-	DECLARE_FUNCTION(function30)
+	DECLARE_FUNCTION(guarding)
+	DECLARE_FUNCTION(climbing)
 	DECLARE_NULL_FUNCTION()
 };
 

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -23,6 +23,7 @@
 #include "common/config-manager.h"
 #include "common/events.h"
 
+#include "queen/midiadlib.h"
 #include "queen/music.h"
 #include "queen/queen.h"
 #include "queen/resource.h"
@@ -32,8 +33,6 @@
 
 
 namespace Queen {
-
-extern MidiDriver *C_Player_CreateAdLibMidiDriver(Audio::Mixer *);
 
 MidiMusic::MidiMusic(QueenEngine *vm)
 	: _isPlaying(false), _isLooping(false),
@@ -69,7 +68,7 @@ MidiMusic::MidiMusic(QueenEngine *vm)
 //		if (READ_LE_UINT16(_musicData + 2) != infoOffset) {
 //			defaultAdLibVolume = _musicData[infoOffset];
 //		}
-		_driver = C_Player_CreateAdLibMidiDriver(vm->_mixer);
+		_driver = new AdLibMidiDriver();
 	} else {
 		_driver = MidiDriver::createMidi(dev);
 		if (_nativeMT32) {
@@ -117,6 +116,9 @@ void MidiMusic::setVolume(int volume) {
 		if (_channelsTable[i])
 			_channelsTable[i]->volume(_channelsVolume[i] * _masterVolume / 255);
 	}
+
+	if (_adlib)
+		static_cast<AdLibMidiDriver*>(_driver)->setVolume(volume);
 }
 
 void MidiMusic::playSong(uint16 songNum) {

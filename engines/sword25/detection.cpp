@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,6 +21,7 @@
  */
 
 #include "base/plugins.h"
+#include "common/translation.h"
 #include "engines/advancedDetector.h"
 
 #include "sword25/sword25.h"
@@ -41,10 +42,17 @@ static const char *directoryGlobs[] = {
 	0
 };
 
+static const ExtraGuiOption sword25ExtraGuiOption = {
+	_s("Use English speech"),
+	_s("Use English speech instead of German for every language other than German"),
+	"english_speech",
+	false
+};
+
 class Sword25MetaEngine : public AdvancedMetaEngine {
 public:
 	Sword25MetaEngine() : AdvancedMetaEngine(Sword25::gameDescriptions, sizeof(ADGameDescription), sword25Game) {
-		_guioptions = GUIO1(GUIO_NOMIDI);
+		_guiOptions = GUIO1(GUIO_NOMIDI);
 		_maxScanDepth = 2;
 		_directoryGlobs = directoryGlobs;
 	}
@@ -58,6 +66,7 @@ public:
 
 	virtual bool createInstance(OSystem *syst, Engine **engine, const ADGameDescription *desc) const;
 	virtual bool hasFeature(MetaEngineFeature f) const;
+	virtual const ExtraGuiOptions getExtraGuiOptions(const Common::String &target) const;
 	virtual int getMaximumSaveSlot() const { return Sword25::PersistenceService::getSlotCount(); }
 	virtual SaveStateList listSaves(const char *target) const;
 };
@@ -74,9 +83,15 @@ bool Sword25MetaEngine::hasFeature(MetaEngineFeature f) const {
 		(f == kSupportsListSaves);
 }
 
+const ExtraGuiOptions Sword25MetaEngine::getExtraGuiOptions(const Common::String &target) const {
+	ExtraGuiOptions options;
+	options.push_back(sword25ExtraGuiOption);
+	return options;
+}
+
 SaveStateList Sword25MetaEngine::listSaves(const char *target) const {
 	Common::String pattern = target;
-	pattern = pattern + ".???";
+	pattern = pattern + ".###";
 	SaveStateList saveList;
 
 	Sword25::PersistenceService ps;

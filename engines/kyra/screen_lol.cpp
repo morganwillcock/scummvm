@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -54,7 +54,7 @@ Screen_LoL::~Screen_LoL() {
 	delete[] _grayOverlay;
 }
 
-void Screen_LoL::fprintString(const char *format, int x, int y, uint8 col1, uint8 col2, uint16 flags, ...) {
+void Screen_LoL::fprintString(const char *format, int x, int y, uint8 col1, uint8 col2, uint flags, ...) {
 	if (!format)
 		return;
 
@@ -90,7 +90,7 @@ void Screen_LoL::fprintString(const char *format, int x, int y, uint8 col1, uint
 	printText(string, x, y, col1, col2);
 }
 
-void Screen_LoL::fprintStringIntro(const char *format, int x, int y, uint8 c1, uint8 c2, uint8 c3, uint16 flags, ...) {
+void Screen_LoL::fprintStringIntro(const char *format, int x, int y, uint8 c1, uint8 c2, uint8 c3, uint flags, ...) {
 	char buffer[400];
 
 	va_list args;

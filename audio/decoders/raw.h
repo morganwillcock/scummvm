@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -35,6 +35,7 @@ class SeekableReadStream;
 
 namespace Audio {
 
+class PacketizedAudioStream;
 class SeekableAudioStream;
 
 /**
@@ -88,6 +89,17 @@ SeekableAudioStream *makeRawStream(const byte *buffer, uint32 size,
 SeekableAudioStream *makeRawStream(Common::SeekableReadStream *stream,
                                    int rate, byte flags,
                                    DisposeAfterUse::Flag disposeAfterUse = DisposeAfterUse::YES);
+
+/**
+ * Creates a PacketizedAudioStream that will automatically queue
+ * packets as individual AudioStreams like returned by makeRawStream.
+ *
+ * @param rate   Rate of the sound data.
+ * @param flags	 Audio flags combination.
+ * @see RawFlags
+ * @return The new PacketizedAudioStream.
+ */
+PacketizedAudioStream *makePacketizedRawStream(int rate, byte flags);
 
 } // End of namespace Audio
 

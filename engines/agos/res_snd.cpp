@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,6 +28,7 @@
 #include "agos/intern.h"
 #include "agos/agos.h"
 #include "agos/midi.h"
+#include "agos/sound.h"
 #include "agos/vga.h"
 
 #include "backends/audiocd/audiocd.h"
@@ -220,6 +221,7 @@ void AGOSEngine::playModule(uint16 music) {
 	}
 
 	_mixer->playStream(Audio::Mixer::kMusicSoundType, &_modHandle, audioStream);
+	_mixer->pauseHandle(_modHandle, _musicPaused);
 }
 
 void AGOSEngine_Simon1::playMusic(uint16 music, uint16 track) {
@@ -227,7 +229,7 @@ void AGOSEngine_Simon1::playMusic(uint16 music, uint16 track) {
 
 	// Support for compressed music from the ScummVM Music Enhancement Project
 	_system->getAudioCDManager()->stop();
-	_system->getAudioCDManager()->play(music + 1, -1, 0, 0);
+	_system->getAudioCDManager()->play(music + 1, -1, 0, 0, true);
 	if (_system->getAudioCDManager()->isPlaying())
 		return;
 
@@ -309,7 +311,9 @@ void AGOSEngine::stopMusic() {
 }
 
 void AGOSEngine::playSting(uint16 soundId) {
-	if (!_midi->_enable_sfx)
+	// The sound effects in floppy disk version of
+	// Simon the Sorcerer 1 are only meant for AdLib
+	if (!_midi->_adLibMusic || !_midi->_enable_sfx)
 		return;
 
 	char filename[15];

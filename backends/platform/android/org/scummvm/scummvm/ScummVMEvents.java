@@ -68,15 +68,7 @@ public class ScummVMEvents implements
 		return true;
 	}
 
-	public boolean onGenericMotionEvent(final MotionEvent e) {
-		if((e.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-			_scummvm.pushEvent(JE_JOYSTICK, e.getAction(),
-					   (int)(e.getAxisValue(MotionEvent.AXIS_X)*100),
-					   (int)(e.getAxisValue(MotionEvent.AXIS_Y)*100),
-					   0, 0);
-			return true;
-		}
-
+	public boolean onGenericMotionEvent(MotionEvent e) {
 		return false;
 	}
 
@@ -127,6 +119,8 @@ public class ScummVMEvents implements
 			case KeyEvent.KEYCODE_MENU:
 			case KeyEvent.KEYCODE_CAMERA:
 			case KeyEvent.KEYCODE_SEARCH:
+			case KeyEvent.KEYCODE_MEDIA_PLAY:
+			case KeyEvent.KEYCODE_MEDIA_PAUSE:
 				break;
 
 			default:

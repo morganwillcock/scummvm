@@ -1,24 +1,24 @@
 /* ScummVM - Graphic Adventure Engine
-*
-* ScummVM is the legal property of its developers, whose names
-* are too numerous to list here. Please refer to the COPYRIGHT
-* file distributed with this source distribution.
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*
-*/
+ *
+ * ScummVM is the legal property of its developers, whose names
+ * are too numerous to list here. Please refer to the COPYRIGHT
+ * file distributed with this source distribution.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
+ */
 
 #include "common/debug.h"
 #include "common/rect.h"
@@ -99,7 +99,7 @@ void FontRenderer::renderText(int16 x, int16 y, const Common::String &origText, 
 		} else {
 			curChar = textToFont(curChar);
 			_currentFont->drawFontFrame(_vm->getMainSurface(), curChar, curX, curY, _currentFontColor);
-			curX = curX + _currentFont->getFrameWidth(curChar) - 1;
+			curX = curX + MAX<int32>(_currentFont->getFrameWidth(curChar) - 2, 0);
 			height = MAX<int32>(height, _currentFont->getFrameHeight(curChar));
 		}
 		text++;
@@ -138,8 +138,8 @@ void FontRenderer::computeSize(const Common::String &origText, int16 *retX, int1
 			// really tell how far it will stick out. For now,
 			// assume we only need to take the lower bound into
 			// consideration.
-			Common::Rect charRect = _currentFont->getFrameRect(curChar);
-			lastLineHeight = MAX(lastLineHeight, charRect.bottom);
+			//Common::Rect charRect = _currentFont->getFrameRect(curChar);
+			lastLineHeight = MAX(lastLineHeight, _currentFont->getHeight());
 		}
 		text++;
 	}

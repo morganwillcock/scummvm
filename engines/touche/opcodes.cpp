@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -610,8 +610,13 @@ void ToucheEngine::op_getInventoryItem() {
 		keyChar = _currentKeyCharNum;
 	}
 	assert(keyChar >= 0 && keyChar < NUM_KEYCHARS);
-	assert(item < sizeof(_keyCharsTable[keyChar].inventoryItems));
-	*_script.stackDataPtr = _keyCharsTable[keyChar].inventoryItems[item];
+	if (item == 4) {
+		// item 4 is the 'money' field
+		*_script.stackDataPtr = _keyCharsTable[keyChar].money;
+	} else {
+		assert(item < ARRAYSIZE(_keyCharsTable[keyChar].inventoryItems));
+		*_script.stackDataPtr = _keyCharsTable[keyChar].inventoryItems[item];
+	}
 }
 
 void ToucheEngine::op_setInventoryItem() {
@@ -625,8 +630,13 @@ void ToucheEngine::op_setInventoryItem() {
 		keyChar = _currentKeyCharNum;
 	}
 	assert(keyChar >= 0 && keyChar < NUM_KEYCHARS);
-	assert(item < sizeof(_keyCharsTable[keyChar].inventoryItems));
-	_keyCharsTable[keyChar].inventoryItems[item] = *_script.stackDataPtr;
+	if (item == 4) {
+		// item 4 is the 'money' field
+		_keyCharsTable[keyChar].money = *_script.stackDataPtr;
+	} else {
+		assert(item < ARRAYSIZE(_keyCharsTable[keyChar].inventoryItems));
+		_keyCharsTable[keyChar].inventoryItems[item] = *_script.stackDataPtr;
+	}
 	if (item == 4 && !_hideInventoryTexts) {
 		drawAmountOfMoneyInInventory();
 	}

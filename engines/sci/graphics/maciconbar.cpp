@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -32,7 +32,7 @@
 #include "common/memstream.h"
 #include "common/system.h"
 #include "graphics/surface.h"
-#include "graphics/decoders/pict.h"
+#include "image/pict.h"
 
 namespace Sci {
 
@@ -201,13 +201,13 @@ void GfxMacIconBar::setInventoryIcon(int16 icon) {
 }
 
 Graphics::Surface *GfxMacIconBar::loadPict(ResourceId id) {
-	Graphics::PICTDecoder pictDecoder;
 	Resource *res = g_sci->getResMan()->findResource(id, false);
 
-	if (!res || res->size == 0)
+	if (!res || res->size() == 0)
 		return 0;
 
-	Common::MemoryReadStream stream(res->data, res->size);
+	Image::PICTDecoder pictDecoder;
+	Common::MemoryReadStream stream(res->toStream());
 	if (!pictDecoder.loadStream(stream))
 		return 0;
 
@@ -234,7 +234,7 @@ void GfxMacIconBar::remapColors(Graphics::Surface *surf, const byte *palette) {
 		byte g = palette[color * 3 + 1];
 		byte b = palette[color * 3 + 2];
 
-		*pixels++ = g_sci->_gfxPalette->findMacIconBarColor(r, g, b);
+		*pixels++ = g_sci->_gfxPalette16->findMacIconBarColor(r, g, b);
 	}
 }
 
@@ -245,10 +245,10 @@ bool GfxMacIconBar::pointOnIcon(uint32 iconIndex, Common::Point point) {
 reg_t GfxMacIconBar::handleEvents() {
 	// Peek event queue for a mouse button press
 	EventManager *evtMgr = g_sci->getEventManager();
-	SciEvent evt = evtMgr->getSciEvent(SCI_EVENT_MOUSE_PRESS | SCI_EVENT_PEEK);
+	SciEvent evt = evtMgr->getSciEvent(kSciEventMousePress | kSciEventPeek);
 
 	// No mouse press found
-	if (evt.type == SCI_EVENT_NONE)
+	if (evt.type == kSciEventNone)
 		return NULL_REG;
 
 	// If the mouse is not over the icon bar, return
@@ -256,7 +256,7 @@ reg_t GfxMacIconBar::handleEvents() {
 		return NULL_REG;
 
 	// Remove event from queue
-	evtMgr->getSciEvent(SCI_EVENT_MOUSE_PRESS);
+	evtMgr->getSciEvent(kSciEventMousePress);
 
 	// Mouse press on the icon bar, check the icon rectangles
 	uint iconNr;
@@ -273,14 +273,14 @@ reg_t GfxMacIconBar::handleEvents() {
 	bool isSelected = true;
 
 	// Wait for mouse release
-	while (evt.type != SCI_EVENT_MOUSE_RELEASE) {
+	while (evt.type != kSciEventMouseRelease) {
 		// Mimic behavior of SSCI when moving mouse with button held down
 		if (isSelected != pointOnIcon(iconNr, evt.mousePos)) {
 			isSelected = !isSelected;
 			drawIcon(iconNr, isSelected);
 		}
 
-		evt = evtMgr->getSciEvent(SCI_EVENT_MOUSE_RELEASE);
+		evt = evtMgr->getSciEvent(kSciEventMouseRelease);
 		g_system->delayMillis(10);
 	}
 

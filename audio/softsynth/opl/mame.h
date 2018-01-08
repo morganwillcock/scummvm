@@ -8,18 +8,19 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  * LGPL licensed version of MAMEs fmopl (V0.37a modified) by
  * Tatsuyuki Satoh. Included from LGPL'ed AdPlug.
+ *
  */
 
 
@@ -173,14 +174,14 @@ void YM3812UpdateOne(FM_OPL *OPL, int16 *buffer, int length);
 FM_OPL *makeAdLibOPL(int rate);
 
 // OPL API implementation
-class OPL : public ::OPL::OPL {
+class OPL : public ::OPL::EmulatedOPL {
 private:
 	FM_OPL *_opl;
 public:
 	OPL() : _opl(0) {}
 	~OPL();
 
-	bool init(int rate);
+	bool init();
 	void reset();
 
 	void write(int a, int v);
@@ -188,8 +189,10 @@ public:
 
 	void writeReg(int r, int v);
 
-	void readBuffer(int16 *buffer, int length);
 	bool isStereo() const { return false; }
+
+protected:
+	void generateSamples(int16 *buffer, int length);
 };
 
 } // End of namespace MAME

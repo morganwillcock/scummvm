@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -57,7 +57,10 @@ void FullpipeEngine::initObjectStates() {
 	setObjectState(sO_FriesPit, getObjectEnumState(sO_FriesPit, sO_WithApple));
 	setObjectState(sO_Jug, getObjectEnumState(sO_Jug, sO_Blocked));
 	setObjectState(sO_RightStairs_9, getObjectEnumState(sO_RightStairs_9, sO_IsClosed));
-	setObjectState(sO_Pipe_9, getObjectEnumState(sO_Pipe_9, sO_WithJug));
+	if (isDemo() && getLanguage() == Common::RU_RUS)
+		setObjectState(sO_Pipe_9, getObjectEnumState(sO_Pipe_9, sO_WithoutJug));
+	else
+		setObjectState(sO_Pipe_9, getObjectEnumState(sO_Pipe_9, sO_WithJug));
 	setObjectState(sO_Inflater, getObjectEnumState(sO_Inflater, sO_WithGum));
 	setObjectState(sO_Swingie, getObjectEnumState(sO_Swingie, sO_IsSwinging));
 	setObjectState(sO_DudeHasJumped, getObjectEnumState(sO_DudeHasJumped, sO_No));
@@ -141,7 +144,7 @@ void FullpipeEngine::setLevelStates() {
 
 void FullpipeEngine::addCursor(CursorInfo *cursorInfo, Scene *inv, int pictureId, int hotspotX, int hotspotY, int itemPictureOffsX, int itemPictureOffsY) {
 	cursorInfo->pictureId = pictureId;
-	cursorInfo->picture = inv->getPictureObjectById(pictureId, 0)->_picture;
+	cursorInfo->picture = inv->getPictureObjectById(pictureId, 0)->_picture.get();
 	cursorInfo->hotspotX = hotspotX;
 	cursorInfo->hotspotY = hotspotY;
 	cursorInfo->itemPictureOffsX = itemPictureOffsX;

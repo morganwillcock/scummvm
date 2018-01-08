@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -191,12 +191,12 @@ bool MoviePlayer::load(uint32 id) {
 
 	// Need to switch to true color for PSX/MP2 videos
 	if (_decoderType == kVideoDecoderPSX || _decoderType == kVideoDecoderMP2)
-		initGraphics(g_system->getWidth(), g_system->getHeight(), true, 0);
+		initGraphics(g_system->getWidth(), g_system->getHeight(), nullptr);
 
 	if (!_decoder->loadFile(filename)) {
 		// Go back to 8bpp color
 		if (_decoderType == kVideoDecoderPSX || _decoderType == kVideoDecoderMP2)
-			initGraphics(g_system->getWidth(), g_system->getHeight(), true);
+			initGraphics(g_system->getWidth(), g_system->getHeight());
 
 		return false;
 	}
@@ -422,7 +422,7 @@ bool MoviePlayer::playVideo() {
 
 	// Need to jump back to paletted color
 	if (_decoderType == kVideoDecoderPSX || _decoderType == kVideoDecoderMP2)
-		initGraphics(g_system->getWidth(), g_system->getHeight(), true);
+		initGraphics(g_system->getWidth(), g_system->getHeight());
 
 	return !_vm->shouldQuit() && !skipped;
 }
@@ -542,7 +542,7 @@ MoviePlayer *makeMoviePlayer(uint32 id, SwordEngine *vm, Text *textMan, ResMan *
 		Video::VideoDecoder *dxaDecoder = new Video::DXADecoder();
 		return new MoviePlayer(vm, textMan, resMan, system, dxaDecoder, kVideoDecoderDXA);
 #else
-		GUI::MessageDialog dialog(_("DXA cutscenes found but ScummVM has been built without zlib support"), _("OK"));
+		GUI::MessageDialog dialog(_("DXA cutscenes found but ScummVM has been built without zlib"), _("OK"));
 		dialog.runModal();
 		return 0;
 #endif
@@ -558,7 +558,7 @@ MoviePlayer *makeMoviePlayer(uint32 id, SwordEngine *vm, Text *textMan, ResMan *
 		Video::VideoDecoder *aviDecoder = new Video::AVIDecoder(12);
 		return new MoviePlayer(vm, textMan, resMan, system, aviDecoder, kVideoDecoderMP2);
 #else
-		GUI::MessageDialog dialog(_("MPEG-2 cutscenes found but ScummVM has been built without MPEG-2"), _("OK"));
+		GUI::MessageDialog dialog(_("MPEG-2 cutscenes found but ScummVM has been built without MPEG-2 support"), _("OK"));
 		dialog.runModal();
 		return 0;
 #endif

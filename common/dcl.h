@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -22,8 +22,10 @@
 
 /**
  * @file
- * PKWARE DCL ("explode") decompressor used in engines:
+ * PKWARE DCL ("explode") ("PKWARE data compression library") decompressor used in engines:
+ * - agos (exclusively for Simon 2 setup.shr file)
  * - mohawk
+ * - neverhood
  * - sci
  */
 
@@ -38,16 +40,22 @@ class ReadStream;
 class SeekableReadStream;
 
 /**
- * Try to decompress a PKWARE DCL compressed stream. Returns true if
+ * Try to decompress a PKWARE DCL (PKWARE data compression library) compressed stream. Returns true if
  * successful.
  */
-bool decompressDCL(ReadStream *src, byte *dest, uint32 packedSize, uint32 unpackedSize);
+bool decompressDCL(ReadStream *sourceStream, byte *dest, uint32 packedSize, uint32 unpackedSize);
 
 /**
- * Try to decompress a PKWARE DCL compressed stream. Returns a valid pointer
+ * Try to decompress a PKWARE DCL (PKWARE data compression library) compressed stream. Returns a valid pointer
  * if successful and 0 otherwise.
  */
-SeekableReadStream *decompressDCL(ReadStream *src, uint32 packedSize, uint32 unpackedSize);
+SeekableReadStream *decompressDCL(SeekableReadStream *sourceStream, uint32 packedSize, uint32 unpackedSize);
+
+/**
+ * Try to decompress a PKWARE DCL (PKWARE data compression library) compressed stream. Returns a valid pointer
+ * if successful and 0 otherwise. This method is meant for cases, where the unpacked size is not known.
+ */
+SeekableReadStream *decompressDCL(SeekableReadStream *sourceStream);
 
 } // End of namespace Common
 

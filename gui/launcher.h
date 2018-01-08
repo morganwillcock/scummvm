@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_LAUNCHER_DIALOG_H
@@ -46,11 +47,13 @@ public:
 	LauncherDialog();
 	~LauncherDialog();
 
+	void rebuild();
+
 	virtual void handleCommand(CommandSender *sender, uint32 cmd, uint32 data);
 
 	virtual void handleKeyDown(Common::KeyState state);
 	virtual void handleKeyUp(Common::KeyState state);
-
+	bool doGameDetection(const Common::String &path);
 protected:
 	EditTextWidget  *_searchWidget;
 	ListWidget		*_list;
@@ -81,6 +84,9 @@ protected:
 
 	void updateButtons();
 	void switchButtonsText(ButtonWidget *button, const char *normalText, const char *shiftedText);
+
+	void build();
+	void clean();
 
 	void open();
 	void close();

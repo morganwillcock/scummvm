@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -23,12 +23,13 @@
 #ifndef GOB_SOUND_SOUND_H
 #define GOB_SOUND_SOUND_H
 
+#include "common/str.h"
 #include "gob/sound/sounddesc.h"
-#include "gob/sound/bgatmosphere.h"
 
 namespace Gob {
 
 class GobEngine;
+class BackgroundAtmosphere;
 class PCSpeaker;
 class SoundBlaster;
 class ADLPlayer;
@@ -39,6 +40,11 @@ class CDROM;
 
 class Sound {
 public:
+	enum BackgroundPlayMode {
+		kPlayModeLinear,
+		kPlayModeRandom
+	};
+
 	static const int kSoundsCount = 60;
 
 	Sound(GobEngine *vm);
@@ -96,6 +102,7 @@ public:
 	int32 adlibGetRepeating() const;
 
 	void adlibSetRepeating(int32 repCount);
+	void adlibSyncVolume();
 
 
 	// Infogrames
@@ -134,7 +141,7 @@ public:
 	void bgPlay(const char *base, const char *ext, SoundType type, int count);
 	void bgStop();
 
-	void bgSetPlayMode(BackgroundAtmosphere::PlayMode mode);
+	void bgSetPlayMode(BackgroundPlayMode mode);
 
 	void bgShade();
 	void bgUnshade();

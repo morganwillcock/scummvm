@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1455,7 +1455,7 @@ int32 Router::newCheck(int32 status, int32 x1, int32 y1, int32 x2, int32 y2) {
 	 * newCheck differs from check in that that 4 route options are
 	 * considered corresponding to actual walked routes.
 	 *
-	 * Note distance doesnt take account of shrinking ???
+	 * Note distance doesn't take account of shrinking ???
 	 *
 	 * Note Bars array must be properly calculated ie min max dx dy co
 	 *********************************************************************/

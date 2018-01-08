@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -323,6 +323,11 @@ void AmigaSoundMan_ns::playLocationMusic(const char *location) {
 
 SoundMan_ns::SoundMan_ns(Parallaction_ns *vm) : _vm(vm) {
 	_mixer = _vm->_mixer;
+	_sfxLooping = false;
+	_sfxVolume = 0;
+	_sfxRate = 0;
+	_sfxChannel = 0;
+	_musicType = 0;
 }
 
 void SoundMan_ns::setMusicVolume(int value) {
@@ -330,7 +335,7 @@ void SoundMan_ns::setMusicVolume(int value) {
 }
 
 void SoundMan_ns::setMusicFile(const char *filename) {
-	strcpy(_musicFile, filename);
+	Common::strlcpy(_musicFile, filename, PATH_LEN);
 }
 
 void SoundMan_ns::execute(int command, const char *parm = 0) {

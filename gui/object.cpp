@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "common/textconsole.h"
@@ -43,19 +44,6 @@ void GuiObject::reflowLayout() {
 		if (!g_gui.xmlEval()->getWidgetData(_name, _x, _y, _w, _h)) {
 			error("Could not load widget position for '%s'", _name.c_str());
 		}
-
-		if (_x < 0)
-			error("Widget <%s> has x < 0 (%d)", _name.c_str(), _x);
-		if (_x >= g_gui.getWidth())
-			error("Widget <%s> has x > %d (%d)", _name.c_str(), g_gui.getWidth(), _x);
-		if (_x + _w > g_gui.getWidth())
-			error("Widget <%s> has x + w > %d (%d)", _name.c_str(), g_gui.getWidth(), _x + _w);
-		if (_y < 0)
-			error("Widget <%s> has y < 0 (%d)", _name.c_str(), _y);
-		if (_y >= g_gui.getHeight())
-			error("Widget <%s> has y > %d (%d)", _name.c_str(), g_gui.getHeight(), _y);
-		if (_y + _h > g_gui.getHeight())
-			error("Widget <%s> has y + h > %d (%d)", _name.c_str(), g_gui.getHeight(), _y + _h);
 	}
 }
 

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -26,70 +26,100 @@
 
 #include "backends/events/dinguxsdl/dinguxsdl-events.h"
 
+#ifndef GCW0
 #define PAD_UP    SDLK_UP
 #define PAD_DOWN  SDLK_DOWN
 #define PAD_LEFT  SDLK_LEFT
 #define PAD_RIGHT SDLK_RIGHT
 #define BUT_A     SDLK_LCTRL
 #define BUT_B     SDLK_LALT
-#define BUT_X     SDLK_SPACE
-#define BUT_Y     SDLK_LSHIFT
+#define BUT_X     SDLK_SPACE       // BUT_Y in GCW0
+#define BUT_Y     SDLK_LSHIFT      // BUT_X in GCW0
 #define BUT_SELECT   SDLK_ESCAPE
 #define BUT_START    SDLK_RETURN
 #define TRIG_L    SDLK_TAB
 #define TRIG_R    SDLK_BACKSPACE
+#else // GCW0
+
+/******
+ * GCW0 keymap
+ *                      Dingoo button
+ * A -> Left Button     BUT_Y
+ * B -> right button    BUT_B
+ * X -> ' '             BUT_A '0'
+ * Y -> '.'             BUT_X
+ * Select -> ESC        TRIG_R
+ * Start -> F5          TRIG_L
+ * L -> Shift           BUT_START
+ * R -> VK              BUT_SELECT
+ */
+
+#define PAD_UP    SDLK_UP
+#define PAD_DOWN  SDLK_DOWN
+#define PAD_LEFT  SDLK_LEFT
+#define PAD_RIGHT SDLK_RIGHT
+#define BUT_A     SDLK_LSHIFT
+#define BUT_B     SDLK_LALT
+#define BUT_X     SDLK_SPACE
+#define BUT_Y     SDLK_LCTRL
+#define BUT_SELECT   SDLK_BACKSPACE
+#define BUT_START    SDLK_TAB
+#define TRIG_L    SDLK_RETURN
+#define TRIG_R    SDLK_ESCAPE
+
+#endif
 
 bool DINGUXSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 	if (ev.key.keysym.sym == PAD_UP) {
 		if (ev.type == SDL_KEYDOWN) {
-			_km.y_vel = -1;
+			_km.y_vel = -1 * MULTIPLIER;
 			_km.y_down_count = 1;
 		} else {
-			_km.y_vel = 0;
+			_km.y_vel = 0 * MULTIPLIER;
 			_km.y_down_count = 0;
 		}
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == PAD_DOWN) {
 		if (ev.type == SDL_KEYDOWN) {
-			_km.y_vel = 1;
+			_km.y_vel = 1 * MULTIPLIER;
 			_km.y_down_count = 1;
 		} else {
-			_km.y_vel = 0;
+			_km.y_vel = 0 * MULTIPLIER;
 			_km.y_down_count = 0;
 		}
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == PAD_LEFT) {
 		if (ev.type == SDL_KEYDOWN) {
-			_km.x_vel = -1;
+			_km.x_vel = -1 * MULTIPLIER;
 			_km.x_down_count = 1;
 		} else {
-			_km.x_vel = 0;
+			_km.x_vel = 0 * MULTIPLIER;
 			_km.x_down_count = 0;
 		}
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == PAD_RIGHT) {
 		if (ev.type == SDL_KEYDOWN) {
-			_km.x_vel = 1;
+			_km.x_vel = 1 * MULTIPLIER;
 			_km.x_down_count = 1;
 		} else {
-			_km.x_vel = 0;
+			_km.x_vel = 0 * MULTIPLIER;
 			_km.x_down_count = 0;
 		}
 
 		event.type = Common::EVENT_MOUSEMOVE;
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == BUT_Y) { // left mouse button
@@ -99,7 +129,7 @@ bool DINGUXSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 			event.type = Common::EVENT_LBUTTONUP;
 		}
 
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == BUT_B) { // right mouse button
@@ -109,7 +139,7 @@ bool DINGUXSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 			event.type = Common::EVENT_RBUTTONUP;
 		}
 
-		processMouseEvent(event, _km.x, _km.y);
+		processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 
 		return true;
 	} else if (ev.key.keysym.sym == BUT_X) { // '.' skip dialogue
@@ -144,8 +174,12 @@ bool DINGUXSdlEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 
 		return true;
 	} else if (ev.key.keysym.sym == BUT_SELECT) { // virtual keyboard
-		ev.key.keysym.sym = SDLK_F7;
+#ifdef ENABLE_VKEYBD
+		if (ev.type == SDL_KEYDOWN)
+			event.type = Common::EVENT_VIRTUAL_KEYBOARD;
 
+		return true;
+#endif
 	} else if (ev.key.keysym.sym == BUT_START) { // F5, menu in some games
 		ev.key.keysym.sym = SDLK_F5;
 

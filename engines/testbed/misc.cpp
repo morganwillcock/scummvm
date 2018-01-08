@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "testbed/misc.h"
@@ -159,10 +160,34 @@ TestExitStatus MiscTests::testMutexes() {
 	return kTestFailed;
 }
 
+TestExitStatus MiscTests::testOpenUrl() {
+	Common::String info = "Testing openUrl() method.\n"
+		"In this test we'll try to open scummvm.org in your default browser.";
+
+	if (Testsuite::handleInteractiveInput(info, "OK", "Skip", kOptionRight)) {
+		Testsuite::logPrintf("Info! Skipping test : openUrl()\n");
+		return kTestSkipped;
+	}
+
+	if (!g_system->openUrl("http://scummvm.org/")) {
+		Testsuite::logPrintf("Info! openUrl() says it couldn't open the url (probably not supported on this platform)\n");
+		return kTestFailed;
+	}
+
+	if (Testsuite::handleInteractiveInput("Was ScummVM able to open 'http://scummvm.org/' in your default browser?", "Yes", "No", kOptionRight)) {
+		Testsuite::logDetailedPrintf("Error! openUrl() is not working!\n");
+		return kTestFailed;
+	}
+
+	Testsuite::logDetailedPrintf("openUrl() is OK\n");
+	return kTestPassed;
+}
+
 MiscTestSuite::MiscTestSuite() {
 	addTest("Datetime", &MiscTests::testDateTime, false);
 	addTest("Timers", &MiscTests::testTimers, false);
 	addTest("Mutexes", &MiscTests::testMutexes, false);
+	addTest("openUrl", &MiscTests::testOpenUrl, true);
 }
 
 } // End of namespace Testbed

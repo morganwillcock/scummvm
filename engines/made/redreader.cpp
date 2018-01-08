@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -76,6 +76,22 @@ bool RedReader::seekFile(Common::File &fd, FileEntry &fileEntry, const char *fil
 }
 
 LzhDecompressor::LzhDecompressor() {
+	freq = nullptr;
+	len_table = nullptr;
+	sortptr = nullptr;
+	_source = nullptr;
+
+	_compSize = 0;
+	_blockPos = 0;
+	_bitbuf = 0;
+	_subbitbuf = 0;
+	_bitcount = 0;
+	_blocksize = 0;
+	tree_n = 0;
+	heapsize = 0;
+	decode_i = 0;
+	decode_j = 0;
+	count_len_depth = 0;
 }
 
 LzhDecompressor::~LzhDecompressor() {
@@ -86,7 +102,7 @@ int LzhDecompressor::decompress(Common::SeekableReadStream &source, byte *dest, 
 	int bufsize;
 	byte* buffer;
 
-	buffer = (byte *) malloc(DICSIZ);
+	buffer = (byte *)calloc(DICSIZ, 1);
 
 	_source = &source;
 	_compSize = sourceLen;

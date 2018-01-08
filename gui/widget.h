@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_WIDGET_H
@@ -67,7 +68,8 @@ enum {
 	kPopUpWidget		= 'POPU',
 	kTabWidget			= 'TABW',
 	kGraphicsWidget		= 'GFXW',
-	kContainerWidget	= 'CTNR'
+	kContainerWidget	= 'CTNR',
+	kScrollContainerWidget = 'SCTR'
 };
 
 enum {
@@ -76,6 +78,15 @@ enum {
 
 enum {
 	kPressedButtonTime = 200
+};
+
+enum {
+	kPicButtonStateEnabled = 0,
+	kPicButtonHighlight = 1,
+	kPicButtonStateDisabled = 2,
+	kPicButtonStatePressed = 3,
+
+	kPicButtonStateMax = 3
 };
 
 /* Widget */
@@ -96,6 +107,7 @@ private:
 public:
 	static Widget *findWidgetInChain(Widget *start, int x, int y);
 	static Widget *findWidgetInChain(Widget *start, const char *name);
+	static bool containsWidgetInChain(Widget *start, Widget *search);
 
 public:
 	Widget(GuiObject *boss, int x, int y, int w, int h, const char *tooltip = 0);
@@ -110,6 +122,7 @@ public:
 
 	virtual int16	getAbsX() const	{ return _x + _boss->getChildX(); }
 	virtual int16	getAbsY() const	{ return _y + _boss->getChildY(); }
+	virtual Common::Rect getBossClipRect() const;
 
 	virtual void setPos(int x, int y) { _x = x; _y = y; }
 	virtual void setSize(int w, int h) { _w = w; _h = h; }
@@ -146,6 +159,8 @@ public:
 	const Common::String &getTooltip() const { return _tooltip; }
 	void setTooltip(const Common::String &tooltip) { _tooltip = tooltip; }
 
+	virtual bool containsWidget(Widget *) const { return false; }
+
 protected:
 	void updateState(int oldFlags, int newFlags);
 
@@ -167,9 +182,10 @@ class StaticTextWidget : public Widget {
 protected:
 	Common::String			_label;
 	Graphics::TextAlign		_align;
+	ThemeEngine::FontStyle	_font;
 public:
-	StaticTextWidget(GuiObject *boss, int x, int y, int w, int h, const Common::String &text, Graphics::TextAlign align, const char *tooltip = 0);
-	StaticTextWidget(GuiObject *boss, const Common::String &name, const Common::String &text, const char *tooltip = 0);
+	StaticTextWidget(GuiObject *boss, int x, int y, int w, int h, const Common::String &text, Graphics::TextAlign align, const char *tooltip = 0, ThemeEngine::FontStyle font = ThemeEngine::kFontStyleBold);
+	StaticTextWidget(GuiObject *boss, const Common::String &name, const Common::String &text, const char *tooltip = 0, ThemeEngine::FontStyle font = ThemeEngine::kFontStyleBold);
 	void setValue(int value);
 	void setLabel(const Common::String &label);
 	const Common::String &getLabel() const		{ return _label; }
@@ -197,19 +213,15 @@ public:
 
 	void handleMouseUp(int x, int y, int button, int clickCount);
 	void handleMouseDown(int x, int y, int button, int clickCount);
-	void handleMouseEntered(int button)	{ setFlags(WIDGET_HILITED); draw(); }
+	void handleMouseEntered(int button)	{ if (_duringPress) { setFlags(WIDGET_PRESSED); } else { setFlags(WIDGET_HILITED); } draw(); }
 	void handleMouseLeft(int button)	{ clearFlags(WIDGET_HILITED | WIDGET_PRESSED); draw(); }
-	void handleTickle();
 
 	void setHighLighted(bool enable);
 	void setPressedState();
-	void startAnimatePressedState();
-	void stopAnimatePressedState();
-
-	void lostFocusWidget() { stopAnimatePressedState(); }
+	void setUnpressedState();
 protected:
 	void drawWidget();
-	void wantTickle(bool tickled);
+	bool _duringPress;
 private:
 	uint32 _lastTime;
 };
@@ -221,18 +233,24 @@ public:
 	PicButtonWidget(GuiObject *boss, const Common::String &name, const char *tooltip = 0, uint32 cmd = 0, uint8 hotkey = 0);
 	~PicButtonWidget();
 
-	void setGfx(const Graphics::Surface *gfx);
-	void setGfx(int w, int h, int r, int g, int b);
+	void setGfx(const Graphics::Surface *gfx, int statenum = kPicButtonStateEnabled);
+	void setAGfx(const Graphics::TransparentSurface *gfx, int statenum = kPicButtonStateEnabled, ThemeEngine::AutoScaleMode mode = ThemeEngine::kAutoScaleNone);
+	void setGfx(int w, int h, int r, int g, int b, int statenum = kPicButtonStateEnabled);
 
 	void useAlpha(int alpha) { _alpha = alpha; }
 	void useThemeTransparency(bool enable) { _transparency = enable; }
+	void setButtonDisplay(bool enable) {_showButton = enable; }
 
 protected:
 	void drawWidget();
 
-	Graphics::Surface _gfx;
+	Graphics::Surface _gfx[kPicButtonStateMax + 1];
+	Graphics::TransparentSurface _agfx[kPicButtonStateMax + 1];
 	int _alpha;
 	bool _transparency;
+	bool _showButton;
+	bool _isAlpha;
+	ThemeEngine::AutoScaleMode _mode;
 };
 
 /* CheckboxWidget */
@@ -351,6 +369,7 @@ public:
 
 	void setGfx(const Graphics::Surface *gfx);
 	void setGfx(int w, int h, int r, int g, int b);
+	void setAGfx(const Graphics::TransparentSurface *gfx, ThemeEngine::AutoScaleMode mode = ThemeEngine::kAutoScaleNone);
 
 	void useAlpha(int alpha) { _alpha = alpha; }
 	void useThemeTransparency(bool enable) { _transparency = enable; }
@@ -359,8 +378,10 @@ protected:
 	void drawWidget();
 
 	Graphics::Surface _gfx;
+	Graphics::TransparentSurface _agfx;
 	int _alpha;
 	bool _transparency;
+	ThemeEngine::AutoScaleMode _mode;
 };
 
 /* ContainerWidget */
@@ -370,6 +391,7 @@ public:
 	ContainerWidget(GuiObject *boss, const Common::String &name);
 	~ContainerWidget();
 
+	virtual bool containsWidget(Widget *) const;
 	virtual Widget *findWidget(int x, int y);
 	virtual void removeWidget(Widget *widget);
 protected:

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -104,7 +104,7 @@ int cd_open(iop_file_t *handle, const char *name, int mode) {
 	fd->pos = 0;
 	fd->cachedLba = 0;
 
-	handle->privdata = (void*)fdSlot;
+	handle->privdata = (void *)fdSlot;
 	return 0;
 }
 
@@ -135,7 +135,7 @@ int cd_read(iop_file_t *handle, void *dest, int length) {
 	FioHandle *fd = fioHandles + (int)handle->privdata;
 	CdRMode rmode = { 16, 0, CdSect2048, 0 };
 	int readLba, readPos, bytesLeft;
-	uint8 *destPos = (uint8*)dest;
+	uint8 *destPos = (uint8 *)dest;
 	int doCopy;
 	int numLba;
 	readLba = fd->lba + (fd->pos >> 11);
@@ -171,13 +171,13 @@ int cd_read(iop_file_t *handle, void *dest, int length) {
 			numLba = bytesLeft >> 11;
 			if (cdReadSectors(readLba, numLba, destPos, &rmode) != 0)
 				break;
-            readLba += numLba;
+			readLba += numLba;
 			fd->pos += numLba << 11;
 			destPos += numLba << 11;
 			bytesLeft &= 0x7FF;
 		}
 	}
-    return destPos - (uint8*)dest;
+	return destPos - (uint8 *)dest;
 }
 
 int cd_close(iop_file_t *handle) {
@@ -219,7 +219,7 @@ int cd_dopen(iop_file_t *handle, const char *path) {
 	}
 	dioHandles[fdSlot].curOfs = 0;
 	dioHandles[fdSlot].lbaOfs = 0;
-	handle->privdata = (void*)fdSlot;
+	handle->privdata = (void *)fdSlot;
 	return fdSlot;
 }
 
@@ -252,7 +252,7 @@ int cd_dread(iop_file_t *handle, iox_dirent_t *buf) {
 			}
 		}
 	}
-    return 0;
+	return 0;
 }
 
 int cd_dclose(iop_file_t *handle) {

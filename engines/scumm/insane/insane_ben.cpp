@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -776,6 +776,7 @@ void Insane::actor02Reaction(int32 buttons) {
 						_actor[0].act[2].state = 106;
 						break;
 					}
+				break;
 			default:
 				smlayer_setActorFacing(0, 2, 20, 180);
 				_actor[0].act[2].state = 16;
@@ -868,7 +869,7 @@ void Insane::actor02Reaction(int32 buttons) {
 					_actor[0].act[2].state = 77;
 					break;
 				}
-				// break skipped intentionally
+				// fall through
 			default:
 				smlayer_setActorFacing(0, 2, 20, 180);
 				_actor[0].act[2].state = 20;
@@ -954,7 +955,7 @@ void Insane::actor02Reaction(int32 buttons) {
 					_actor[0].act[2].state = 83;
 					break;
 				}
-				// break missed intentionally
+				// fall through
 			default:
 				smlayer_setActorFacing(0, 2, 20, 180);
 				_actor[0].act[2].state = 24;
@@ -1035,7 +1036,7 @@ void Insane::actor02Reaction(int32 buttons) {
 					_actor[0].act[2].state = 75;
 					break;
 				}
-				// break missed intentionaly
+				// fall through
 			default:
 				smlayer_setActorFacing(0, 2, 20, 180);
 				_actor[0].act[2].state = 28;

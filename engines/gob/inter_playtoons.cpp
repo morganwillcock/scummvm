@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -41,7 +41,6 @@
 #include "gob/video.h"
 #include "gob/videoplayer.h"
 #include "gob/save/saveload.h"
-#include "gob/sound/sound.h"
 
 namespace Gob {
 
@@ -253,7 +252,7 @@ void Inter_Playtoons::oPlaytoons_readData(OpFuncParams &params) {
 		WRITE_VAR(1, 1);
 
 		if (!_vm->_saveLoad->load(file.c_str(), dataVar, size, offset)) {
-			GUI::MessageDialog dialog(_("Failed to load game state from file."));
+			GUI::MessageDialog dialog(_("Failed to load saved game from file."));
 			dialog.runModal();
 		} else
 			WRITE_VAR(1, 0);

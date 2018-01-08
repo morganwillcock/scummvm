@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -60,7 +60,7 @@ void dumpMusic();
 
 class MidiMusicPlayer : public Audio::MidiPlayer {
 public:
-	MidiMusicPlayer();
+	MidiMusicPlayer(TinselEngine *vm);
 
 	virtual void setVolume(int volume);
 
@@ -76,6 +76,8 @@ public:
 	// The original sets the "sequence timing" to 109 Hz, whatever that
 	// means. The default is 120.
 	uint32 getBaseTempo()	{ return _driver ? (109 * _driver->getBaseTempo()) / 120 : 0; }
+
+	bool _milesAudioMode;
 
 private:
 	void playXMIDI(uint32 size, bool loop);

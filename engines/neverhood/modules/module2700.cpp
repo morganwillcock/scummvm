@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -84,7 +84,7 @@ static const uint32 kScene2725StaticSprites[] = {
 };
 
 Module2700::Module2700(NeverhoodEngine *vm, Module *parentModule, int which)
-	: Module(vm, parentModule), _soundIndex(0), _radioMusicInitialized(false) {
+	: Module(vm, parentModule), _soundIndex(0), _radioMusicInitialized(false), _musicFileHash(0) {
 
 	_vm->_soundMan->addMusic(0x42212411, 0x04020210);
 	_vm->_soundMan->startMusic(0x04020210, 24, 2);
@@ -461,6 +461,7 @@ void Module2700::updateScene() {
 			_vm->_soundMan->deleteMusic(_musicFileHash);
 			_vm->_soundMan->startMusic(0x04020210, 0, 2);
 			_vm->_soundMan->deleteSoundGroup(0x42212411);
+			_radioMusicInitialized = false;
 			createScene(20, 3);
 			break;
 		case 22:
@@ -760,7 +761,7 @@ void Scene2702::moveCarToPoint(NPoint pt) {
 	_tracks.findTrackPoint(pt, minMatchTrackIndex, minMatchDistance, _dataResource);
 	if (minMatchTrackIndex >= 0 && minMatchTrackIndex != _currTrackIndex) {
 		_newTrackIndex = minMatchTrackIndex;
-		_newTrackDestX = pt.x;
+		_newTrackDest = pt;
 		if (_isUpperTrack) {
 			if (_currTrackIndex == 0)
 				sendMessage(_asCar, 0x2003, _trackPoints->size() - 1);
@@ -772,7 +773,7 @@ void Scene2702::moveCarToPoint(NPoint pt) {
 			sendMessage(_asCar, 0x2003, _trackPoints->size() - 1);
 	} else {
 		_newTrackIndex = -1;
-		sendMessage(_asCar, 0x2004, pt.x);
+		sendMessage(_asCar, 0x2004, pt);
 	}
 }
 
@@ -789,7 +790,7 @@ void Scene2702::changeTrack() {
 		sendMessage(_asCar, NM_POSITION_CHANGE, 0);
 	else
 		sendMessage(_asCar, NM_POSITION_CHANGE, _trackPoints->size() - 1);
-	sendMessage(_asCar, 0x2004, _newTrackDestX);
+	sendMessage(_asCar, 0x2004, _newTrackDest);
 	_newTrackIndex = -1;
 }
 
@@ -1091,14 +1092,14 @@ void Scene2706::moveCarToPoint(NPoint pt) {
 	_tracks.findTrackPoint(pt, minMatchTrackIndex, minMatchDistance, _dataResource);
 	if (minMatchTrackIndex >= 0 && minMatchTrackIndex != _currTrackIndex) {
 		_newTrackIndex = minMatchTrackIndex;
-		_newTrackDestX = pt.x;
+		_newTrackDest = pt;
 		if (_currTrackIndex == 0)
 			sendMessage(_asCar, 0x2003, _trackPoints->size() - 1);
 		else
 			sendMessage(_asCar, 0x2003, 0);
 	} else {
 		_newTrackIndex = -1;
-		sendMessage(_asCar, 0x2004, pt.x);
+		sendMessage(_asCar, 0x2004, pt);
 	}
 }
 
@@ -1110,7 +1111,7 @@ void Scene2706::changeTrack() {
 		sendMessage(_asCar, NM_POSITION_CHANGE, _trackPoints->size() - 1);
 	else
 		sendMessage(_asCar, NM_POSITION_CHANGE, 0);
-	sendMessage(_asCar, 0x2004, _newTrackDestX);
+	sendMessage(_asCar, 0x2004, _newTrackDest);
 	_newTrackIndex = -1;
 }
 

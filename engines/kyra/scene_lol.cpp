@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -303,12 +303,10 @@ void LoLEngine::loadLevelGraphics(const char *file, int specialColor, int weight
 		_lastSpecialColor = specialColor;
 		_lastSpecialColorWeight = weight;
 		strcpy(_lastBlockDataFile, file);
-		if (palFile) {
-			strcpy(_lastOverridePalFile, palFile);
-			_lastOverridePalFilePtr = _lastOverridePalFile;
-		} else {
-			_lastOverridePalFilePtr = 0;
-		}
+		if (palFile)
+			_lastOverridePalFile = palFile;
+		else
+			_lastOverridePalFile.clear();
 	}
 
 	if (_flags.use16ColorMode) {
@@ -361,8 +359,8 @@ void LoLEngine::loadLevelGraphics(const char *file, int specialColor, int weight
 		memcpy(_vcnColTable, v, 128);
 		v += 128;
 
-		if (_lastOverridePalFilePtr) {
-			_res->loadFileToBuf(_lastOverridePalFilePtr, _screen->getPalette(0).getData(), 384);
+		if (!_lastOverridePalFile.empty()) {
+			_res->loadFileToBuf(_lastOverridePalFile.c_str(), _screen->getPalette(0).getData(), 384);
 		} else {
 			_screen->getPalette(0).copy(v, 0, 128);
 		}
@@ -620,14 +618,14 @@ void LoLEngine::updateCompass() {
 	if (_compassStep)
 		_compassStep -= (((ABS(_compassStep) >> 4) + 2) * dir);
 
-	int16 d = _compassBroken ? (int8(_rnd.getRandomNumber(255)) - _compassDirection) : (_currentDirection << 6) - _compassDirection;
-	if (d <= -128)
-		d += 256;
-	if (d >= 128)
-		d -= 256;
+	int16 diff = _compassBroken ? (int8(_rnd.getRandomNumber(255)) - _compassDirection) : (_currentDirection << 6) - _compassDirection;
+	if (diff <= -128)
+		diff += 256;
+	if (diff >= 128)
+		diff -= 256;
 
-	d >>= 2;
-	_compassStep += d;
+	diff >>= 2;
+	_compassStep += diff;
 	_compassStep = CLIP(_compassStep, -24, 24);
 	_compassDirection += _compassStep;
 
@@ -636,14 +634,9 @@ void LoLEngine::updateCompass() {
 	if (_compassDirection > 255)
 		_compassDirection -= 256;
 
-	if ((_compassDirection >> 6) == _currentDirection && _compassStep < 2) {
-		int16 d2 = d >> 16;
-		d ^= d2;
-		d -= d2;
-		if (d < 4) {
-			_compassDirection = _currentDirection << 6;
-			_compassStep = 0;
-		}
+	if (((((_compassDirection + 3) & 0xFD) >> 6) == _currentDirection) && (_compassStep < 2) && (ABS(diff) < 4)) {
+		_compassDirection = _currentDirection << 6;
+		_compassStep = 0;
 	}
 
 	gui_drawCompass();

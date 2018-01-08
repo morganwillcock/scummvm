@@ -11,7 +11,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -43,6 +43,7 @@ TizenGraphicsManager::~TizenGraphicsManager() {
 	logEntered();
 
 	if (_eglDisplay != EGL_NO_DISPLAY) {
+		notifyContextDestroy();
 		eglMakeCurrent(_eglDisplay, NULL, NULL, NULL);
 		if (_eglContext != EGL_NO_CONTEXT) {
 			eglDestroyContext(_eglDisplay, _eglContext);
@@ -55,10 +56,11 @@ result TizenGraphicsManager::Construct() {
 	loadEgl();
 
 	// Notify the OpenGL code about our context.
+	setContextType(OpenGL::kContextGLES);
 
 	// We default to RGB565 and RGBA5551 which is closest to the actual output
 	// mode we setup.
-	notifyContextChange(Graphics::PixelFormat(2, 5, 6, 5, 0, 11, 5, 0, 0), Graphics::PixelFormat(2, 5, 5, 5, 1, 11, 6, 1, 0));
+	notifyContextCreate(Graphics::PixelFormat(2, 5, 6, 5, 0, 11, 5, 0, 0), Graphics::PixelFormat(2, 5, 5, 5, 1, 11, 6, 1, 0));
 
 	// Tell our size.
 	int x, y, width, height;
@@ -101,7 +103,7 @@ Common::List<Graphics::PixelFormat> TizenGraphicsManager::getSupportedFormats() 
 }
 
 bool TizenGraphicsManager::hasFeature(OSystem::Feature f) {
-	bool result = 
+	bool result =
 			(f == OSystem::kFeatureVirtualKeyboard ||
 			OpenGLGraphicsManager::hasFeature(f));
 	return result;
@@ -126,7 +128,6 @@ void TizenGraphicsManager::setReady() {
 void TizenGraphicsManager::updateScreen() {
 	if (!_initState) {
 		OpenGLGraphicsManager::updateScreen();
-		eglSwapBuffers(_eglDisplay, _eglSurface);
 	}
 }
 
@@ -201,4 +202,12 @@ bool TizenGraphicsManager::loadVideoMode(uint requestedWidth, uint requestedHeig
 	// We get this whenever a new resolution is requested. Since Tizen is
 	// using a fixed output size we do nothing like that here.
 	return true;
+}
+
+void TizenGraphicsManager::refreshScreen() {
+	eglSwapBuffers(_eglDisplay, _eglSurface);
+}
+
+void *TizenGraphicsManager::getProcAddress(const char *name) const {
+	return eglGetProcAddress(name);
 }

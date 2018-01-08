@@ -8,16 +8,15 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
  *
  */
 
@@ -112,7 +111,7 @@ public:
 	}
 
 	virtual const char *getOriginalCopyright() const {
-		return "Hopkins FBI (c)1997-2003 MP Entertainment";
+		return "Hopkins FBI (C)1997-2003 MP Entertainment";
 	}
 
 	virtual bool hasFeature(MetaEngineFeature f) const;
@@ -129,7 +128,8 @@ bool HopkinsMetaEngine::hasFeature(MetaEngineFeature f) const {
 		(f == kSupportsLoadingDuringStartup) ||
 		(f == kSupportsDeleteSave) ||
 		(f == kSavesSupportMetaInfo) ||
-		(f == kSavesSupportThumbnail);
+		(f == kSavesSupportThumbnail) ||
+		(f == kSimpleSavesNames);
 }
 
 bool Hopkins::HopkinsEngine::hasFeature(EngineFeature f) const {
@@ -151,10 +151,9 @@ SaveStateList HopkinsMetaEngine::listSaves(const char *target) const {
 	Common::SaveFileManager *saveFileMan = g_system->getSavefileManager();
 	Common::StringArray filenames;
 	Common::String saveDesc;
-	Common::String pattern = Common::String::format("%s.0??", target);
+	Common::String pattern = Common::String::format("%s.0##", target);
 
 	filenames = saveFileMan->listSavefiles(pattern);
-	sort(filenames.begin(), filenames.end());   // Sort to get the files in numerical order
 
 	Hopkins::hopkinsSavegameHeader header;
 
@@ -179,6 +178,8 @@ SaveStateList HopkinsMetaEngine::listSaves(const char *target) const {
 		}
 	}
 
+	// Sort saves based on slot number.
+	Common::sort(saveList.begin(), saveList.end(), SaveStateDescriptorSlotComparator());
 	return saveList;
 }
 
@@ -215,7 +216,7 @@ SaveStateDescriptor HopkinsMetaEngine::querySaveMetaInfos(const char *target, in
 
 
 #if PLUGIN_ENABLED_DYNAMIC(HOPKINS)
-REGISTER_PLUGIN_DYNAMIC(HOPKINS, PLUGIN_TYPE_ENGINE, HopkinsMetaEngine);
+	REGISTER_PLUGIN_DYNAMIC(HOPKINS, PLUGIN_TYPE_ENGINE, HopkinsMetaEngine);
 #else
-REGISTER_PLUGIN_STATIC(HOPKINS, PLUGIN_TYPE_ENGINE, HopkinsMetaEngine);
+	REGISTER_PLUGIN_STATIC(HOPKINS, PLUGIN_TYPE_ENGINE, HopkinsMetaEngine);
 #endif

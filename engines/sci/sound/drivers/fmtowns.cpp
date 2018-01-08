@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -101,7 +101,7 @@ public:
 	~MidiDriver_FMTowns();
 
 	int open();
-	void loadInstruments(const uint8 *data);
+	void loadInstruments(const SciSpan<const uint8> &data);
 	bool isOpen() const { return _isOpen; }
 	void close();
 
@@ -461,14 +461,18 @@ int MidiDriver_FMTowns::open() {
 	return 0;
 }
 
-void MidiDriver_FMTowns::loadInstruments(const uint8 *data) {
-	if (data) {
-		data += 6;
-		for (int i = 0; i < 128; i++) {
-			_intf->callback(5, 0, i, data);
-			data += 48;
+void MidiDriver_FMTowns::loadInstruments(const SciSpan<const uint8> &data) {
+	enum {
+		fmDataSize = 48
+	};
+
+	if (data.size()) {
+		SciSpan<const uint8> instrumentData = data.subspan(6);
+		for (int i = 0; i < 128; i++, instrumentData += fmDataSize) {
+			_intf->callback(5, 0, i, instrumentData.getUnsafeDataAt(0, fmDataSize));
 		}
 	}
+
 	_intf->callback(70, 3);
 	property(MIDI_PROP_MASTER_VOLUME, _masterVolume);
 }
@@ -622,7 +626,7 @@ int MidiPlayer_FMTowns::open(ResourceManager *resMan) {
 	if (_townsDriver) {
 		result = _townsDriver->open();
 		if (!result && _version == SCI_VERSION_1_LATE)
-			_townsDriver->loadInstruments((resMan->findResource(ResourceId(kResourceTypePatch, 8), true))->data);
+			_townsDriver->loadInstruments(*resMan->findResource(ResourceId(kResourceTypePatch, 8), false));
 	}
 	return result;
 }

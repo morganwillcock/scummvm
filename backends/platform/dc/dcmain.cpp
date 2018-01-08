@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -90,43 +90,53 @@ static bool find_track(int track, int &first_sec, int &last_sec)
   return false;
 }
 
-void DCCDManager::playCD(int track, int num_loops, int start_frame, int duration)
-{
-  int first_sec, last_sec;
+bool DCCDManager::play(int track, int numLoops, int startFrame, int duration, bool onlyEmulate) {
+	DefaultAudioCDManager::play(track, numLoops, startFrame, duration, onlyEmulate);
+
+	// If we're playing now return here
+	if (isPlaying()) {
+		return true;
+	}
+
+	// If we should only play emulated tracks stop here.
+	if (onlyEmulate) {
+		return false;
+	}
+
+	int firstSec, lastSec;
 #if 1
-  if (num_loops)
-    --num_loops;
+	if (numLoops)
+		--numLoops;
 #endif
-  if (num_loops>14) num_loops=14;
-  else if (num_loops<0) num_loops=15; // infinity
-  if (!find_track(track, first_sec, last_sec))
-    return;
-  if (duration)
-    last_sec = first_sec + start_frame + duration;
-  first_sec += start_frame;
-  play_cdda_sectors(first_sec, last_sec, num_loops);
+
+	if (numLoops > 14)
+		numLoops = 14;
+	else if (numLoops < 0)
+		numLoops = 15; // infinity
+
+	if (!find_track(track, firstSec, lastSec))
+		return false;
+
+	if (duration)
+		lastSec = firstSec + startFrame + duration;
+
+	firstSec += startFrame;
+	play_cdda_sectors(firstSec, lastSec, numLoops);
+
+	return true;
 }
 
-void DCCDManager::stopCD()
-{
-  stop_cdda();
+void DCCDManager::stop() {
+	DefaultAudioCDManager::stop();
+	stop_cdda();
 }
 
-bool DCCDManager::pollCD()
-{
-  extern int getCdState();
-  return getCdState() == 3;
-}
+bool DCCDManager::isPlaying() const {
+	if (DefaultAudioCDManager::isPlaying())
+		return true;
 
-void DCCDManager::updateCD()
-{
-  // Dummy.  The CD drive takes care of itself.
-}
-
-bool DCCDManager::openCD(int drive)
-{
-  // Dummy.
-  return true;
+	extern int getCdState();
+	return getCdState() == 3;
 }
 
 void OSystem_Dreamcast::setWindowCaption(const char *caption)

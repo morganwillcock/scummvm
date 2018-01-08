@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,7 +28,7 @@
 #include "common/stream.h"
 #include "common/system.h"
 #include "graphics/surface.h"
-#include "graphics/decoders/pict.h"
+#include "image/pict.h"
 #include "video/video_decoder.h"
 
 #include "pegasus/pegasus.h"
@@ -101,7 +101,7 @@ void Surface::getImageFromPICTResource(Common::MacResManager *resFork, uint16 id
 }
 
 bool Surface::getImageFromPICTStream(Common::SeekableReadStream *stream) {
-	Graphics::PICTDecoder pict;
+	Image::PICTDecoder pict;
 
 	if (!pict.loadStream(*stream))
 		return false;

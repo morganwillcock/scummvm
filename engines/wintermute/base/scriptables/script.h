@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,12 +33,15 @@
 #include "engines/wintermute/base/base.h"
 #include "engines/wintermute/base/scriptables/dcscript.h"   // Added by ClassView
 #include "engines/wintermute/coll_templ.h"
+#include "engines/wintermute/persistent.h"
 
 namespace Wintermute {
 class BaseScriptHolder;
 class BaseObject;
 class ScEngine;
 class ScStack;
+class ScValue;
+
 class ScScript : public BaseClass {
 public:
 	BaseArray<int> _breakpoints;
@@ -50,7 +53,7 @@ public:
 	bool copyParameters(ScStack *stack);
 
 	void afterLoad();
-private:
+protected:
 	ScValue *_operand;
 	ScValue *_reg1;
 public:
@@ -125,7 +128,7 @@ public:
 	ScValue *_globals;
 	ScEngine *_engine;
 	int32 _currentLine;
-	bool executeInstruction();
+	virtual bool executeInstruction();
 	char *getString();
 	uint32 getDWORD();
 	double getFloat();
@@ -162,11 +165,8 @@ private:
 	bool initScript();
 	bool initTables();
 
-
-// IWmeDebugScript interface implementation
-public:
-	virtual int dbgGetLine();
-	virtual const char *dbgGetFilename();
+	virtual void preInstHook(uint32 inst);
+	virtual void postInstHook(uint32 inst);
 };
 
 } // End of namespace Wintermute

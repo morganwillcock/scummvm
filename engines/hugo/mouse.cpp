@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,6 +33,7 @@
 #include "common/system.h"
 
 #include "hugo/hugo.h"
+#include "hugo/dialogs.h"
 #include "hugo/game.h"
 #include "hugo/mouse.h"
 #include "hugo/schedule.h"
@@ -121,10 +122,22 @@ void MouseHandler::cursorText(const char *buffer, const int16 cx, const int16 cy
 	int16 sx, sy;
 	if (cx < kXPix / 2) {
 		sx = cx + kCursorNameOffX;
-		sy = (_vm->_inventory->getInventoryObjId() == -1) ? cy + kCursorNameOffY : cy + kCursorNameOffY - (_vm->_screen->fontHeight() + 1);
+		if (_vm->_inventory->getInventoryObjId() == -1) {
+			sy = cy + kCursorNameOffY;
+		} else {
+			sy = cy + kCursorNameOffY - (_vm->_screen->fontHeight() + 1);
+			if (sy < 0) {
+				sx = cx + kCursorNameOffX + 25;
+				sy = cy + kCursorNameOffY;
+			}
+		}
 	} else {
 		sx = cx - sdx - kCursorNameOffX / 2;
 		sy = cy + kCursorNameOffY;
+	}
+
+	if (sy < 0) {
+		sy = 0;
 	}
 
 	// Display the string and add rect to display list
@@ -160,7 +173,6 @@ void MouseHandler::processRightClick(const int16 objId, const int16 cx, const in
 		return;
 
 	int16 inventObjId = _vm->_inventory->getInventoryObjId();
-	bool foundFl = false;                           // TRUE if route found to object
 	// Check if this was over iconbar
 	if ((_vm->_inventory->getInventoryState() == kInventoryActive) && (cy < kInvDy + kDibOffY)) { // Clicked over iconbar object
 		if (inventObjId == -1)
@@ -172,12 +184,14 @@ void MouseHandler::processRightClick(const int16 objId, const int16 cx, const in
 	} else {                                        // Clicked over viewport object
 		Object *obj = &_vm->_object->_objects[objId];
 		int16 x, y;
-		switch (obj->_viewx) {                       // Where to walk to
-		case -1:                                    // Walk to object position
+		switch (obj->_viewx) {                      // Where to walk to
+		case -1: {                                  // Walk to object position
+			bool foundFl = false;
 			if (_vm->_object->findObjectSpace(obj, &x, &y))
-				foundFl = _vm->_route->startRoute(kRouteGet, objId, x, y);
+				foundFl = _vm->_route->startRoute(kRouteGet, objId, x, y);  // TRUE if route found to object
 			if (!foundFl)                           // Can't get there, try to use from here
 				_vm->_object->useObject(objId);
+			}
 			break;
 		case 0:                                     // Immediate use
 			_vm->_object->useObject(objId);         // Pick up or use object

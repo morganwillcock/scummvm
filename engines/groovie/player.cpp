@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,6 +21,7 @@
  */
 
 #include "common/debug.h"
+#include "audio/audiostream.h"
 
 #include "groovie/player.h"
 #include "groovie/groovie.h"
@@ -28,7 +29,8 @@
 namespace Groovie {
 
 VideoPlayer::VideoPlayer(GroovieEngine *vm) :
-	_vm(vm), _syst(vm->_system), _file(NULL), _audioStream(NULL), _fps(0), _overrideSpeed(false) {
+	_vm(vm), _syst(vm->_system), _file(NULL), _audioStream(NULL), _fps(0), _overrideSpeed(false), _flags(0),
+	_begunPlaying(false), _millisBetweenFrames(0), _lastFrameTime(0) {
 }
 
 bool VideoPlayer::load(Common::SeekableReadStream *file, uint16 flags) {
@@ -94,13 +96,13 @@ void VideoPlayer::waitFrame() {
 	} else {
 		uint32 millisDiff = currTime - _lastFrameTime;
 		if (millisDiff < _millisBetweenFrames) {
-			debugC(7, kGroovieDebugVideo | kGroovieDebugAll, "Groovie::Player: Delaying %d (currTime=%d, _lastFrameTime=%d, millisDiff=%d, _millisBetweenFrame=%d)",
+			debugC(7, kDebugVideo, "Groovie::Player: Delaying %d (currTime=%d, _lastFrameTime=%d, millisDiff=%d, _millisBetweenFrame=%d)",
 					_millisBetweenFrames - millisDiff, currTime, _lastFrameTime, millisDiff, _millisBetweenFrames);
 			_syst->delayMillis(_millisBetweenFrames - millisDiff);
 			currTime = _syst->getMillis();
-			debugC(7, kGroovieDebugVideo | kGroovieDebugAll, "Groovie::Player: Finished delay at %d", currTime);
+			debugC(7, kDebugVideo, "Groovie::Player: Finished delay at %d", currTime);
 		}
-		debugC(6, kGroovieDebugVideo | kGroovieDebugAll, "Groovie::Player: Frame displayed at %d (%f FPS)", currTime, 1000.0 / (currTime - _lastFrameTime));
+		debugC(6, kDebugVideo, "Groovie::Player: Frame displayed at %d (%f FPS)", currTime, 1000.0 / (currTime - _lastFrameTime));
 		_lastFrameTime = currTime;
 	}
 }

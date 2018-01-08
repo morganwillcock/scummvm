@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -62,7 +62,7 @@ private:
 	uint16  _liveList[TOTAL_SECTIONS];                  //which sections are active
 	uint8 *_cptData[TOTAL_SECTIONS];
 	static char _missingSubTitleStr[];
-	static const char *const _translationId2950145[7];        //translation for textId 2950145 (missing from cluster file for some langages)
+	static const char *const _translationId2950145[7];        //translation for textId 2950145 (missing from cluster file for some languages)
 	static const char *const _translationId8455194[7];        //translation for textId 8455194 (missing in the demo)
 	static const char *const _translationId8455195[7];        //translation for textId 8455195 (missing in the demo)
 	static const char *const _translationId8455196[7];        //translation for textId 8455196 (missing in the demo)

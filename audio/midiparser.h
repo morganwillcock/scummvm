@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -370,6 +370,7 @@ public:
 
 public:
 	typedef void (*XMidiCallbackProc)(byte eventData, void *refCon);
+	typedef void (*XMidiNewTimbreListProc)(MidiDriver_BASE *driver, const byte *timbreListPtr, uint32 timbreListSize);
 
 	MidiParser();
 	virtual ~MidiParser() { allNotesOff(); }
@@ -395,7 +396,7 @@ public:
 	static void defaultXMidiCallback(byte eventData, void *refCon);
 
 	static MidiParser *createParser_SMF();
-	static MidiParser *createParser_XMIDI(XMidiCallbackProc proc = defaultXMidiCallback, void *refCon = 0);
+	static MidiParser *createParser_XMIDI(XMidiCallbackProc proc = defaultXMidiCallback, void *refCon = 0, XMidiNewTimbreListProc newTimbreListProc = NULL, MidiDriver_BASE *newTimbreListDriver = NULL);
 	static MidiParser *createParser_QT();
 	static void timerCallback(void *data) { ((MidiParser *) data)->onTimer(); }
 };

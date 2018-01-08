@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -37,7 +37,7 @@ namespace Kyra {
 
 Sound::Sound(KyraEngine_v1 *vm, Audio::Mixer *mixer)
 	: _vm(vm), _mixer(mixer), _soundChannels(), _musicEnabled(1),
-	_sfxEnabled(true) {
+	  _sfxEnabled(true) {
 }
 
 Sound::~Sound() {
@@ -165,7 +165,7 @@ bool Sound::allVoiceChannelsPlaying() const {
 #pragma mark -
 
 MixedSoundDriver::MixedSoundDriver(KyraEngine_v1 *vm, Audio::Mixer *mixer, Sound *music, Sound *sfx)
-    : Sound(vm, mixer), _music(music), _sfx(sfx) {
+	: Sound(vm, mixer), _music(music), _sfx(sfx) {
 }
 
 MixedSoundDriver::~MixedSoundDriver() {
@@ -289,16 +289,16 @@ void KyraEngine_v1::snd_playWanderScoreViaMap(int command, int restart) {
 	//}
 
 	if (_flags.platform == Common::kPlatformDOS || _flags.platform == Common::kPlatformMacintosh) {
-		assert(command*2+1 < _trackMapSize);
-		if (_curMusicTheme != _trackMap[command*2]) {
-			if (_trackMap[command*2] != -1 && _trackMap[command*2] != -2)
-				snd_playTheme(_trackMap[command*2], -1);
+		assert(command * 2 + 1 < _trackMapSize);
+		if (_curMusicTheme != _trackMap[command * 2]) {
+			if (_trackMap[command * 2] != -1 && _trackMap[command * 2] != -2)
+				snd_playTheme(_trackMap[command * 2], -1);
 		}
 
 		if (command != 1) {
 			if (_lastMusicCommand != command) {
 				_sound->haltTrack();
-				_sound->playTrack(_trackMap[command*2+1]);
+				_sound->playTrack(_trackMap[command * 2 + 1]);
 			}
 		} else {
 			_sound->beginFadeOut();
@@ -307,8 +307,8 @@ void KyraEngine_v1::snd_playWanderScoreViaMap(int command, int restart) {
 		if (command == -1) {
 			_sound->haltTrack();
 		} else {
-			assert(command*2+1 < _trackMapSize);
-			if (_trackMap[command*2] != -2 && command != _lastMusicCommand) {
+			assert(command * 2 + 1 < _trackMapSize);
+			if (_trackMap[command * 2] != -2 && command != _lastMusicCommand) {
 				_sound->haltTrack();
 				_sound->playTrack(command);
 			}

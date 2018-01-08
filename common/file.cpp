@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,6 +25,8 @@
 #include "common/file.h"
 #include "common/fs.h"
 #include "common/textconsole.h"
+#include "common/system.h"
+#include "backends/fs/fs-factory.h"
 
 namespace Common {
 
@@ -149,9 +151,22 @@ DumpFile::~DumpFile() {
 	close();
 }
 
-bool DumpFile::open(const String &filename) {
+bool DumpFile::open(const String &filename, bool createPath) {
 	assert(!filename.empty());
 	assert(!_handle);
+
+	if (createPath) {
+		for (uint32 i = 0; i < filename.size(); ++i) {
+			if (filename[i] == '/' || filename[i] == '\\') {
+				Common::String subpath = filename;
+				subpath.erase(i);
+				if (subpath.empty()) continue;
+				AbstractFSNode *node = g_system->getFilesystemFactory()->makeFileNodePath(subpath);
+				if (node->exists()) continue;
+				if (!node->create(true)) warning("DumpFile: unable to create directories from path prefix");
+			}
+		}
+	}
 
 	FSNode node(filename);
 	return open(node);
@@ -201,5 +216,7 @@ bool DumpFile::flush() {
 	assert(_handle);
 	return _handle->flush();
 }
+
+int32 DumpFile::pos() const { return _handle->pos(); }
 
 } // End of namespace Common

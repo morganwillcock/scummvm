@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,11 +21,15 @@
  */
 
 
+#include "common/config-manager.h"
 #include "common/endian.h"
 #include "common/events.h"
 #include "common/textconsole.h"
+#include "common/translation.h"
 
 #include "graphics/cursorman.h"
+
+#include "gui/saveload.h"
 
 #include "cine/cine.h"
 #include "cine/main_loop.h"
@@ -335,6 +339,55 @@ void CineEngine::resetEngine() {
 	}
 }
 
+int CineEngine::scummVMSaveLoadDialog(bool isSave) {
+	GUI::SaveLoadChooser *dialog;
+	Common::String desc;
+	int slot;
+
+	if (isSave) {
+		dialog = new GUI::SaveLoadChooser(_("Save game:"), _("Save"), true);
+
+		slot = dialog->runModalWithCurrentTarget();
+		desc = dialog->getResultString();
+
+		if (desc.empty()) {
+			// create our own description for the saved game, the user didnt enter it
+			desc = dialog->createDefaultSaveDescription(slot);
+		}
+	}
+	else {
+		dialog = new GUI::SaveLoadChooser(_("Restore game:"), _("Restore"), false);
+		slot = dialog->runModalWithCurrentTarget();
+	}
+
+	delete dialog;
+
+	if (slot < 0)
+		return true;
+
+	Common::String saveFileName(Common::String::format("%s.%1d", _targetName.c_str(), slot));
+
+	if (isSave) {
+		Common::String tmp = Common::String::format("%s.dir", _targetName.c_str());
+
+		Common::OutSaveFile *fHandle = _saveFileMan->openForSaving(tmp);
+		if (!fHandle) {
+			warning("Unable to open file %s for saving", tmp.c_str());
+			return false;
+		}
+
+		Common::strlcpy(currentSaveName[slot], desc.c_str(), 20);
+
+		fHandle->write(currentSaveName, 200);
+		delete fHandle;
+
+		makeSave(saveFileName);
+		return true;
+	} else {
+		return makeLoad(saveFileName);
+	}
+}
+
 void CineEngine::makeSystemMenu() {
 	int16 numEntry, systemCommand;
 	int16 mouseX, mouseY, mouseButton;
@@ -381,7 +434,11 @@ void CineEngine::makeSystemMenu() {
 		}
 		case 4: { // load game
 			if (loadSaveDirectory()) {
-//					int16 selectedSave;
+				if (!ConfMan.getBool("originalsaveload")) {
+					scummVMSaveLoadDialog(false);
+					inMenu = false;
+					return;
+				}
 
 				getMouseData(mouseUpdateStatus, (uint16 *)&mouseButton, (uint16 *)&mouseX, (uint16 *)&mouseY);
 				selectedSave = makeMenuChoice(currentSaveName, 10, mouseX, mouseY + 8, 180);
@@ -417,6 +474,13 @@ void CineEngine::makeSystemMenu() {
 		}
 		case 5: { // Save game
 			loadSaveDirectory();
+
+			if (!ConfMan.getBool("originalsaveload")) {
+				scummVMSaveLoadDialog(true);
+				inMenu = false;
+				return;
+			}
+
 			selectedSave = makeMenuChoice(currentSaveName, 10, mouseX, mouseY + 8, 180);
 
 			if (selectedSave >= 0) {
@@ -557,12 +621,20 @@ int16 selectSubObject(int16 x, int16 y, int16 param) {
 		}
 	}
 
+	if (selectedObject >= 20)
+		error("Invalid value for selectedObject: %d", selectedObject);
 	return objListTab[selectedObject];
 }
 
-// TODO: Make separate functions for Future Wars's and Operation Stealth's version of this function, this is getting too messy
-// TODO: Add support for using the different prepositions for different verbs (Doesn't work currently)
 void makeCommandLine() {
+	if (g_cine->getGameType() == Cine::GType_FW)
+		makeFWCommandLine();
+	else
+		makeOSCommandLine();
+}
+
+// TODO: Add support for using the different prepositions for different verbs (Doesn't work currently)
+void makeOSCommandLine() {
 	uint16 x, y;
 
 	commandVar1 = 0;
@@ -578,28 +650,16 @@ void makeCommandLine() {
 		int16 si;
 
 		getMouseData(mouseUpdateStatus, &dummyU16, &x, &y);
-
-		if (g_cine->getGameType() == Cine::GType_FW) {
-			si = selectSubObject(x, y + 8, -2);
-		} else {
-			si = selectSubObject(x, y + 8, -subObjectUseTable[playerCommand]);
-		}
+		si = selectSubObject(x, y + 8, -subObjectUseTable[playerCommand]);
 
 		if (si < 0) {
-			if (g_cine->getGameType() == Cine::GType_OS) {
-				canUseOnObject = 0;
-			} else { // Future Wars
-				playerCommand = -1;
-				g_cine->_commandBuffer = "";
-			}
+			canUseOnObject = 0;
 		} else {
-			if (g_cine->getGameType() == Cine::GType_OS) {
-				if (si >= 8000) {
-					si -= 8000;
-					canUseOnObject = canUseOnItemTable[playerCommand];
-				} else {
-					canUseOnObject = 0;
-				}
+			if (si >= 8000) {
+				si -= 8000;
+				canUseOnObject = canUseOnItemTable[playerCommand];
+			} else {
+				canUseOnObject = 0;
 			}
 
 			commandVar3[0] = si;
@@ -607,27 +667,21 @@ void makeCommandLine() {
 			g_cine->_commandBuffer += " ";
 			g_cine->_commandBuffer += g_cine->_objectTable[commandVar3[0]].name;
 			g_cine->_commandBuffer += " ";
-			if (g_cine->getGameType() == Cine::GType_OS) {
-				g_cine->_commandBuffer += commandPrepositionTable[playerCommand];
-			} else { // Future Wars
-				g_cine->_commandBuffer += defaultCommandPreposition;
-			}
+			g_cine->_commandBuffer += commandPrepositionTable[playerCommand];
 		}
 	}
 
-	if (g_cine->getGameType() == Cine::GType_OS || !(playerCommand != -1 && choiceResultTable[playerCommand] == 2)) {
-		if (playerCommand == 2) {
-			getMouseData(mouseUpdateStatus, &dummyU16, &x, &y);
-			CursorMan.showMouse(false);
-			processInventory(x, y + 8);
-			playerCommand = -1;
-			commandVar1 = 0;
-			g_cine->_commandBuffer = "";
-			CursorMan.showMouse(true);
-		}
+	if (playerCommand == 2) {
+		getMouseData(mouseUpdateStatus, &dummyU16, &x, &y);
+		CursorMan.showMouse(false);
+		processInventory(x, y + 8);
+		playerCommand = -1;
+		commandVar1 = 0;
+		g_cine->_commandBuffer = "";
+		CursorMan.showMouse(true);
 	}
 
-	if (g_cine->getGameType() == Cine::GType_OS && playerCommand != 2) {
+	if (playerCommand != 2) {
 		if (playerCommand != -1 && canUseOnObject != 0) { // call use on sub object
 			int16 si;
 
@@ -665,7 +719,55 @@ void makeCommandLine() {
 		}
 	}
 
-	if (g_cine->getGameType() == Cine::GType_OS || !disableSystemMenu) {
+	isDrawCommandEnabled = 1;
+	renderer->setCommand(g_cine->_commandBuffer);
+}
+
+// TODO: Add support for using the different prepositions for different verbs (Doesn't work currently)
+void makeFWCommandLine() {
+	uint16 x, y;
+
+	commandVar1 = 0;
+	commandVar2 = -10;
+
+	if (playerCommand != -1) {
+		g_cine->_commandBuffer = defaultActionCommand[playerCommand];
+	} else {
+		g_cine->_commandBuffer = "";
+	}
+
+	if ((playerCommand != -1) && (choiceResultTable[playerCommand] == 2)) { // need object selection?
+		int16 si;
+
+		getMouseData(mouseUpdateStatus, &dummyU16, &x, &y);
+		si = selectSubObject(x, y + 8, -2);
+
+		if (si < 0) {
+			playerCommand = -1;
+			g_cine->_commandBuffer = "";
+		} else {
+			commandVar3[0] = si;
+			commandVar1 = 1;
+			g_cine->_commandBuffer += " ";
+			g_cine->_commandBuffer += g_cine->_objectTable[commandVar3[0]].name;
+			g_cine->_commandBuffer += " ";
+			g_cine->_commandBuffer += defaultCommandPreposition;
+		}
+	}
+
+	if (!(playerCommand != -1 && choiceResultTable[playerCommand] == 2)) {
+		if (playerCommand == 2) {
+			getMouseData(mouseUpdateStatus, &dummyU16, &x, &y);
+			CursorMan.showMouse(false);
+			processInventory(x, y + 8);
+			playerCommand = -1;
+			commandVar1 = 0;
+			g_cine->_commandBuffer = "";
+			CursorMan.showMouse(true);
+		}
+	}
+
+	if (!disableSystemMenu) {
 		isDrawCommandEnabled = 1;
 		renderer->setCommand(g_cine->_commandBuffer);
 	}
@@ -1390,7 +1492,7 @@ uint16 addAni(uint16 param1, uint16 objIdx, const int8 *ptr, SeqListElement &ele
 	int16 di;
 
 	debug(5, "addAni: param1 = %d, objIdx = %d, ptr = %p, element.var8 = %d, element.var14 = %d param3 = %d",
-	      param1, objIdx, ptr, element.var8, element.var14, param3);
+	      param1, objIdx, (const void *)ptr, element.var8, element.var14, param3);
 
 	// In the original an error string is set and 0 is returned if the following doesn't hold
 	assert(ptr);
@@ -1668,6 +1770,7 @@ bool makeTextEntryMenu(const char *messagePtr, char *inputString, int stringMaxL
 			}
 			inputPos--;
 			redraw = true;
+			// fall through
 		case Common::KEYCODE_DELETE:
 			if (inputPos <= inputLength) {
 				if (inputPos != 1) {

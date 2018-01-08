@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -32,8 +32,8 @@
 
 static SDL_Cursor *hiddenCursor;
 
-OPGraphicsManager::OPGraphicsManager(SdlEventSource *sdlEventSource)
-	: SurfaceSdlGraphicsManager(sdlEventSource) {
+OPGraphicsManager::OPGraphicsManager(SdlEventSource *sdlEventSource, SdlWindow *window)
+	: SurfaceSdlGraphicsManager(sdlEventSource, window) {
 }
 
 bool OPGraphicsManager::loadGFXMode() {
@@ -54,19 +54,6 @@ bool OPGraphicsManager::loadGFXMode() {
 	SDL_SetCursor(hiddenCursor);
 
 	_videoMode.fullscreen = true;
-
-	_videoMode.overlayWidth = _videoMode.screenWidth * _videoMode.scaleFactor;
-	_videoMode.overlayHeight = _videoMode.screenHeight * _videoMode.scaleFactor;
-
-	if (_videoMode.screenHeight != 200 && _videoMode.screenHeight != 400)
-		_videoMode.aspectRatioCorrection = false;
-
-	if (_videoMode.aspectRatioCorrection)
-		_videoMode.overlayHeight = real2Aspect(_videoMode.overlayHeight);
-
-	_videoMode.hardwareWidth = _videoMode.screenWidth * _videoMode.scaleFactor;
-	_videoMode.hardwareHeight = effectiveScreenHeight();
-
 	return SurfaceSdlGraphicsManager::loadGFXMode();
 }
 

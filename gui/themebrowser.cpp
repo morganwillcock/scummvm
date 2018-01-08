@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "gui/themebrowser.h"
@@ -83,6 +84,7 @@ void ThemeBrowser::handleCommand(CommandSender *sender, uint32 cmd, uint32 data)
 			++sel;
 
 		_select = sel->id;
+		_selectName = sel->name;
 		setResult(1);
 		close();
 		break;

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #define FORBIDDEN_SYMBOL_ALLOW_ALL
@@ -56,6 +57,7 @@ public:
 
 	virtual Common::SeekableReadStream *createReadStream();
 	virtual Common::WriteStream *createWriteStream() { return 0; }
+	virtual bool create(bool isDirectoryFlag) { return false; }
 
 	static AbstractFSNode *makeFileNodePath(const Common::String &path);
 };

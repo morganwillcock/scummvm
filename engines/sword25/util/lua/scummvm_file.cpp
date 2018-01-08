@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -183,7 +183,7 @@ Common::String Sword25FileProxy::getLanguage() {
 	case Common::FR_FRA:
 		return "fr";
 	case Common::HU_HUN:
-		return "hr";
+		return "hu";
 	case Common::IT_ITA:
 		return "it";
 	case Common::PL_POL:
@@ -210,7 +210,7 @@ void Sword25FileProxy::setLanguage(const Common::String &lang) {
 		ConfMan.set("language", Common::getLanguageCode(Common::ES_ESP));
 	else if (lang == "fr")
 		ConfMan.set("language", Common::getLanguageCode(Common::FR_FRA));
-	else if (lang == "hr")
+	else if (lang == "hu")
 		ConfMan.set("language", Common::getLanguageCode(Common::HU_HUN));
 	else if (lang == "it")
 		ConfMan.set("language", Common::getLanguageCode(Common::IT_ITA));

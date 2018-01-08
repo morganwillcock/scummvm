@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -89,7 +89,7 @@ uint32 Decompressor::getBitsLSB(int n) {
 	// fetching more data to buffer if needed
 	if (_nBits < n)
 		fetchBitsLSB();
-	uint32 ret = (_dwBits & ~((~0) << n));
+	uint32 ret = (_dwBits & ~(0xFFFFFFFFU << n));
 	_dwBits >>= n;
 	_nBits -= n;
 	return ret;
@@ -257,7 +257,7 @@ int DecompressorLZW::unpackLZW1(Common::ReadStream *src, byte *dest, uint32 nPac
 	init(src, dest, nPacked, nUnpacked);
 
 	byte *stak = (byte *)malloc(0x1014);
-	unsigned int tokensSize = 0x1004 * sizeof(Tokenlist);
+	uint32 tokensSize = 0x1004 * sizeof(Tokenlist);
 	Tokenlist *tokens = (Tokenlist *)malloc(tokensSize);
 	if (!stak || !tokens) {
 		free(stak);

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -23,6 +23,7 @@
 #include "common/config-manager.h"
 #include "common/translation.h"
 #include "gui/saveload.h"
+#include "tsage/dialogs.h"
 #include "tsage/scenes.h"
 #include "tsage/globals.h"
 #include "tsage/ringworld/ringworld_logic.h"
@@ -139,7 +140,7 @@ void SceneManager::fadeInIfNecessary() {
 				percent = 100;
 
 			g_globals->_scenePalette.fade((const byte *)&adjustData, false, percent);
-			GLOBALS._screenSurface.updateScreen();
+			GLOBALS._screen.update();
 			g_system->delayMillis(10);
 		}
 
@@ -150,6 +151,7 @@ void SceneManager::fadeInIfNecessary() {
 
 void SceneManager::changeScene(int newSceneNumber) {
 	debug(1, "changeScene(%d)", newSceneNumber);
+
 	// Fade out the scene
 	ScenePalette scenePalette;
 	uint32 adjustData = 0;
@@ -174,7 +176,7 @@ void SceneManager::changeScene(int newSceneNumber) {
 	}
 
 	// Blank out the screen
-	g_globals->_screenSurface.fillRect(g_globals->_screenSurface.getBounds(), 0);
+	g_globals->_screen.fillRect(g_globals->_screen.getBounds(), 0);
 
 	// If there are any fading sounds, wait until fading is complete
 	while (g_globals->_soundManager.isFading()) {
@@ -462,7 +464,7 @@ void Scene::refreshBackground(int xAmount, int yAmount) {
 				// Check if the section is already loaded
 				if ((_enabledSections[xp * 16 + yp] == 0xffff) || ((xAmount == 0) && (yAmount == 0))) {
 					// Chunk isn't loaded, so load it in
-					Graphics::Surface s = _backSurface.lockSurface();
+					Graphics::ManagedSurface s = _backSurface.lockSurface();
 					GfxSurface::loadScreenSection(s, xp - xHalfOffset, yp - yHalfOffset, xp, yp);
 					_backSurface.unlockSurface();
 					changedFlag = true;

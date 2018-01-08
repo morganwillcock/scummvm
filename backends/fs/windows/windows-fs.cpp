@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #if defined(WIN32)
@@ -241,6 +242,38 @@ Common::SeekableReadStream *WindowsFilesystemNode::createReadStream() {
 
 Common::WriteStream *WindowsFilesystemNode::createWriteStream() {
 	return StdioStream::makeFromPath(getPath(), true);
+}
+
+bool WindowsFilesystemNode::create(bool isDirectoryFlag) {
+	bool success;
+
+	if (isDirectoryFlag) {
+		success = CreateDirectory(toUnicode(_path.c_str()), NULL) != 0;
+	} else {
+		success = CreateFile(toUnicode(_path.c_str()), GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL) != INVALID_HANDLE_VALUE;
+	}
+
+	if (success) {
+		//this piece is copied from constructor, it checks that file exists and detects whether it's a directory
+		DWORD fileAttribs = GetFileAttributes(toUnicode(_path.c_str()));
+		if (fileAttribs != INVALID_FILE_ATTRIBUTES) {
+			_isDirectory = ((fileAttribs & FILE_ATTRIBUTE_DIRECTORY) != 0);
+			_isValid = true;
+			// Add a trailing slash, if necessary.
+			if (_isDirectory && _path.lastChar() != '\\') {
+				_path += '\\';
+			}
+
+			if (_isDirectory != isDirectoryFlag) warning("failed to create %s: got %s", isDirectoryFlag ? "directory" : "file", _isDirectory ? "directory" : "file");
+			return _isDirectory == isDirectoryFlag;
+		}
+
+		warning("WindowsFilesystemNode: Create%s() was a success, but GetFileAttributes() indicates there is no such %s",
+			    isDirectoryFlag ? "Directory" : "File", isDirectoryFlag ? "directory" : "file");
+		return false;
+	}
+
+	return false;
 }
 
 #endif //#ifdef WIN32

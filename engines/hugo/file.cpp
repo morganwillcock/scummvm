@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -32,12 +32,14 @@
 #include "common/savefile.h"
 #include "common/textconsole.h"
 #include "common/config-manager.h"
+#include "common/translation.h"
 
 #include "graphics/surface.h"
-#include "graphics/decoders/pcx.h"
 #include "graphics/thumbnail.h"
 
 #include "gui/saveload.h"
+
+#include "image/pcx.h"
 
 #include "hugo/hugo.h"
 #include "hugo/file.h"
@@ -110,7 +112,7 @@ Seq *FileManager::readPCX(Common::SeekableReadStream &f, Seq *seqPtr, byte *imag
 			error("Insufficient memory to run game.");
 	}
 
-	Graphics::PCXDecoder pcx;
+	Image::PCXDecoder pcx;
 	if (!pcx.loadStream(f))
 		error("Error while reading PCX image");
 
@@ -293,7 +295,7 @@ bool FileManager::saveGame(const int16 slot, const Common::String &descrip) {
 	Common::String savegameDescription;
 
 	if (slot == -1) {
-		GUI::SaveLoadChooser *dialog = new GUI::SaveLoadChooser("Save game:", "Save", true);
+		GUI::SaveLoadChooser *dialog = new GUI::SaveLoadChooser(_("Save game:"), _("Save"), true);
 		savegameId = dialog->runModalWithCurrentTarget();
 		savegameDescription = dialog->getResultString();
 		delete dialog;
@@ -395,7 +397,7 @@ bool FileManager::restoreGame(const int16 slot) {
 	int16 savegameId;
 
 	if (slot == -1) {
-		GUI::SaveLoadChooser *dialog = new GUI::SaveLoadChooser("Restore game:", "Restore", false);
+		GUI::SaveLoadChooser *dialog = new GUI::SaveLoadChooser(_("Restore game:"), _("Restore"), false);
 		savegameId = dialog->runModalWithCurrentTarget();
 		delete dialog;
 	} else {

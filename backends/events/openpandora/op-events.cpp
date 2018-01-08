@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -84,6 +84,9 @@ bool OPEventSource::handleMouseButtonDown(SDL_Event &ev, Common::Event &event) {
 		return false;
 
 	processMouseEvent(event, ev.button.x, ev.button.y);
+	// update KbdMouse
+	_km.x = ev.button.x * MULTIPLIER;
+	_km.y = ev.button.y * MULTIPLIER;
 
 	return true;
 }
@@ -112,6 +115,9 @@ bool OPEventSource::handleMouseButtonUp(SDL_Event &ev, Common::Event &event) {
 		return false;
 
 	processMouseEvent(event, ev.button.x, ev.button.y);
+	// update KbdMouse
+	_km.x = ev.button.x * MULTIPLIER;
+	_km.y = ev.button.y * MULTIPLIER;
 
 	return true;
 }
@@ -126,18 +132,18 @@ bool OPEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 		switch (ev.key.keysym.sym) {
 		case SDLK_LEFT:
 			event.type = (ev.type == SDL_KEYDOWN) ? Common::EVENT_LBUTTONDOWN : Common::EVENT_LBUTTONUP;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 		case SDLK_RIGHT:
 			event.type = (ev.type == SDL_KEYDOWN) ? Common::EVENT_RBUTTONDOWN : Common::EVENT_RBUTTONUP;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 #if defined(SDL_BUTTON_MIDDLE)
 		case SDLK_UP:
 			event.type = (ev.type == SDL_KEYDOWN) ? Common::EVENT_MBUTTONDOWN : Common::EVENT_MBUTTONUP;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 #endif
@@ -150,12 +156,12 @@ bool OPEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 		switch (ev.key.keysym.sym) {
 		case SDLK_HOME:
 			event.type = Common::EVENT_LBUTTONDOWN;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 		case SDLK_END:
 			event.type = Common::EVENT_RBUTTONDOWN;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 		case SDLK_PAGEDOWN:
@@ -188,12 +194,12 @@ bool OPEventSource::remapKey(SDL_Event &ev, Common::Event &event) {
 		switch (ev.key.keysym.sym) {
 		case SDLK_HOME:
 			event.type = Common::EVENT_LBUTTONUP;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 		case SDLK_END:
 			event.type = Common::EVENT_RBUTTONUP;
-			processMouseEvent(event, _km.x, _km.y);
+			processMouseEvent(event, _km.x / MULTIPLIER, _km.y / MULTIPLIER);
 			return true;
 			break;
 		case SDLK_PAGEDOWN:

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -87,6 +87,7 @@ bool BaseSoundMgr::initialize() {
 	setMasterVolumePercent(volumeMasterPercent);
 	_soundAvailable = true;
 
+	g_engine->syncSoundSettings();
 	return STATUS_OK;
 }
 
@@ -96,18 +97,22 @@ BaseSoundBuffer *BaseSoundMgr::addSound(const Common::String &filename, Audio::M
 		return nullptr;
 	}
 
+	if (filename.empty()) {
+		// At least one game, Bickadoodle, calls playSound with an empty filename, see #6594
+		BaseEngine::LOG(0, "addSound called with empty filename");
+	}
+
 	BaseSoundBuffer *sound;
 
 	Common::String useFilename = filename;
+	useFilename.toLowercase();
 	// try to switch WAV to OGG file (if available)
-	AnsiString ext = PathUtil::getExtension(filename);
-	if (StringUtil::compareNoCase(ext, "wav")) {
-		AnsiString path = PathUtil::getDirectoryName(filename);
-		AnsiString name = PathUtil::getFileNameWithoutExtension(filename);
-
-		AnsiString newFile = PathUtil::combine(path, name + "ogg");
-		if (BaseFileManager::getEngineInstance()->hasFile(newFile)) {
-			useFilename = newFile;
+	if (useFilename.hasSuffix(".wav")) {
+		Common::String oggFilename = useFilename;
+		oggFilename.erase(oggFilename.size() - 4);
+		oggFilename = oggFilename + ".ogg";
+		if (BaseFileManager::getEngineInstance()->hasFile(oggFilename)) {
+			useFilename = oggFilename;
 		}
 	}
 
@@ -253,9 +258,9 @@ byte BaseSoundMgr::getMasterVolume() {
 bool BaseSoundMgr::pauseAll(bool includingMusic) {
 
 	for (uint32 i = 0; i < _sounds.size(); i++) {
-		if (_sounds[i]->isPlaying() && (_sounds[i]->_type != Audio::Mixer::kMusicSoundType || includingMusic)) {
+		if (_sounds[i]->isPlaying() && (_sounds[i]->getType() != Audio::Mixer::kMusicSoundType || includingMusic)) {
 			_sounds[i]->pause();
-			_sounds[i]->_freezePaused = true;
+			_sounds[i]->setFreezePaused(true);
 		}
 	}
 
@@ -267,9 +272,9 @@ bool BaseSoundMgr::pauseAll(bool includingMusic) {
 bool BaseSoundMgr::resumeAll() {
 
 	for (uint32 i = 0; i < _sounds.size(); i++) {
-		if (_sounds[i]->_freezePaused) {
+		if (_sounds[i]->isFreezePaused()) {
 			_sounds[i]->resume();
-			_sounds[i]->_freezePaused = false;
+			_sounds[i]->setFreezePaused(false);
 		}
 	}
 

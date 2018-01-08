@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -514,6 +514,17 @@ void NoradDelta::openDoor() {
 	}
 }
 
+void NoradDelta::cantMoveThatWay(CanOpenDoorReason reason) {
+	// WORKAROUND: The door outside the launch console room isn't treated as a door,
+	// so play the correct sound.
+	if (reason == kCantMoveBlocked && GameState.getCurrentRoomAndView() == MakeRoomView(kNorad67, kNorth)) {
+		cantOpenDoor(kCantOpenLocked);
+		return;
+	}
+
+	Neighborhood::cantMoveThatWay(reason);
+}
+
 void NoradDelta::activateHotspots() {
 	Norad::activateHotspots();
 
@@ -861,6 +872,13 @@ void NoradDelta::doSolve() {
 		Input scratch;
 		InputHandler::_inputHandler->clickInHotspot(scratch, spot);
 	}
+}
+
+void NoradDelta::setSoundFXLevel(const uint16 level) {
+	Neighborhood::setSoundFXLevel(level);
+
+	if (GameState.getCurrentRoomAndView() == MakeRoomView(kNorad54North, kNorth))
+		_loop2Fader.setMasterVolume(level);
 }
 
 Common::String NoradDelta::getSoundSpotsName() {

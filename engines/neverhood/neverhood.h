@@ -8,20 +8,20 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef NEVERHOOD_H
-#define NEVERHOOD_H
+#ifndef NEVERHOOD_NEVERHOOD_H
+#define NEVERHOOD_NEVERHOOD_H
 
 #include "common/scummsys.h"
 #include "common/events.h"
@@ -30,7 +30,6 @@
 #include "common/savefile.h"
 #include "common/str-array.h"
 #include "common/system.h"
-#include "audio/mixer.h"
 #include "engines/engine.h"
 #include "gui/debugger.h"
 #include "neverhood/console.h"
@@ -150,4 +149,4 @@ private:
 
 } // End of namespace Neverhood
 
-#endif /* NEVERHOOD_H */
+#endif /* NEVERHOOD_NEVERHOOD_H */

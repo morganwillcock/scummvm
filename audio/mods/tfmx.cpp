@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -230,7 +230,7 @@ void Tfmx::macroRun(ChannelContext &channel) {
 		switch (macroPtr[0]) {
 		case 0x00:	// Reset + DMA Off. Parameters: deferWait, addset, vol
 			clearEffects(channel);
-			// FT
+			// fall through
 		case 0x13:	// DMA Off. Parameters:  deferWait, addset, vol
 			// TODO: implement PArameters
 			Paula::disableChannel(channel.paulaChannel);
@@ -285,7 +285,7 @@ void Tfmx::macroRun(ChannelContext &channel) {
 		case 0x10:	// Loop Key Up. Parameters: Loopcount, MacroStep(W)
 			if (channel.keyUp)
 				continue;
-			// FT
+			// fall through
 		case 0x05:	// Loop. Parameters: Loopcount, MacroStep(W)
 			if (channel.macroLoopCount != 0) {
 				if (channel.macroLoopCount == 0xFF)
@@ -554,7 +554,7 @@ bool Tfmx::patternRun(PatternContext &pattern) {
 			case 14: 	// Stop custompattern
 				// TODO apparently toggles on/off pattern channel 7
 				debug(3, "Tfmx: Encountered 'Stop custompattern' command");
-				// FT
+				// fall through
 			case 4: 	// Stop this pattern
 				pattern.command = 0xFF;
 				--pattern.step;

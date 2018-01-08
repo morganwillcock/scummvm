@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef COMMON_RATIONAL_H
@@ -82,6 +83,8 @@ public:
 
 	int getNumerator() const { return _num; }
 	int getDenominator() const { return _denom; }
+
+	bool isOne() const { return _num == _denom; }
 
 	void debugPrint(int debuglevel = 0, const char *caption = "Rational:") const;
 

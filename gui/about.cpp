@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "engines/metaengine.h"
@@ -56,7 +57,7 @@ enum {
 
 static const char *copyright_text[] = {
 "",
-"C0""Copyright (C) 2001-2014 The ScummVM Team",
+"C0""Copyright (C) 2001-2018 The ScummVM Team",
 "C0""http://www.scummvm.org",
 "",
 "C0""ScummVM is the legal property of its developers, whose names are too numerous to list here. Please refer to the COPYRIGHT file distributed with this binary.",
@@ -109,16 +110,16 @@ AboutDialog::AboutDialog()
 	engines += _("Available engines:");
 	addLine(engines.c_str());
 
-	const EnginePlugin::List &plugins = EngineMan.getPlugins();
-	EnginePlugin::List::const_iterator iter = plugins.begin();
+	const PluginList &plugins = EngineMan.getPlugins();
+	PluginList::const_iterator iter = plugins.begin();
 	for (; iter != plugins.end(); ++iter) {
 		Common::String str;
 		str = "C0";
-		str += (**iter).getName();
+		str += (*iter)->getName();
 		addLine(str.c_str());
 
 		str = "C2";
-		str += (**iter)->getOriginalCopyright();
+		str += (*iter)->get<MetaEngine>().getOriginalCopyright();
 		addLine(str.c_str());
 
 		//addLine("");
@@ -240,7 +241,7 @@ void AboutDialog::drawDialog() {
 			while (*str && *str == ' ')
 				str++;
 
-		if (*str) 
+		if (*str)
 			g_gui.theme()->drawText(Common::Rect(_x + _xOff, y, _x + _w - _xOff, y + g_gui.theme()->getFontHeight()), str, state, align, ThemeEngine::kTextInversionNone, 0, false, ThemeEngine::kFontStyleBold, ThemeEngine::kFontColorNormal, true, _textDrawableArea);
 		y += _lineHeight;
 	}

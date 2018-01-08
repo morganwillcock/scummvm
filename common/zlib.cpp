@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,7 @@
 #include "common/ptr.h"
 #include "common/util.h"
 #include "common/stream.h"
+#include "common/debug.h"
 #include "common/textconsole.h"
 
 #if defined(USE_ZLIB)
@@ -140,6 +141,10 @@ bool inflateZlibInstallShield(byte *dst, uint dstLen, const byte *src, uint srcL
 	return true;
 }
 
+#ifndef RELEASE_BUILD
+static bool _shownBackwardSeekingWarning = false;
+#endif
+
 /**
  * A simple wrapper class which can be used to wrap around an arbitrary
  * other SeekableReadStream and will then provide on-the-fly decompression support.
@@ -159,11 +164,10 @@ protected:
 	uint32 _pos;
 	uint32 _origSize;
 	bool _eos;
-	bool _shownBackwardSeekingWarning;
 
 public:
 
-	GZipReadStream(SeekableReadStream *w, uint32 knownSize = 0) : _wrapped(w), _stream(), _shownBackwardSeekingWarning(false) {
+	GZipReadStream(SeekableReadStream *w, uint32 knownSize = 0) : _wrapped(w), _stream() {
 		assert(w != 0);
 
 		// Verify file header is correct
@@ -263,13 +267,15 @@ public:
 			// from the start of the file. A rather wasteful operation, best
 			// to avoid it. :/
 
+#ifndef RELEASE_BUILD
 			if (!_shownBackwardSeekingWarning) {
 				// We only throw this warning once per stream, to avoid
 				// getting the console swarmed with warnings when consecutive
 				// seeks are made.
-				warning("Backward seeking in GZipReadStream detected");
+				debug(1, "Backward seeking in GZipReadStream detected");
 				_shownBackwardSeekingWarning = true;
 			}
+#endif
 
 			_pos = 0;
 			_wrapped->seek(0, SEEK_SET);
@@ -310,6 +316,7 @@ protected:
 	ScopedPtr<WriteStream> _wrapped;
 	z_stream _stream;
 	int _zlibErr;
+	uint32 _pos;
 
 	void processData(int flushType) {
 		// This function is called by both write() and finalize().
@@ -327,7 +334,7 @@ protected:
 	}
 
 public:
-	GZipWriteStream(WriteStream *w) : _wrapped(w), _stream() {
+	GZipWriteStream(WriteStream *w) : _wrapped(w), _stream(), _pos(0) {
 		assert(w != 0);
 
 		// Adding 16 to windowBits indicates to zlib that it is supposed to
@@ -397,8 +404,11 @@ public:
 		// ... and flush it to disk
 		processData(Z_NO_FLUSH);
 
+		_pos += dataSize - _stream.avail_in;
 		return dataSize - _stream.avail_in;
 	}
+
+	virtual int32 pos() const { return _pos; }
 };
 
 #endif	// USE_ZLIB

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1440,7 +1440,7 @@ void Scene2425::postInit(SceneObjectList *OwnerList) {
 	case 2425:
 		_sceneMode = 10;
 		R2_GLOBALS._player.setPosition(Common::Point(280, 150));
-		_action->signal();
+		signal();
 		break;
 	case 2455:
 		_sceneMode = 2428;
@@ -1883,7 +1883,7 @@ void Scene2440::signal() {
 	case 2440:
 		_oilLamp.remove();
 		R2_INVENTORY.setObjectScene(R2_ALCOHOL_LAMP_2, 2);
-	// No break on purpose
+		// fall through
 	default:
 		R2_GLOBALS._player.enableControl();
 		break;
@@ -4388,7 +4388,7 @@ void Scene2800::Action2::signal() {
 		_object4.setStrip(2);
 		_object4.setFrame(11);
 		R2_GLOBALS._player.hide();
-	// No break on purpose
+		// fall through
 	case 18:
 		R2_GLOBALS._sound1.play(241);
 		_object4.animate(ANIM_MODE_6, this);
@@ -4872,10 +4872,10 @@ void Scene2900::Map::drawBlock(const byte *data, int xp, int yp,
 void Scene2900::Map::moveArea(Rect &r, int xAmt, int yAmt) {
 	Rect tempRect = r;
 	tempRect.translate(xAmt, yAmt);
-	int xpSrc, xpDest, width;
-	int ypSrc, ypDest, height;
 
 	if (tempRect.intersects(r)) {
+		int xpSrc, xpDest, width;
+		int ypSrc, ypDest, height;
 		if (xAmt >= 0) {
 			xpSrc = tempRect.left;
 			width = tempRect.width() - xAmt;

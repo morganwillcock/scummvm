@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -39,9 +39,9 @@
 namespace Pegasus {
 
 Item::Item(const ItemID id, const NeighborhoodID neighborhood, const RoomID room, const DirectionConstant direction) : IDObject(id) {
-	_itemNeighborhood = neighborhood;
-	_itemRoom = room;
-	_itemDirection = direction;
+	_originalNeighborhood = _itemNeighborhood = neighborhood;
+	_originalRoom = _itemRoom = room;
+	_originalDirection = _itemDirection = direction;
 	_itemWeight = 1;
 	_itemOwnerID = kNoActorID;
 	_itemState = 0;
@@ -129,6 +129,14 @@ Item::Item(const ItemID id, const NeighborhoodID neighborhood, const RoomID room
 Item::~Item() {
 	delete[] _sharedAreaInfo.entries;
 	delete[] _itemExtras.entries;
+}
+
+void Item::reset() {
+	_itemNeighborhood = _originalNeighborhood;
+	_itemRoom = _originalRoom;
+	_itemDirection = _originalDirection;
+	_itemOwnerID = kNoActorID;
+	_itemState = 0;
 }
 
 void Item::writeToStream(Common::WriteStream *stream) {

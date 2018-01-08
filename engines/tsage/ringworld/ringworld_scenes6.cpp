@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1363,7 +1363,7 @@ void Scene5100::signal() {
 		g_globals->_player.setStrip(6);
 		g_globals->_player.fixPriority(-1);
 		g_globals->_player.animate(ANIM_MODE_1, NULL);
-	// No break on purpose
+		// fall through
 	case 5117:
 		g_globals->_player.enableControl();
 		break;
@@ -2149,7 +2149,7 @@ void Scene5300::signal() {
 		break;
 	case 5307:
 		_soundHandler.fadeOut(NULL);
-	// No break on purpose
+		// fall through
 	case 5302:
 	case 5308:
 	case 5316:

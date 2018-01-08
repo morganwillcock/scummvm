@@ -5,7 +5,7 @@ import re
 import os
 import zipfile
 
-THEME_FILE_EXTENSIONS = ('.stx', '.bmp', '.fcc', '.ttf')
+THEME_FILE_EXTENSIONS = ('.stx', '.bmp', '.fcc', '.ttf', '.png')
 
 def buildTheme(themeName):
 	if not os.path.isdir(themeName) or not os.path.isfile(os.path.join(themeName, "THEMERC")):
@@ -19,7 +19,9 @@ def buildTheme(themeName):
 
 	zf.write('THEMERC', './THEMERC')
 
-	for filename in os.listdir('.'):
+	filenames = os.listdir('.')
+	filenames.sort()
+	for filename in filenames:
 		if os.path.isfile(filename) and not filename[0] == '.' and filename.endswith(THEME_FILE_EXTENSIONS):
 			zf.write(filename, './' + filename)
 			print ("    Adding file: " + filename)
@@ -33,11 +35,15 @@ def buildAllThemes():
 		if os.path.isdir(os.path.join('.', f)) and not f[0] == '.':
 			buildTheme(f)
 
-def parseSTX(theme_file, def_file):
+def parseSTX(theme_file, def_file, subcount):
 	comm = re.compile("<!--(.*?)-->", re.DOTALL)
 	head = re.compile("<\?(.*?)\?>")
 
 	strlitcount = 0
+	subcount += 1
+
+	def_file.write(";\n const char *defaultXML" + str(subcount) + " = ")
+
 	output = ""
 	for line in theme_file:
 		output +=  line.rstrip("\r\n\t ").lstrip()
@@ -53,8 +59,12 @@ def parseSTX(theme_file, def_file):
 	for line in output.splitlines():
 		if line and not line.isspace():
 			strlitcount += len(line)
+			if strlitcount > 65535:
+				subcount += 1
+				def_file.write(";\n const char *defaultXML" + str(subcount) + " = ")
+				strlitcount = len(line)
 			def_file.write("\"" + line + "\"\n")
-	return strlitcount
+	return subcount
 
 def buildDefTheme(themeName):
 	def_file = open("default.inc", "w")
@@ -62,23 +72,25 @@ def buildDefTheme(themeName):
 	if not os.path.isdir(themeName):
 		print ("Cannot open default theme dir.")
 
-	def_file.write(""" "<?xml version = '1.0'?>"\n""")
-	strlitcount = 24
+	def_file.write("""const char *defaultXML1 = "<?xml version = '1.0'?>"\n""")
+	subcount = 1
 
-	for filename in os.listdir(themeName):
+	filenames = os.listdir(themeName)
+	filenames.sort()
+	for filename in filenames:
 		filename = os.path.join(themeName, filename)
 		if os.path.isfile(filename) and filename.endswith(".stx"):
 			theme_file = open(filename, "r")
-			strlitcount += parseSTX(theme_file, def_file)
+			subcount = parseSTX(theme_file, def_file, subcount)
 			theme_file.close()
 
-	def_file.close()
+	def_file.write(";\nconst char *defaultXML[] = { defaultXML1")
+	for sub in range(2, subcount + 1):
+		def_file.write(", defaultXML" + str(sub))
 
-	if strlitcount > 65535:
-		print("WARNING: default.inc string literal is of length %d which exceeds the" % strlitcount)
-		print("         maximum length of 65536 that C++ compilers are required to support.")
-		print("         It is likely that bugs will occur dependent on compiler behaviour.")
-		print("         To avoid this, reduce the size of the theme.")
+	def_file.write(" };\n")
+
+	def_file.close()
 
 def printUsage():
 	print ("===============================")

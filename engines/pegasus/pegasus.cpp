@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -36,6 +36,7 @@
 #include "backends/keymapper/keymapper.h"
 #include "base/plugins.h"
 #include "base/version.h"
+#include "gui/message.h"
 #include "gui/saveload.h"
 #include "video/theora_decoder.h"
 #include "video/qt_decoder.h"
@@ -97,6 +98,8 @@ PegasusEngine::PegasusEngine(OSystem *syst, const PegasusGameDescription *gamede
 }
 
 PegasusEngine::~PegasusEngine() {
+	throwAwayEverything();
+
 	delete _resFork;
 	delete _console;
 	delete _cursor;
@@ -306,6 +309,7 @@ void PegasusEngine::runIntro() {
 
 	Video::VideoDecoder *video = new Video::QuickTimeDecoder();
 	if (video->loadFile(_introDirectory + "/BandaiLogo.movie")) {
+		video->setVolume(MIN<uint>(getAmbienceLevel(), 0xFF));
 		video->start();
 
 		while (!shouldQuit() && !video->endOfVideo() && !skipped) {
@@ -337,6 +341,8 @@ void PegasusEngine::runIntro() {
 	if (!video->loadFile(_introDirectory + "/Big Movie.movie"))
 		error("Could not load intro movie");
 
+	video->setVolume(MIN<uint>(getAmbienceLevel(), 0xFF));
+
 	video->seek(Audio::Timestamp(0, 10 * 600, 600));
 	video->start();
 
@@ -350,7 +356,7 @@ Common::Error PegasusEngine::showLoadDialog() {
 
 	Common::String gameId = ConfMan.get("gameid");
 
-	const EnginePlugin *plugin = 0;
+	const Plugin *plugin = nullptr;
 	EngineMan.findGame(gameId, &plugin);
 
 	int slot = slc.runModalWithPluginAndTarget(plugin, ConfMan.getActiveDomainName());
@@ -374,24 +380,25 @@ Common::Error PegasusEngine::showSaveDialog() {
 
 	Common::String gameId = ConfMan.get("gameid");
 
-	const EnginePlugin *plugin = 0;
+	const Plugin *plugin = nullptr;
 	EngineMan.findGame(gameId, &plugin);
 
 	int slot = slc.runModalWithPluginAndTarget(plugin, ConfMan.getActiveDomainName());
 
-	Common::Error result;
+	if (slot >= 0)
+		return saveGameState(slot, slc.getResultString());
 
-	if (slot >= 0) {
-		if (saveGameState(slot, slc.getResultString()).getCode() == Common::kNoError)
-			result = Common::kNoError;
-		else
-			result = Common::kUnknownError;
-	} else {
-		result = Common::kUserCanceled;
-	}
-
-	return result;
+	return Common::kUserCanceled;
 }
+
+void PegasusEngine::showSaveFailedDialog(const Common::Error &status) {
+	Common::String failMessage = Common::String::format(_("Failed to save game (%s)! "
+			"Please consult the README for basic information, and for "
+			"instructions on how to obtain further assistance."), status.getDesc().c_str());
+	GUI::MessageDialog dialog(failMessage);
+	dialog.runModal();
+}
+
 
 GUI::Debugger *PegasusEngine::getDebugger() {
 	return _console;
@@ -431,6 +438,8 @@ void PegasusEngine::removeTimeBase(TimeBase *timeBase) {
 
 bool PegasusEngine::loadFromStream(Common::SeekableReadStream *stream) {
 	// Dispose currently running stuff
+	lowerInventoryDrawerSync();
+	lowerBiochipDrawerSync();
 	useMenu(0);
 	useNeighborhood(0);
 	removeAllItemsFromInventory();
@@ -704,7 +713,7 @@ static bool isValidSaveFileName(const Common::String &desc) {
 
 Common::Error PegasusEngine::saveGameState(int slot, const Common::String &desc) {
 	if (!isValidSaveFileName(desc))
-		return Common::Error(Common::kCreatingFileFailed, _("Invalid save file name"));
+		return Common::Error(Common::kCreatingFileFailed, _("Invalid file name for saving"));
 
 	Common::String output = Common::String::format("pegasus-%s.sav", desc.c_str());
 	Common::OutSaveFile *saveFile = _saveFileMan->openForSaving(output, false);
@@ -790,6 +799,8 @@ void PegasusEngine::introTimerExpired() {
 		if (!video->loadFile(_introDirectory + "/LilMovie.movie"))
 			error("Failed to load little movie");
 
+		video->setVolume(MIN<uint>(getAmbienceLevel(), 0xFF));
+
 		bool saveAllowed = swapSaveAllowed(false);
 		bool openAllowed = swapLoadAllowed(false);
 
@@ -832,6 +843,7 @@ void PegasusEngine::delayShell(TimeValue time, TimeScale scale) {
 	uint32 timeInMillis = time * 1000 / scale;
 
 	while (g_system->getMillis() < startTime + timeInMillis) {
+		InputDevice.pumpEvents();
 		checkCallBacks();
 		_gfx->updateDisplay();
 	}
@@ -929,12 +941,15 @@ void PegasusEngine::doGameMenuCommand(const GameMenuCommand command) {
 			} else {
 				_gfx->doFadeOutSync();
 				useMenu(0);
-				_gfx->clearScreen();
+				_gfx->enableErase();
 				_gfx->updateDisplay();
+				_gfx->disableErase();
 
 				Video::VideoDecoder *video = new Video::QuickTimeDecoder();
 				if (!video->loadFile(_introDirectory + "/Closing.movie"))
 					error("Could not load closing movie");
+
+				video->setVolume(MIN<uint>(getSoundFXLevel(), 0xFF));
 
 				uint16 x = (640 - video->getWidth() * 2) / 2;
 				uint16 y = (480 - video->getHeight() * 2) / 2;
@@ -967,8 +982,14 @@ void PegasusEngine::doGameMenuCommand(const GameMenuCommand command) {
 		resetIntroTimer();
 		break;
 	case kMenuCmdPauseSave:
-		if (showSaveDialog().getCode() != Common::kUserCanceled)
+		result = showSaveDialog();
+
+		if (result.getCode() != Common::kUserCanceled) {
+			if (result.getCode() != Common::kNoError)
+				showSaveFailedDialog(result);
+
 			pauseMenu(false);
+		}
 		break;
 	case kMenuCmdPauseContinue:
 		pauseMenu(false);
@@ -1019,7 +1040,12 @@ void PegasusEngine::handleInput(const Input &input, const Hotspot *cursorSpot) {
 		// Can only save during a game and not in the demo
 		if (g_neighborhood && !isDemo()) {
 			pauseEngine(true);
-			showSaveDialog();
+
+			Common::Error result = showSaveDialog();
+
+			if (result.getCode() != Common::kNoError && result.getCode() != Common::kUserCanceled)
+				showSaveFailedDialog(result);
+
 			pauseEngine(false);
 		}
 	}
@@ -1460,6 +1486,15 @@ void PegasusEngine::throwAwayEverything() {
 	g_interface = 0;
 }
 
+InputBits PegasusEngine::getInputFilter() {
+	InputBits filter = InputHandler::getInputFilter();
+
+	if (isPaused())
+		return filter & ~JMPPPInput::getItemPanelsInputFilter();
+
+	return filter;
+}
+
 void PegasusEngine::processShell() {
 	checkCallBacks();
 	checkNotifications();
@@ -1623,10 +1658,12 @@ void PegasusEngine::startNewGame() {
 	GameState.resetGameState();
 	GameState.setWalkthroughMode(isWalkthrough);
 
-	// TODO: Enable erase
 	_gfx->doFadeOutSync();
 	useMenu(0);
+
+	_gfx->enableErase();
 	_gfx->updateDisplay();
+	_gfx->disableErase();
 	_gfx->enableUpdates();
 
 	createInterface();
@@ -1657,6 +1694,9 @@ void PegasusEngine::startNewGame() {
 
 	removeAllItemsFromInventory();
 	removeAllItemsFromBiochips();
+
+	// Properly reset all items to their original state
+	g_allItems.resetAllItems();
 
 	BiochipItem *biochip = (BiochipItem *)_allItems.findItemByID(kAIBiochip);
 	addItemToBiochips(biochip);
@@ -2148,6 +2188,7 @@ void PegasusEngine::autoDragItemIntoRoom(Item *item, Sprite *draggingSprite) {
 	_autoDragger.autoDrag(draggingSprite, start, stop, time, kDefaultTimeScale);
 
 	while (_autoDragger.isDragging()) {
+		InputDevice.pumpEvents();
 		checkCallBacks();
 		refreshDisplay();
 		_system->delayMillis(10);
@@ -2181,6 +2222,7 @@ void PegasusEngine::autoDragItemIntoInventory(Item *, Sprite *draggingSprite) {
 	_autoDragger.autoDrag(draggingSprite, start, stop, time, kDefaultTimeScale);
 
 	while (_autoDragger.isDragging()) {
+		InputDevice.pumpEvents();
 		checkCallBacks();
 		refreshDisplay();
 		_system->delayMillis(10);
@@ -2257,10 +2299,7 @@ void PegasusEngine::doSubChase() {
 				drawScaledFrame(frame, 0, 0);
 		}
 
-		Common::Event event;
-		while (_eventMan->pollEvent(event))
-			;
-
+		InputDevice.pumpEvents();
 		_system->delayMillis(10);
 	}
 
@@ -2480,7 +2519,7 @@ void PegasusEngine::initKeymap() {
 		{ Common::KEYCODE_t, "TMA", _("Toggle Center Data Display") },
 		{ Common::KEYCODE_i, "TIN", _("Display/Hide Info Screen") },
 		{ Common::KEYCODE_ESCAPE, "PM", _("Display/Hide Pause Menu") },
-		{ Common::KEYCODE_e, "WTF", _("???") } // easter egg key (without being completely upfront about it)
+		{ Common::KEYCODE_e, "WTF", "???" } // easter egg key (without being completely upfront about it)
 	};
 
 	for (uint i = 0; i < ARRAYSIZE(keyActionEntries); i++) {

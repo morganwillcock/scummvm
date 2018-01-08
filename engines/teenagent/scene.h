@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef TEENAGENT_SCENE_H
@@ -193,7 +194,7 @@ private:
 	SurfaceList on;
 	bool onEnabled;
 	Surface *ons;
-	uint32 onsCount;
+	uint32 _onsCount;
 	Animation actorAnimation, animation[4], customAnimation[4];
 	Common::Rect actorAnimationPosition, animationPosition[4];
 
@@ -213,7 +214,7 @@ private:
 
 	Common::String message;
 	Common::Point messagePos;
-	byte messageColor;
+	byte _messageColor;
 	uint messageTimer;
 	byte messageFirstFrame;
 	byte messageLastFrame;

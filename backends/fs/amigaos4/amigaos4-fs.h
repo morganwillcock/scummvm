@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef AMIGAOS_FILESYSTEM_H
@@ -61,6 +62,11 @@ protected:
 	 */
 	virtual AbstractFSList listVolumes() const;
 
+	/**
+	 * True if this is the pseudo root filesystem.
+	 */
+	bool isRootNode() const { return _bIsValid && _bIsDirectory && _pFileLock == 0; }
+
 public:
 	/**
 	 * Creates an AmigaOSFilesystemNode with the root node as path.
@@ -75,19 +81,19 @@ public:
 	AmigaOSFilesystemNode(const Common::String &p);
 
 	/**
-	 * Creates an AmigaOSFilesystemNode given its lock and display name
+	 * Creates an AmigaOSFilesystemNode given its lock and display name.
 	 *
 	 * @param pLock BPTR to the lock.
 	 * @param pDisplayName name to be used for display, in case not supplied the FilePart() of the filename will be used.
 	 *
-	 * @note This shouldn't even be public as it's only internally, at best it should have been protected if not private
+	 * @note This shouldn't even be public as it's only internally, at best it should have been protected if not private.
 	 */
 	AmigaOSFilesystemNode(BPTR pLock, const char *pDisplayName = 0);
 
 	/**
 	 * Copy constructor.
 	 *
-	 * @note Needed because it duplicates the file lock
+	 * @note Needed because it duplicates the file lock.
 	 */
 	AmigaOSFilesystemNode(const AmigaOSFilesystemNode &node);
 
@@ -110,6 +116,7 @@ public:
 
 	virtual Common::SeekableReadStream *createReadStream();
 	virtual Common::WriteStream *createWriteStream();
+	virtual bool create(bool isDirectoryFlag);
 };
 
 

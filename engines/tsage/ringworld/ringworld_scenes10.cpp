@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -103,7 +103,7 @@ void Scene9100::signal() {
 		break;
 	case 9105:
 		_hotspotCleanedClothes.remove();
-	// No break on purpose
+		// fall through
 	case 9103:
 	case 9104:
 	case 9107:
@@ -336,7 +336,7 @@ void Scene9200::signal() {
 		break;
 	case 9210:
 		_hotspot1.remove();
-	// No break on purpose
+		// fall through
 	case 9201:
 	case 9202:
 	case 9203:
@@ -480,7 +480,7 @@ void Scene9300::signal() {
 	switch (_sceneMode++) {
 	case 9301:
 		g_globals->setFlag(84);
-		// No break on purpose
+		// fall through
 	case 9303:
 		g_globals->_soundHandler.play(295);
 		g_globals->_sceneManager.changeScene(9350);
@@ -938,7 +938,7 @@ void Scene9450::signal() {
 		break;
 	case 1006:
 		g_globals->setFlag(87);
-		// No break on purpose
+		// fall through
 	default:
 		g_globals->_player.enableControl();
 		break;
@@ -1004,7 +1004,7 @@ void Scene9450::postInit(SceneObjectList *OwnerList) {
 	_hotspot8.setDetails(110, 0, 199, 117, 9450, 7, 8);
 	_hotspot9.setDetails(101, 104, 130, 174, 9450, 9, 10);
 	_hotspot10.setDetails(110, 246, 149, 319, 9450, 11, 12);
-	_hotspot11.setDetails(16, 34, 74, 62, 6450, 13, 14);
+	_hotspot11.setDetails(16, 34, 74, 62, 9450, 13, 14);
 	_hotspot12.setDetails(19, 108, 72, 134, 9450, 15, 16);
 	_hotspot13.setDetails(18, 215, 71, 237, 9450, 17, 18);
 	_hotspot14.setDetails(15, 288, 76, 314, 9450, 19, 20);
@@ -1217,7 +1217,7 @@ void Scene9500::postInit(SceneObjectList *OwnerList) {
 	g_globals->_events.setCursor(CURSOR_WALK);
 	g_globals->_player.disableControl();
 
-	if ((g_globals->_sceneManager._previousScene == 9200) || (g_globals->_sceneManager._previousScene != 9850)) {
+	if (g_globals->_sceneManager._previousScene != 9850) {
 		_sceneMode = 0;
 		if (RING_INVENTORY._helmet._sceneNumber != 1) {
 			setAction(&_sequenceManager, this, 9501, &g_globals->_player, &_candle, NULL);
@@ -1240,7 +1240,7 @@ void Scene9700::signal() {
 	switch (_sceneMode ++) {
 	case 9703:
 		g_globals->setFlag(88);
-		// No break on purpose
+		// fall through
 	case 9701:
 	case 9702:
 		_gfxButton1.setText(EXIT_MSG);
@@ -1700,7 +1700,7 @@ void Scene9900::strAction2::signal() {
 		_txtArray2[0]._position.y = 400;
 		_txtArray2[1]._position.y = 500;
 		_var3 = 0;
-		// No break on purpose
+		// fall through
 	case 1: {
 		Common::String msg = g_resourceManager->getMessage(8030, _lineNum++);
 		if (msg.compareTo("LASTCREDIT")) {

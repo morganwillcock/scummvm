@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -43,6 +43,7 @@ Resource::~Resource() {
 
 PictureResource::PictureResource() : _picture(NULL), _picturePalette(NULL) {
 	_hasPalette = false;
+	_paletteColorCount = 0;
 }
 
 PictureResource::~PictureResource() {
@@ -182,6 +183,9 @@ void PictureResource::loadChunked(byte *source, int size) {
 /* AnimationResource */
 
 AnimationResource::AnimationResource() {
+	_flags = 0;
+	_width = 0;
+	_height = 0;
 }
 
 AnimationResource::~AnimationResource() {
@@ -241,6 +245,7 @@ void AnimationResource::load(byte *source, int size) {
 /* SoundResource */
 
 SoundResource::SoundResource() : _soundSize(0), _soundData(NULL) {
+	_soundEnergyArray = nullptr;
 }
 
 SoundResource::~SoundResource() {
@@ -377,6 +382,9 @@ void GenericResource::load(byte *source, int size) {
 ResourceReader::ResourceReader() {
 	_isV1 = false;
 	_cacheDataSize = 0;
+
+	_fd = _fdMusic = _fdPics = _fdSounds = nullptr;
+	_cacheCount = 0;
 }
 
 ResourceReader::~ResourceReader() {
@@ -441,7 +449,8 @@ void ResourceReader::openResourceBlocks() {
 }
 
 void ResourceReader::openResourceBlock(const char *filename, Common::File *blockFile, uint32 resType) {
-	blockFile->open(filename);
+	if (!blockFile->open(filename))
+		error("Failed to open '%s'", filename);
 
 	blockFile->readUint16LE(); // Skip unused
 	uint16 count = blockFile->readUint16LE();

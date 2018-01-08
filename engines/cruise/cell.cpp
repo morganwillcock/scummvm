@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -129,14 +129,11 @@ void createTextObject(cellStruct *pObject, int overlayIdx, int messageIdx, int x
 
 	cellStruct *pNewElement;
 	cellStruct *si = pObject->next;
-	cellStruct *var_2;
 
 	while (si) {
 		pObject = si;
 		si = si->next;
 	}
-
-	var_2 = si;
 
 	pNewElement = (cellStruct *) MemAlloc(sizeof(cellStruct));
 	memset(pNewElement, 0, sizeof(cellStruct));
@@ -157,11 +154,7 @@ void createTextObject(cellStruct *pObject, int overlayIdx, int messageIdx, int x
 	pNewElement->parentOverlay = parentOvl;
 	pNewElement->gfxPtr = NULL;
 
-	if (var_2) {
-		cx = var_2;
-	} else {
-		cx = savePObject;
-	}
+	cx = savePObject;
 
 	pNewElement->prev = cx->prev;
 	cx->prev = pNewElement;

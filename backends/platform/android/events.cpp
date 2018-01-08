@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -101,7 +101,9 @@ enum {
 	JKEYCODE_MEDIA_NEXT = 87,
 	JKEYCODE_MEDIA_PREVIOUS = 88,
 	JKEYCODE_MEDIA_REWIND = 89,
-	JKEYCODE_MEDIA_FAST_FORWARD = 90
+	JKEYCODE_MEDIA_FAST_FORWARD = 90,
+	JKEYCODE_MEDIA_PLAY = 126,
+	JKEYCODE_MEDIA_PAUSE = 127
 };
 
 // five-way navigation control
@@ -263,7 +265,7 @@ void OSystem_Android::setupKeymapper() {
 	Action *act;
 
 	act = new Action(globalMap, "VIRT", "Display keyboard");
-	act->addKeyEvent(KeyState(KEYCODE_F7, ASCII_F7, 0));
+	act->addKeyEvent(KeyState(KEYCODE_F7, ASCII_F7, KBD_CTRL));
 
 	mapper->addGlobalKeymap(globalMap);
 
@@ -380,6 +382,19 @@ void OSystem_Android::pushEvent(int type, int arg1, int arg2, int arg3,
 
 			return;
 
+		case JKEYCODE_MEDIA_PAUSE:
+		case JKEYCODE_MEDIA_PLAY:
+		case JKEYCODE_MEDIA_PLAY_PAUSE:
+			if (arg1 == JACTION_DOWN) {
+				e.type = Common::EVENT_MAINMENU;
+
+				lockMutex(_event_queue_lock);
+				_event_queue.push(e);
+				unlockMutex(_event_queue_lock);
+			}
+
+			return;
+
 		case JKEYCODE_CAMERA:
 		case JKEYCODE_SEARCH:
 			if (arg1 == JACTION_DOWN)
@@ -428,7 +443,7 @@ void OSystem_Android::pushEvent(int type, int arg1, int arg2, int arg3,
 		}
 
 		if (arg5 > 0)
-			e.synthetic = true;
+			e.kbdRepeat = true;
 
 		// map special keys to 'our' ascii codes
 		switch (e.kbd.keycode) {
@@ -886,6 +901,10 @@ void OSystem_Android::pushEvent(int type, int arg1, int arg2, int arg3,
 		case JKEYCODE_BUTTON_X:
 			e.kbd.keycode = Common::KEYCODE_ESCAPE;
 			e.kbd.ascii = Common::ASCII_ESCAPE;
+			break;
+
+		case JKEYCODE_BUTTON_Y:
+			e.type = Common::EVENT_MAINMENU;
 			break;
 
 		default:

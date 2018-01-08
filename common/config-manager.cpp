@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -45,6 +45,10 @@ char const *const ConfigManager::kTransientDomain = "__TRANSIENT";
 char const *const ConfigManager::kKeymapperDomain = "keymapper";
 #endif
 
+#ifdef USE_CLOUD
+char const *const ConfigManager::kCloudDomain = "cloud";
+#endif
+
 #pragma mark -
 
 
@@ -66,6 +70,9 @@ void ConfigManager::copyFrom(ConfigManager &source) {
 	_defaultsDomain = source._defaultsDomain;
 #ifdef ENABLE_KEYMAPPER
 	_keymapperDomain = source._keymapperDomain;
+#endif
+#ifdef USE_CLOUD
+	_cloudDomain = source._cloudDomain;
 #endif
 	_domainSaveOrder = source._domainSaveOrder;
 	_activeDomainName = source._activeDomainName;
@@ -121,6 +128,10 @@ void ConfigManager::addDomain(const String &domainName, const ConfigManager::Dom
 	} else if (domainName == kKeymapperDomain) {
 		_keymapperDomain = domain;
 #endif
+#ifdef USE_CLOUD
+	} else if (domainName == kCloudDomain) {
+		_cloudDomain = domain;
+#endif
 	} else if (domain.contains("gameid")) {
 		// If the domain contains "gameid" we assume it's a game domain
 		if (_gameDomains.contains(domainName))
@@ -159,6 +170,9 @@ void ConfigManager::loadFromStream(SeekableReadStream &stream) {
 
 #ifdef ENABLE_KEYMAPPER
 	_keymapperDomain.clear();
+#endif
+#ifdef USE_CLOUD
+	_cloudDomain.clear();
 #endif
 
 	// TODO: Detect if a domain occurs multiple times (or likewise, if
@@ -272,6 +286,10 @@ void ConfigManager::flushToDisk() {
 	// Write the keymapper domain
 	writeDomain(*stream, kKeymapperDomain, _keymapperDomain);
 #endif
+#ifdef USE_CLOUD
+	// Write the cloud domain
+	writeDomain(*stream, kCloudDomain, _cloudDomain);
+#endif
 
 	DomainMap::const_iterator d;
 
@@ -359,6 +377,10 @@ const ConfigManager::Domain *ConfigManager::getDomain(const String &domName) con
 	if (domName == kKeymapperDomain)
 		return &_keymapperDomain;
 #endif
+#ifdef USE_CLOUD
+	if (domName == kCloudDomain)
+		return &_cloudDomain;
+#endif
 	if (_gameDomains.contains(domName))
 		return &_gameDomains[domName];
 	if (_miscDomains.contains(domName))
@@ -378,6 +400,10 @@ ConfigManager::Domain *ConfigManager::getDomain(const String &domName) {
 #ifdef ENABLE_KEYMAPPER
 	if (domName == kKeymapperDomain)
 		return &_keymapperDomain;
+#endif
+#ifdef USE_CLOUD
+	if (domName == kCloudDomain)
+		return &_cloudDomain;
 #endif
 	if (_gameDomains.contains(domName))
 		return &_gameDomains[domName];
@@ -597,7 +623,7 @@ void ConfigManager::setActiveDomain(const String &domName) {
 		_activeDomain = 0;
 	} else {
 		assert(isValidDomainName(domName));
-		_activeDomain = & _gameDomains[domName];
+		_activeDomain = &_gameDomains[domName];
 	}
 	_activeDomainName = domName;
 }
@@ -626,6 +652,10 @@ void ConfigManager::addMiscDomain(const String &domName) {
 void ConfigManager::removeGameDomain(const String &domName) {
 	assert(!domName.empty());
 	assert(isValidDomainName(domName));
+	if (domName == _activeDomainName) {
+		_activeDomainName.clear();
+		_activeDomain = 0;
+	}
 	_gameDomains.erase(domName);
 }
 
@@ -638,6 +668,10 @@ void ConfigManager::removeMiscDomain(const String &domName) {
 
 void ConfigManager::renameGameDomain(const String &oldName, const String &newName) {
 	renameDomain(oldName, newName, _gameDomains);
+	if (_activeDomainName == oldName) {
+		_activeDomainName = newName;
+		_activeDomain = &_gameDomains[newName];
+	}
 }
 
 void ConfigManager::renameMiscDomain(const String &oldName, const String &newName) {

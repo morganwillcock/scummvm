@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -38,6 +38,7 @@
 #include "kyra/item.h"
 
 namespace Common {
+class OutSaveFile;
 class SeekableReadStream;
 class WriteStream;
 } // End of namespace Common
@@ -423,7 +424,7 @@ protected:
 	virtual Common::Error saveGameStateIntern(int slot, const char *saveName, const Graphics::Surface *thumbnail) = 0;
 
 	Common::SeekableReadStream *openSaveForReading(const char *filename, SaveHeader &header, bool checkID = true);
-	Common::WriteStream *openSaveForWriting(const char *filename, const char *saveName, const Graphics::Surface *thumbnail) const;
+	Common::OutSaveFile *openSaveForWriting(const char *filename, const char *saveName, const Graphics::Surface *thumbnail) const;
 
 	// TODO: Consider moving this to Screen
 	virtual Graphics::Surface *generateSaveThumbnail() const { return 0; }

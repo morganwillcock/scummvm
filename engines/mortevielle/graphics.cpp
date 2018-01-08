@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1019,6 +1019,8 @@ void ScreenSurface::writeCharacter(const Common::Point &pt, unsigned char ch, in
  *		simulate the original 640x400 surface, all Y values have to be doubled
  */
 void ScreenSurface::drawBox(int x, int y, int dx, int dy, int col) {
+	dx++; dy++;	// Original function draws 1px bigger
+
 	Graphics::Surface destSurface = lockArea(Common::Rect(x, y * 2, x + dx, (y + dy) * 2));
 
 	destSurface.hLine(0, 0, dx, col);

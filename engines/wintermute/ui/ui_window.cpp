@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -139,13 +139,12 @@ bool UIWindow::display(int offsetX, int offsetY) {
 			_shieldButton->setListener(this, _shieldButton, 0);
 			_shieldButton->_parent = this;
 		}
-		if (_shieldButton) {
-			_shieldButton->_posX = _shieldButton->_posY = 0;
-			_shieldButton->setWidth(_gameRef->_renderer->getWidth());
-			_shieldButton->setHeight(_gameRef->_renderer->getHeight());
 
-			_shieldButton->display();
-		}
+		_shieldButton->_posX = _shieldButton->_posY = 0;
+		_shieldButton->setWidth(_gameRef->_renderer->getWidth());
+		_shieldButton->setHeight(_gameRef->_renderer->getHeight());
+
+		_shieldButton->display();
 	}
 
 	if (!_visible) {

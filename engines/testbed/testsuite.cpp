@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "common/config-manager.h"
@@ -281,6 +282,9 @@ void Testsuite::execute() {
 	Common::Point pt = getDisplayRegionCoordinates();
 	pt.y += getLineSeparation();
 	int numEnabledTests = getNumTestsEnabled();
+
+	if (!numEnabledTests)
+		return;
 
 	for (Common::Array<Test *>::iterator i = _testsToExecute.begin(); i != _testsToExecute.end(); ++i) {
 		if (!(*i)->enabled) {

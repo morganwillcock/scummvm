@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -234,22 +234,22 @@ IMPLEMENT_FUNCTION(9, Yasmin, part1)
 		case 2:
 			if (Entity::timeCheckCallback(kTime1161000, params->param2, 3, WRAP_SETUP_FUNCTION(Yasmin, setup_goGtoE)))
 				break;
-			// Fallback to case 3
+			// fall through
 
 		case 3:
 			if (Entity::timeCheckPlaySoundUpdatePosition(kTime1162800, params->param3, 4, "Har1102", kPosition_4070))
 				break;
-			// Fallback to case 4
+			// fall through
 
 		case 4:
 			if (Entity::timeCheckCallback(kTime1165500, params->param4, 5, "Har1104", WRAP_SETUP_FUNCTION_S(Yasmin, setup_playSound)))
 				break;
-			// Fallback to case 5
+			// fall through
 
 		case 5:
 			if (Entity::timeCheckCallback(kTime1174500, params->param5, 6, "Har1106", WRAP_SETUP_FUNCTION_S(Yasmin, setup_playSound)))
 				break;
-			// Fallback to case 6
+			// fall through
 
 		case 6:
 			Entity::timeCheckCallback(kTime1183500, params->param6, 7, WRAP_SETUP_FUNCTION(Yasmin, setup_goEtoG));
@@ -364,7 +364,7 @@ IMPLEMENT_FUNCTION(14, Yasmin, part3)
 		case 1:
 			if (Entity::timeCheckCallback(kTime2106000, params->param2, 2, WRAP_SETUP_FUNCTION(Yasmin, setup_goGtoE)))
 				break;
-			// Fallback to case 2
+			// fall through
 
 		case 2:
 			Entity::timeCheckCallback(kTime2160000, params->param3, 3, WRAP_SETUP_FUNCTION(Yasmin, setup_goEtoG));

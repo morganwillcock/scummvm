@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include <sdlapp.h> // for CSDLApp::GetExecutablePathCStr() @ Symbian::GetExecutablePath()
@@ -62,6 +63,8 @@ OSystem_SDL_Symbian::OSystem_SDL_Symbian()
 
 void OSystem_SDL_Symbian::init() {
 	_RFs = &CEikonEnv::Static()->FsSession();
+	// Use iconless window: it uses the EScummVM.aif file for the icon.
+	_window = new SdlIconlessWindow();
 	_fsFactory = new SymbianFilesystemFactory();
 	OSystem_SDL::init();
 }
@@ -108,7 +111,7 @@ void OSystem_SDL_Symbian::initBackend() {
 		_mixerManager->init();
 	}
 	if (_graphicsManager == 0)
-		_graphicsManager = new SymbianSdlGraphicsManager(_eventSource);
+		_graphicsManager = new SymbianSdlGraphicsManager(_eventSource, _window);
 
 	// Call parent implementation of this method
 	OSystem_SDL::initBackend();
@@ -170,9 +173,12 @@ Common::String OSystem_SDL_Symbian::getDefaultConfigFileName() {
 	return configFile;
 }
 
-void OSystem_SDL_Symbian::setupIcon() {
-	// Don't for Symbian: it uses the EScummVM.aif file for the icon.
+bool OSystem_SDL_Symbian::hasFeature(Feature f) {
+	if (f == kFeatureJoystickDeadzone) return false;
+
+	return OSystem_SDL::hasFeature(f);
 }
+
 
 RFs& OSystem_SDL_Symbian::FsSession() {
 	return *_RFs;
@@ -198,7 +204,3 @@ void* scumm_bsearch(const void *key, const void *base, size_t nmemb, size_t size
 	return NULL;
 }
 
-int remove(const char *path)
-{
-	return unlink(path);
-}

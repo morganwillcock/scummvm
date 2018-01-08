@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -63,7 +63,7 @@ public:
 	uint32 getMaxUsedSlot();
 	bool getSaveExists(int slot);
 	bool initLoad(const Common::String &filename);
-	bool initSave(const char *desc);
+	bool initSave(const Common::String &desc);
 	bool getBytes(byte *buffer, uint32 size);
 	bool putBytes(byte *buffer, uint32 size);
 	uint32 _offset;
@@ -86,7 +86,7 @@ public:
 	bool transferCharPtr(const char *name, char **val);
 	bool transferString(const char *name, Common::String *val);
 	bool transferVector2(const char *name, Vector2 *val);
-	BasePersistenceManager(const char *savePrefix = nullptr, bool deleteSingleton = false);
+	BasePersistenceManager(const Common::String &savePrefix = "", bool deleteSingleton = false);
 	virtual ~BasePersistenceManager();
 	bool checkVersion(byte  verMajor, byte verMinor, byte verBuild);
 

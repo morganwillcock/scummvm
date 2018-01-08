@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -552,6 +552,48 @@
 		"Interactive Demo 3",
 		AD_ENTRY1s("intro.stk", "9e20ad7b471b01f84db526da34eaf0a2", 395561),
 		EN_ANY,
+		kPlatformDOS,
+		ADGF_DEMO,
+		GUIO2(GUIO_NOSUBTITLES, GUIO_NOSPEECH)
+	},
+	kGameTypeGob3,
+	kFeaturesAdLib,
+	0, 0, 0
+},
+{ // Supplied by Dark-Star on #scummvm
+	{
+		"gob3",
+		"Interactive Demo 4",
+		AD_ENTRY1s("intro.stk", "9c7c9002506fc976128ffe8f308d428c", 395562),
+		EN_GRB,
+		kPlatformDOS,
+		ADGF_DEMO,
+		GUIO2(GUIO_NOSUBTITLES, GUIO_NOSPEECH)
+	},
+	kGameTypeGob3,
+	kFeaturesAdLib,
+	0, 0, 0
+},
+{ // Supplied by Dark-Star on #scummvm
+	{
+		"gob3",
+		"Interactive Demo 4",
+		AD_ENTRY1s("intro.stk", "9c7c9002506fc976128ffe8f308d428c", 395562),
+		DE_DEU,
+		kPlatformDOS,
+		ADGF_DEMO,
+		GUIO2(GUIO_NOSUBTITLES, GUIO_NOSPEECH)
+	},
+	kGameTypeGob3,
+	kFeaturesAdLib,
+	0, 0, 0
+},
+{ // Supplied by Dark-Star on #scummvm
+	{
+		"gob3",
+		"Interactive Demo 4",
+		AD_ENTRY1s("intro.stk", "9c7c9002506fc976128ffe8f308d428c", 395562),
+		FR_FRA,
 		kPlatformDOS,
 		ADGF_DEMO,
 		GUIO2(GUIO_NOSUBTITLES, GUIO_NOSPEECH)

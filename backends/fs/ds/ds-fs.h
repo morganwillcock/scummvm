@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -91,6 +91,7 @@ public:
 
 	virtual Common::SeekableReadStream *createReadStream();
 	virtual Common::WriteStream *createWriteStream();
+	virtual bool create(bool isDirectoryFlag);
 
 	/**
 	 * Returns the zip file this node points to.
@@ -131,7 +132,7 @@ public:
 	 * @param path String with the path the new node should point to.
 	 * @param path true if path is a directory, false otherwise.
 	 */
-	GBAMPFileSystemNode(const Common::String &path, bool isDirectory);
+	GBAMPFileSystemNode(const Common::String &path, bool isDirectoryFlag);
 
 	/**
 	 * Copy constructor.
@@ -156,6 +157,7 @@ public:
 
 	virtual Common::SeekableReadStream *createReadStream();
 	virtual Common::WriteStream *createWriteStream();
+	virtual bool create(bool isDirectoryFlag);
 };
 
 struct fileHandle {

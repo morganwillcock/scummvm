@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,9 +25,6 @@
 
 #include "mohawk/installer_archive.h"
 #include "mohawk/mohawk.h"
-#include "mohawk/riven_scripts.h"
-
-#include "gui/saveload.h"
 
 #include "common/hashmap.h"
 #include "common/hash-str.h"
@@ -39,70 +36,37 @@ namespace Mohawk {
 struct MohawkGameDescription;
 class MohawkArchive;
 class RivenGraphics;
-class RivenExternal;
 class RivenConsole;
 class RivenSaveLoad;
 class RivenOptionsDialog;
-
-#define RIVEN_STACKS 8
+class RivenStack;
+class RivenCard;
+class RivenHotspot;
+class RivenScriptManager;
+class RivenSoundManager;
+class RivenInventory;
+class RivenVideoManager;
 
 // Riven Stack Types
 enum {
-	aspit = 0,		// Main Menu, Books, Setup
-	bspit = 1,		// Book-Making Island
-	gspit = 2,		// Garden Island
-	jspit = 3,		// Jungle Island
-	ospit = 4,		// 233rd Age (Gehn's Office)
-	pspit = 5,		// Prison Island
-	rspit = 6,		// Rebel Age (Tay)
-	tspit = 7		// Temple Island
+	kStackUnknown = 0, // Default value for ReturnStackID
+	kStackOspit = 1,   // 233rd Age (Gehn's Office)
+	kStackPspit = 2,   // Prison Island
+	kStackRspit = 3,   // Temple Island
+	kStackTspit = 4,   // Rebel Age (Tay)
+	kStackBspit = 5,   // Book-Making Island
+	kStackGspit = 6,   // Garden Island
+	kStackJspit = 7,   // Jungle Island
+	kStackAspit = 8,   // Main Menu, Books, Setup
+
+	kStackFirst = kStackOspit,
+	kStackLast = kStackAspit
 };
 
-// NAME Resource ID's
+// Engine Debug Flags
 enum {
-	CardNames = 1,
-	HotspotNames = 2,
-	ExternalCommandNames = 3,
-	VariableNames = 4,
-	StackNames = 5
-};
-
-enum RivenTransitionSpeed {
-	kRivenTransitionSpeedNone = 5000,
-	kRivenTransitionSpeedFastest = 5001,
-	kRivenTransitionSpeedNormal = 5002,
-	kRivenTransitionSpeedBest = 5003
-};
-
-// Rects for the inventory object positions (initialized in
-// MohawkEngine_Riven's constructor).
-extern Common::Rect *g_atrusJournalRect1;
-extern Common::Rect *g_atrusJournalRect2;
-extern Common::Rect *g_cathJournalRect2;
-extern Common::Rect *g_atrusJournalRect3;
-extern Common::Rect *g_cathJournalRect3;
-extern Common::Rect *g_trapBookRect3;
-extern Common::Rect *g_demoExitRect;
-
-struct RivenHotspot {
-	uint16 blstID;
-	int16 name_resource;
-	Common::Rect rect;
-	uint16 u0;
-	uint16 mouse_cursor;
-	uint16 index;
-	int16 u1;
-	int16 zipModeHotspot;
-	RivenScriptList scripts;
-
-	bool enabled;
-};
-
-struct Card {
-	int16 name;
-	uint16 zipModePlace;
-	bool hasData;
-	RivenScriptList scripts;
+	kRivenDebugScript   = (1 << 0),
+	kRivenDebugPatches  = (1 << 1)
 };
 
 struct ZipMode {
@@ -121,99 +85,85 @@ public:
 	MohawkEngine_Riven(OSystem *syst, const MohawkGameDescription *gamedesc);
 	virtual ~MohawkEngine_Riven();
 
+	RivenVideoManager *_video;
+	RivenSoundManager *_sound;
 	RivenGraphics *_gfx;
-	RivenExternal *_externalScriptHandler;
 	Common::RandomSource *_rnd;
 	RivenScriptManager *_scriptMan;
+	RivenInventory *_inventory;
 
-	Card _cardData;
+	// Display debug rectangles around the hotspots
+	bool _showHotspots;
 
 	GUI::Debugger *getDebugger();
 
-	bool canLoadGameStateCurrently() { return !(getFeatures() & GF_DEMO); }
-	bool canSaveGameStateCurrently() { return !(getFeatures() & GF_DEMO); }
+	bool canLoadGameStateCurrently();
+	bool canSaveGameStateCurrently();
 	Common::Error loadGameState(int slot);
 	Common::Error saveGameState(int slot, const Common::String &desc);
 	bool hasFeature(EngineFeature f) const;
 
-	typedef void (*TimerProc)(MohawkEngine_Riven *vm);
-
-	void doVideoTimer(VideoHandle handle, bool force);
+	void doFrame();
 
 private:
+	// Datafiles
 	MohawkArchive *_extrasFile; // We need a separate handle for the extra data
+	const char **listExpectedDatafiles() const;
+	bool checkDatafiles();
+
 	RivenConsole *_console;
 	RivenSaveLoad *_saveLoad;
 	RivenOptionsDialog *_optionsDialog;
 	InstallerArchive _installerArchive;
 
 	// Stack/Card-related functions and variables
-	uint16 _curCard;
-	uint16 _curStack;
-	void loadCard(uint16);
-	void handleEvents();
+	RivenCard *_card;
+	RivenStack *_stack;
 
-	// Hotspot related functions and variables
-	uint16 _hotspotCount;
-	void loadHotspots(uint16);
-	void checkInventoryClick();
-	bool _showHotspots;
-	void updateZipMode();
-	void checkHotspotChange();
+	bool _gameEnded;
 
 	// Variables
 	void initVars();
 
-	// Timer
-	TimerProc _timerProc;
-	uint32 _timerTime;
-
-	// Miscellaneous
-	bool _gameOver;
-	bool _ignoreNextMouseUp;
-	void checkSunnerAlertClick();
-
+	void pauseEngineIntern(bool) override;
 public:
 	// Stack/card/script funtions
+	RivenStack *constructStackById(uint16 id);
 	void changeToCard(uint16 dest);
-	void changeToStack(uint16);
-	void refreshCard();
-	Common::String getName(uint16 nameResource, uint16 nameID);
-	Common::String getStackName(uint16 stack) const;
-	void runCardScript(uint16 scriptType);
-	void runUpdateScreenScript() { runCardScript(kCardUpdateScript); }
-	uint16 getCurCard() const { return _curCard; }
-	uint16 getCurStack() const { return _curStack; }
-	uint16 matchRMAPToCard(uint32);
-	uint32 getCurCardRMAP();
+	void changeToStack(uint16 stackId);
+	RivenCard *getCard() const { return _card; }
+	RivenStack *getStack() const { return _stack; }
 
 	// Hotspot functions/variables
-	RivenHotspot *_hotspots;
-	int32 _curHotspot;
 	Common::Array<ZipMode> _zipModeData;
-	uint16 getHotspotCount() const { return _hotspotCount; }
-	void runHotspotScript(uint16 hotspot, uint16 scriptType);
-	int32 getCurHotspot() const { return _curHotspot; }
-	Common::String getHotspotName(uint16 hotspot);
-	void updateCurrentHotspot();
+	void addZipVisitedCard(uint16 cardId, uint16 cardNameId);
+	bool isZipVisitedCard(const Common::String &hotspotName) const;
 
 	// Variables
 	RivenVariableMap _vars;
 	uint32 &getStackVar(uint32 index);
 
 	// Miscellaneous
-	void setGameOver() { _gameOver = true; }
-	void ignoreNextMouseUp() { _ignoreNextMouseUp = true; }
 	Common::SeekableReadStream *getExtrasResource(uint32 tag, uint16 id);
+	bool _activatedPLST;
 	bool _activatedSLST;
-	void runLoadDialog();
-	void delayAndUpdate(uint32 ms);
+	void delay(uint32 ms);
 
-	// Timer
-	void installTimer(TimerProc proc, uint32 time);
-	void installCardTimer();
-	void checkTimer();
-	void removeTimer();
+	// Save / Load
+	void runLoadDialog();
+	void runSaveDialog();
+	void loadGameStateAndDisplayError(int slot);
+	void saveGameStateAndDisplayError(int slot, const Common::String &desc);
+
+	/**
+	 * Has the game ended, or has the user requested to quit?
+	 */
+	bool hasGameEnded() const;
+
+	/**
+	 * End the game gracefully
+	 */
+	void setGameEnded();
 };
 
 } // End of namespace Mohawk

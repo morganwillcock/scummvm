@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,7 +27,6 @@
 
 #include "backends/platform/sdl/sdl-sys.h"
 
-#include "backends/mixer/doublebuffersdl/doublebuffersdl-mixer.h"
 #include "backends/platform/openpandora/op-sdl.h"
 #include "backends/plugins/posix/posix-provider.h"
 #include "backends/saves/default/default-saves.h"
@@ -147,7 +146,7 @@ void OSystem_OP::initBackend() {
 
 	// Create the graphics manager
 	if (_graphicsManager == 0) {
-		_graphicsManager = new OPGraphicsManager(_eventSource);
+		_graphicsManager = new OPGraphicsManager(_eventSource, _window);
 	}
 
 	/* Pass to POSIX method to do the heavy lifting */

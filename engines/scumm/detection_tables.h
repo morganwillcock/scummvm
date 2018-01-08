@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -52,13 +52,15 @@ namespace Scumm {
  */
 static const char *const directoryGlobs[] = {
 	"rooms *",  // Mac version of indy3/loom
+	"Contents", // Mac Steam versions
+	"MacOS",    // Mac Steam versions
 	0
 };
 
 
 /**
  * This table contains all game IDs supported by the SCUMM engine, and maps
- * them to the full humand readable game name.
+ * them to the full human readable game name.
  */
 static const PlainGameDescriptor gameDescriptions[] = {
 	{ "atlantis", "Indiana Jones and the Fate of Atlantis" },
@@ -205,6 +207,7 @@ static const Engines::ObsoleteGameID obsoleteGameIDsTable[] = {
 static const GameSettings gameVariantsTable[] = {
 	{"maniac", "Apple II",   0, GID_MANIAC, 0, 0, MDT_APPLEIIGS, 0, Common::kPlatformApple2GS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"maniac", "C64",        0, GID_MANIAC, 0, 0, MDT_C64, 0, Common::kPlatformC64, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI) },
+	{"maniac", "C64 Demo",   0, GID_MANIAC, 0, 0, MDT_C64, GF_DEMO, Common::kPlatformC64, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI) },
 	{"maniac", "V1",      "v1", GID_MANIAC, 1, 0, MDT_PCSPK | MDT_PCJR, 0, Common::kPlatformDOS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"maniac", "V1 Demo", "v1", GID_MANIAC, 1, 0, MDT_PCSPK | MDT_PCJR, GF_DEMO, Common::kPlatformDOS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"maniac", "NES",        0, GID_MANIAC, 1, 0, MDT_NONE,  0, Common::kPlatformNES, GUIO3(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_NOASPECT)},
@@ -221,6 +224,7 @@ static const GameSettings gameVariantsTable[] = {
 	{"indy3", "EGA",      "ega", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, 0, UNK, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"indy3", "No AdLib", "ega", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR,             0, UNK, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"indy3", "VGA",      "vga", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, GF_OLD256 | GF_FEW_LOCALS,                  Common::kPlatformDOS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
+	{"indy3", "Steam",  "steam", GID_INDY3, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, GF_OLD256 | GF_FEW_LOCALS, UNK, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"indy3", "FM-TOWNS",     0, GID_INDY3, 3, 0, MDT_TOWNS,             GF_OLD256 | GF_FEW_LOCALS | GF_AUDIOTRACKS, Common::kPlatformFMTowns, GUIO4(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GUIO_NOASPECT)},
 
 	{"loom", "EGA",      "ega", GID_LOOM, 3, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO1(GUIO_NOSPEECH)},
@@ -230,6 +234,7 @@ static const GameSettings gameVariantsTable[] = {
 #endif
 	{"loom", "FM-TOWNS",     0, GID_LOOM, 3, 0, MDT_TOWNS,                        GF_AUDIOTRACKS | GF_OLD256, Common::kPlatformFMTowns, GUIO4(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GUIO_NOASPECT)},
 	{"loom", "VGA",      "vga", GID_LOOM, 4, 0, MDT_NONE,                         GF_AUDIOTRACKS,             Common::kPlatformDOS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
+	{"loom", "Steam",  "steam", GID_LOOM, 4, 0, MDT_NONE,                         GF_AUDIOTRACKS,  UNK, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 
 	{"pass", 0, 0, GID_PASS, 4, 0, MDT_PCSPK | MDT_PCJR | MDT_CMS | MDT_ADLIB, GF_16COLOR, Common::kPlatformDOS, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 
@@ -240,11 +245,14 @@ static const GameSettings gameVariantsTable[] = {
 	{"monkey", "CD",           0, GID_MONKEY,     5, 0, MDT_ADLIB,                        GF_AUDIOTRACKS, UNK, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
 	{"monkey", "FM-TOWNS",     0, GID_MONKEY,     5, 0, MDT_TOWNS,                        GF_AUDIOTRACKS, Common::kPlatformFMTowns, GUIO4(GUIO_NOSPEECH, GUIO_NOMIDI, GUIO_MIDITOWNS, GUIO_NOASPECT)},
 	{"monkey", "SEGA",         0, GID_MONKEY,     5, 0, MDT_NONE,                         GF_AUDIOTRACKS, Common::kPlatformSegaCD, GUIO2(GUIO_NOSPEECH, GUIO_NOMIDI)},
+	{"monkey", "SE Talkie",    0, GID_MONKEY,     5, 0, MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, GF_AUDIOTRACKS, UNK, GUIO0()},
 
 	{"monkey2",  "", 0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO1(GUIO_NOSPEECH)},
 	{"monkey2", "FM-TOWNS", 0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_TOWNS | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, Common::kPlatformFMTowns, GUIO5(GUIO_NOSPEECH, GUIO_MIDITOWNS, GUIO_MIDIADLIB, GUIO_MIDIMT32, GUIO_NOASPECT)},
+	{"monkey2", "SE Talkie",0, GID_MONKEY2,  5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO0()},
 
 	{"atlantis", "", 0, GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO0()},
+	{"atlantis", "Steam", "steam", GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO0()},
 	{"atlantis", "Floppy", 0, GID_INDY4,    5, 0, MDT_PCSPK | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, UNK, GUIO1(GUIO_NOSPEECH)},
 	{"atlantis", "FM-TOWNS", 0, GID_INDY4,    5, 0, MDT_TOWNS | MDT_ADLIB | MDT_MIDI | MDT_PREFER_MT32, 0, Common::kPlatformFMTowns, GUIO4(GUIO_MIDITOWNS, GUIO_MIDIADLIB, GUIO_MIDIMT32, GUIO_NOASPECT)},
 
@@ -255,12 +263,16 @@ static const GameSettings gameVariantsTable[] = {
 	{"samnmax",  "Floppy", 0, GID_SAMNMAX,  6, 0, MDT_ADLIB | MDT_MIDI | MDT_PREFER_GM, GF_USE_KEY, UNK, GUIO1(GUIO_NOSPEECH)},
 
 #ifdef ENABLE_SCUMM_7_8
-	{"ft",       0, 0, GID_FT,  7, 0, MDT_NONE, 0, UNK, GUIO1(GUIO_NOMIDI)},
+	{"ft",   "", 0, GID_FT,  7, 0, MDT_NONE, 0, UNK, GUIO1(GUIO_NOMIDI)},
+	{"ft",   "Demo", 0, GID_FT,  7, 0, MDT_NONE, GF_DEMO, UNK, GUIO1(GUIO_NOMIDI)},
 
-	{"dig",      0, 0, GID_DIG, 7, 0, MDT_NONE, 0, UNK, GUIO1(GUIO_NOMIDI)},
+	{"dig",  "", 0, GID_DIG, 7, 0, MDT_NONE, 0, UNK, GUIO1(GUIO_NOMIDI)},
+	{"dig",  "Demo", 0, GID_DIG, 7, 0, MDT_NONE, GF_DEMO, UNK, GUIO1(GUIO_NOMIDI)},
+	{"dig",  "Steam", "steam", GID_DIG, 7, 0, MDT_NONE, 0, UNK, GUIO1(GUIO_NOMIDI)},
 
-	{"comi",     0, 0, GID_CMI, 8, 0, MDT_NONE, 0, Common::kPlatformWindows, GUIO2(GUIO_NOMIDI, GUIO_NOASPECT)},
-#endif
+	{"comi", "", 0, GID_CMI, 8, 0, MDT_NONE, 0, Common::kPlatformWindows, GUIO2(GUIO_NOMIDI, GUIO_NOASPECT)},
+	{"comi", "Demo", 0, GID_CMI, 8, 0, MDT_NONE, GF_DEMO, Common::kPlatformWindows, GUIO2(GUIO_NOMIDI, GUIO_NOASPECT)},
+	#endif
 
 	// Humongous Entertainment Scumm Version 6
 	{"activity", "", 0, GID_HEGAME, 6, 62, MDT_ADLIB | MDT_MIDI, GF_USE_KEY, UNK, GUIO1(GUIO_NOLAUNCHLOAD)},
@@ -292,15 +304,15 @@ static const GameSettings gameVariantsTable[] = {
 	// The first version to use 640x480 resolution and wizImages
 	// There are also 7.1 versions of freddemo, airdemo and farmdemo
 	{"catalog", "", 0, GID_HEGAME, 6, 71, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
+	{"farm", "", 0, GID_HEGAME, 6, 71, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 	{"freddi", "", 0, GID_HEGAME, 6, 71, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 
 	// Humongous Entertainment Scumm Version 7.2
 	{"airport", "", 0, GID_HEGAME, 6, 72, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 
 	// Changed o_getResourceSize to cover all resource types
-	{"farm", "", 0, GID_HEGAME, 6, 73, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 	{"puttzoo", "", 0, GID_PUTTZOO, 6, 73, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
-	{"puttzoo", "HE 72", 0, GID_PUTTZOO, 6, 72, MDT_NONE, GF_USE_KEY | GF_HE_985, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
+	{"puttzoo", "HE 72", 0, GID_PUTTZOO, 6, 72, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 	{"puttzoo", "HE 98.5", 0, GID_PUTTZOO, 6, 98, MDT_NONE, GF_USE_KEY | GF_HE_985, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 	{"puttzoo", "HE 99", 0, GID_PUTTZOO, 6, 99, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 	{"puttzoo", "HE 100", 0, GID_PUTTZOO, 6, 100, MDT_NONE, GF_USE_KEY, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
@@ -383,7 +395,7 @@ static const GameSettings gameVariantsTable[] = {
 	{"freddicove", "HE 100", 0, GID_HEGAME, 6, 100, MDT_NONE, GF_USE_KEY | GF_HE_LOCALIZED | GF_16BIT_COLOR, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 
 	// Restructured the Scumm engine
-	{"pjgames", 0, 0, GID_HEGAME, 6, 100, MDT_NONE, GF_USE_KEY | GF_HE_LOCALIZED | GF_16BIT_COLOR, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
+	{"pjgames", 0, 0, GID_PJGAMES, 6, 100, MDT_NONE, GF_USE_KEY | GF_HE_LOCALIZED | GF_16BIT_COLOR, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
 
 	// Added the use of bink videos
 	{"Soccer2004", 0, 0, GID_SOCCER2004, 6, 100, MDT_NONE, GF_USE_KEY | GF_16BIT_COLOR, UNK, GUIO3(GUIO_NOLAUNCHLOAD, GUIO_NOMIDI, GUIO_NOASPECT)},
@@ -422,10 +434,10 @@ static const GameSettings gameVariantsTable[] = {
 using Common::UNK_LANG;
 
 // The following describes how Fingolfin thinks this table might be used one day;
-// this is work in progress, so read this with a salt of grain...
+// this is work in progress, so read this with a grain of salt...
 //
 // The following table maps gameids to possible filename variants for that game.
-// This information is used by the detector to determin possible "detect files".
+// This information is used by the detector to determine possible "detect files".
 // It is also later used by the engine creation code to verify the game to be
 // launched is present. Finally, the correct GameFilenamePattern entry is passed on
 // to the engine which uses it to locate the files for the game.
@@ -439,6 +451,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "maniac", "%02d.MAN", kGenRoomNum, UNK_LANG, UNK, "V1 Demo" },
 	{ "maniac", "maniac1.d64", kGenUnchanged, UNK_LANG, Common::kPlatformC64, "C64" },   // ... and maniac2.d64
 	{ "maniac", "maniac1.dsk", kGenUnchanged, UNK_LANG, Common::kPlatformApple2GS, "Apple II" },   // ... and maniac2.dsk
+	{ "maniac", "maniacdemo.d64", kGenUnchanged, UNK_LANG, Common::kPlatformC64, "C64 Demo" },
 	{ "maniac", "Maniac Mansion (E).prg", kGenUnchanged, Common::EN_GRB, Common::kPlatformNES, "NES" },
 	{ "maniac", "Maniac Mansion (F).prg", kGenUnchanged, Common::FR_FRA, Common::kPlatformNES, "NES" },
 	{ "maniac", "Maniac Mansion (SW).prg", kGenUnchanged, Common::SE_SWE, Common::kPlatformNES, "NES" },
@@ -451,6 +464,8 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "zak", "zak1.d64", kGenUnchanged, UNK_LANG, Common::kPlatformC64, "V1" },         // ... and zak2.d64
 
 	{ "indy3", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
+	{ "indy3", "%02d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+	{ "indy3", "%02d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
 
 	{ "indyloom", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 	{ "indyzak", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
@@ -458,6 +473,8 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 
 	{ "loom", "%02d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 	{ "loom", "%03d.LFL", kGenRoomNum, UNK_LANG, UNK, "VGA" },	// Loom CD
+	{ "loom", "%03d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+	{ "loom", "%03d.LFL", kGenRoomNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
 
 	{ "pass", "%03d.LFL", kGenRoomNum, UNK_LANG, UNK, 0 },
 
@@ -476,6 +493,8 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "atlantis", "indy4.%03d", kGenDiskNum, Common::JA_JPN, Common::kPlatformFMTowns, "FM-TOWNS" },
 	{ "atlantis", "indydemo.%03d", kGenDiskNum, Common::JA_JPN, Common::kPlatformFMTowns, "FM-TOWNS" },
 	{ "atlantis", "Fate of Atlantis Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
+	{ "atlantis", "atlantis.%03d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+	{ "atlantis", "atlantis.%03d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
 
 	{ "tentacle", "tentacle.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "tentacle", "dottdemo.%03d", kGenDiskNum, UNK_LANG, UNK, 0 },
@@ -497,6 +516,8 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "dig", "thedig.la%d", kGenDiskNum, UNK_LANG, UNK, "Demo" }, // Used by an alternate version of the demo
 	{ "dig", "The Dig Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "dig", "The Dig Demo Data", kGenUnchanged, UNK_LANG, Common::kPlatformMacintosh, "Demo" },
+	{ "dig", "dig.la%d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformWindows, "Steam" },
+	{ "dig", "dig.la%d", kGenDiskNumSteam, UNK_LANG, Common::kPlatformMacintosh, "Steam" },
 
 	{ "ft", "ft.la%d", kGenDiskNum, UNK_LANG, UNK, 0 },
 	{ "ft", "ft.%03d", kGenDiskNum, UNK_LANG, UNK, "Demo" },    // Used by PC version of Full Throttle demo
@@ -647,6 +668,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "dog", "Springparadijs", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 
 	{ "farm", "farm", kGenHEPC, UNK_LANG, UNK, 0 },
+	{ "farm", "farm", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "farm", "farmdemo", kGenHEPC, UNK_LANG, UNK, 0 },
 	{ "farm", "Farm Demo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 
@@ -663,12 +685,13 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "freddi", "Freddi Demo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "freddi", "Freddi Fish", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "freddi", "FreddiD", kGenHEPC, Common::NL_NLD, UNK, 0 },
+	{ "freddi", "FreddiE", kGenHEPC, UNK_LANG, UNK, 0 },
 	{ "freddi", "Freddi Fisk", kGenHEMac, Common::SE_SWE, Common::kPlatformMacintosh, 0 },
 	{ "freddi", "FRITZI", kGenHEPC, Common::DE_DEU, UNK, 0 },
 	{ "freddi", "Marine Malice", kGenHEMac, Common::FR_FRA, Common::kPlatformMacintosh, 0 },
 	{ "freddi", "MM-DEMO", kGenHEPC, UNK_LANG, UNK, 0 },
 
-	{ "freddi2", "freddi2", kGenHEPC, UNK_LANG, UNK, 0 },
+	{ "freddi2", "freddi2", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "freddi2", "FF2-demo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "freddi2", "ff2-demo", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "freddi2", "FFHSDemo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
@@ -730,7 +753,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "lost", "lost", kGenHEPC, UNK_LANG, UNK, 0 },
 	{ "lost", "Lost and Found", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "lost", "smaller", kGenHEPC, UNK_LANG, UNK, 0 },
-	{ "lost", "verloren", kGenHEPC, Common::NL_NLD, UNK, 0 },
+	{ "lost", "verloren", kGenHEPC, Common::NL_NLD, Common::kPlatformWindows, 0 },
 	{ "lost", "Verloren", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 
 	{ "maze", "maze", kGenHEPC, UNK_LANG, UNK, 0 },
@@ -775,7 +798,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "pajama2", "PJ2 Demo", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 	{ "pajama2", "PS2DEMO", kGenHEPC, Common::HE_ISR, UNK, 0 },
 
-	{ "pajama3", "pajama3", kGenHEPC, UNK_LANG, UNK, 0 },
+	{ "pajama3", "pajama3", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "pajama3", "FPJ3Demo", kGenHEPC, Common::FR_FRA, UNK, 0 },
 	{ "pajama3", "GPJ3Demo", kGenHEPC, Common::DE_DEU, UNK, 0 },
 	{ "pajama3", "PajamaHTF", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
@@ -791,6 +814,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "pajama3", "PyjamaHG", kGenHEPC, Common::FR_FRA, UNK, 0 },
 	{ "pajama3", "PyjamaSKS", kGenHEPC, Common::DE_DEU, UNK, 0 },
 	{ "pajama3", "PyjamaSKS", kGenHEMac, Common::DE_DEU, Common::kPlatformMacintosh, 0 },
+	{ "pajama3", "SamLDM", kGenHEPC, Common::IT_ITA, Common::kPlatformWindows, 0 },
 	{ "pajama3", "UKPajamaEAT", kGenHEPC, Common::RU_RUS, UNK, 0 },
 
 	{ "puttcircus", "puttcircus", kGenHEPC, UNK_LANG, UNK, 0 },
@@ -809,6 +833,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "puttrace", "500demo", kGenHEPC, Common::NL_NLD, Common::kPlatformWindows, 0 },
 	{ "puttrace", "course", kGenHEPC, Common::FR_FRA, UNK, 0 },
 	{ "puttrace", "CourseDemo", kGenHEPC, Common::FR_FRA, UNK, 0 },
+	{ "puttrace", "GasGasEG", kGenHEPC, Common::IT_ITA, Common::kPlatformWindows, 0 },
 	{ "puttrace", "racedemo", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "puttrace", "RaceDemo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "puttrace", "Rennen", kGenHEPC, Common::DE_DEU, UNK, 0 },
@@ -837,7 +862,7 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "putttime", "PuttTijd", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 	{ "putttime", "Putt Time", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "putttime", "PuttTTT", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
-	{ "putttime", "PuttTTT", kGenHEPC, UNK_LANG, UNK, 0 },
+	{ "putttime", "PuttTTT", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "putttime", "TIJDDEMO", kGenHEPC, Common::NL_NLD, Common::kPlatformWindows, 0 },
 	{ "putttime", "TijdDemo", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 	{ "putttime", "timedemo", kGenHEPC, UNK_LANG, UNK, 0 },
@@ -874,11 +899,12 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 
 	{ "socks", "socks", kGenHEPC, UNK_LANG, UNK, 0 },
 	{ "socks", "SockWorks", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
-	{ "socks", "SokkenSoep", kGenHEPC, Common::NL_NLD, UNK, 0 },
+	{ "socks", "SokkenSoep", kGenHEPC, Common::NL_NLD, Common::kPlatformWindows, 0 },
 	{ "socks", "SokkenSoep", kGenHEMac, Common::NL_NLD, Common::kPlatformMacintosh, 0 },
 
 	{ "spyfox", "spyfox", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "spyfox", "Fuchsdem", kGenHEMac, Common::DE_DEU, Common::kPlatformMacintosh, 0 },
+	{ "spyfox", "FUCHS", kGenHEPC, Common::DE_DEU, Common::kPlatformWindows, 0 },
 	{ "spyfox", "FUCHSDEM", kGenHEPC, Common::DE_DEU, UNK, 0 },
 	{ "spyfox", "FoxDemo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "spyfox", "foxdemo", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
@@ -899,12 +925,13 @@ static const GameFilenamePattern gameFilenamesTable[] = {
 	{ "spyfox", "JR-Demo", kGenHEMac, Common::FR_FRA, Common::kPlatformMacintosh, 0 },
 	{ "spyfox", "game", kGenHEIOS, Common::EN_ANY, Common::kPlatformIOS, 0 },
 
-	{ "spyfox2", "spyfox2", kGenHEPC, UNK_LANG, UNK, 0 },
+	{ "spyfox2", "spyfox2", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "spyfox2", "sf2-demo", kGenHEPC, UNK_LANG, UNK, 0 },
 	{ "spyfox2", "sf2demo", kGenHEPC, UNK_LANG, Common::kPlatformWindows, 0 },
 	{ "spyfox2", "Sf2demo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "spyfox2", "Spy Fox 2", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
 	{ "spyfox2", "Spy Fox 2 - Demo", kGenHEMac, UNK_LANG, Common::kPlatformMacintosh, 0 },
+	{ "spyfox2", "SPyFoxMCR", kGenHEPC, Common::IT_ITA, Common::kPlatformWindows, 0 },
 	{ "spyfox2", "SpyFoxOR", kGenHEPC, Common::DE_DEU, UNK, 0 },
 	{ "spyfox2", "SpyFoxOR", kGenHEMac, Common::DE_DEU, Common::kPlatformMacintosh, 0 },
 	{ "spyfox2", "SPYFoxORE", kGenHEPC, Common::FR_FRA, UNK, 0 },

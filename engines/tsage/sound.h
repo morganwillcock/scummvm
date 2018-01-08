@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -26,12 +26,18 @@
 #include "common/scummsys.h"
 #include "common/mutex.h"
 #include "common/queue.h"
-#include "audio/audiostream.h"
-#include "audio/fmopl.h"
 #include "audio/mixer.h"
 #include "common/list.h"
 #include "tsage/saveload.h"
 #include "tsage/core.h"
+
+namespace Audio {
+class QueuingAudioStream;
+}
+
+namespace OPL {
+class OPL;
+}
 
 namespace TsAGE {
 
@@ -118,15 +124,14 @@ struct VoiceStructEntryType0 {
 	Sound *_sound;
 	int _channelNum;
 	int _priority;
-	int _fieldA;
+	bool _fieldA;
 	Sound *_sound2;
 	int _channelNum2;
 	int _priority2;
-	int _field12;
+	bool _field12;
 	Sound *_sound3;
 	int _channelNum3;
 	int _priority3;
-	int _field1A;
 };
 
 struct VoiceStructEntryType1 {
@@ -191,7 +196,6 @@ public:
 	virtual void listenerSynchronize(Serializer &s);
 	virtual void postInit();
 	void syncSounds();
-	void update();
 
 	static void saveNotifier(bool postFlag);
 	void saveNotifierProc(bool postFlag);
@@ -247,11 +251,10 @@ public:
 	static void sfDoAddToPlayList(Sound *sound);
 	static bool sfDoRemoveFromPlayList(Sound *sound);
 	static void sfDoUpdateVolume(Sound *sound);
-	static void sfSoundServer();
+	static void sfSoundServer(void *);
 	static void sfProcessFading();
 	static void sfUpdateVoiceStructs();
 	static void sfUpdateVoiceStructs2();
-	static void sfUpdateCallback(void *ref);
 };
 
 class Sound: public EventHandler {
@@ -447,21 +450,16 @@ public:
 
 #define ADLIB_CHANNEL_COUNT 9
 
-class AdlibSoundDriver: public SoundDriver, Audio::AudioStream {
+class AdlibSoundDriver: public SoundDriver {
 private:
 	GroupData _groupData;
 	Audio::Mixer *_mixer;
-	FM_OPL *_opl;
-	Audio::SoundHandle _soundHandle;
-	int _sampleRate;
+	OPL::OPL *_opl;
 	byte _portContents[256];
 	const byte *_patchData;
 	int _masterVolume;
+	Common::Mutex _queueMutex;
 	Common::Queue<RegisterValue> _queue;
-	int _samplesTillCallback;
-	int _samplesTillCallbackRemainder;
-	int _samplesPerCallback;
-	int _samplesPerCallbackRemainder;
 
 	bool _channelVoiced[ADLIB_CHANNEL_COUNT];
 	int _channelVolume[ADLIB_CHANNEL_COUNT];
@@ -496,13 +494,8 @@ public:
 	virtual void proc38(int channel, int cmd, int value);
 	virtual void setPitch(int channel, int pitchBlend);
 
-	// AudioStream interface
-	virtual int readBuffer(int16 *buffer, const int numSamples);
-	virtual bool isStereo() const { return false; }
-	virtual bool endOfData() const { return false; }
-	virtual int getRate() const { return _sampleRate; }
-
-	void update(int16 *buf, int len);
+private:
+	void onTimer();
 };
 
 class SoundBlasterDriver: public SoundDriver {

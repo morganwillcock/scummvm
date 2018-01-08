@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -665,6 +665,7 @@ bool HopkinsEngine::runLinuxDemo() {
 			_linesMan->setMaxLineIdx(40);
 			_globals->_characterMaxPosY = 435;
 			_objectsMan->sceneControl2("IM26", "IM26", "ANIM26", "IM26", 30, true);
+			break;
 
 		case 33:
 			_objectsMan->sceneControl("IM33", "IM33", "ANIM33", "IM33", 8, false);
@@ -2860,7 +2861,6 @@ void HopkinsEngine::syncSoundSettings() {
 }
 
 bool HopkinsEngine::displayAdultDisclaimer() {
-	int xp, yp;
 	int buttonIndex;
 
 	_graphicsMan->_minX = 0;
@@ -2880,8 +2880,8 @@ bool HopkinsEngine::displayAdultDisclaimer() {
 	_events->_mouseSpriteId = 0;
 
 	do {
-		xp = _events->getMouseX();
-		yp = _events->getMouseY();
+		int xp = _events->getMouseX();
+		int yp = _events->getMouseY();
 
 		buttonIndex = 0;
 		if (xp >= 37 && xp <= 169 && yp >= 406 && yp <= 445)

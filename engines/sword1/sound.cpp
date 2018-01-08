@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -37,7 +37,6 @@
 #include "audio/decoders/mp3.h"
 #include "audio/decoders/raw.h"
 #include "audio/decoders/vorbis.h"
-#include "audio/decoders/wave.h"
 #include "audio/decoders/xa.h"
 
 namespace Sword1 {
@@ -116,7 +115,7 @@ void Sound::checkSpeechFileEndianness() {
 		return;
 
 	// I picked the sample to use randomly (I just made sure it is long enough so that there is
-	// a fair change of the heuristic to have a stable result and work for every language).
+	// a fair chance of the heuristic to have a stable result and work for every language).
 	int roomNo = _currentCowFile == 1 ? 1 : 129;
 	int localNo = _currentCowFile == 1 ? 2 : 933;
 	// Get the speech data and apply the heuristic
@@ -125,32 +124,52 @@ void Sound::checkSpeechFileEndianness() {
 	uint32 index = _cowHeader[locIndex + (localNo * 2) - 1];
 	if (sampleSize) {
 		uint32 size;
-		double be_diff_sum = 0., le_diff_sum = 0.;
-		_bigEndianSpeech = false;
-		int16 *data = uncompressSpeech(index + _cowHeaderSize, sampleSize, &size);
+		bool leOk = false, beOk = false;
 		// Compute average of difference between two consecutive samples for both BE and LE
-		if (data) {
-			if (size > 4000)
-				size = 2000;
-			else
-				size /= 2;
-			int16 prev_be_value = (int16)SWAP_BYTES_16(*((uint16 *)(data)));
-			for (uint32 i = 1; i < size; ++i) {
-				le_diff_sum += fabs((double)(data[i] - data[i - 1]));
-				int16 be_value = (int16)SWAP_BYTES_16(*((uint16 *)(data + i)));
-				be_diff_sum += fabs((double)(be_value - prev_be_value));
-				prev_be_value = be_value;
-			}
-			delete[] data;
-		}
+		_bigEndianSpeech = false;
+		int16 *data = uncompressSpeech(index + _cowHeaderSize, sampleSize, &size, &leOk);
+		uint32 maxSamples = size > 2000 ? 2000 : size;
+		double le_diff = endiannessHeuristicValue(data, size, maxSamples);
+		delete[] data;
+		_bigEndianSpeech = true;
+		data = uncompressSpeech(index + _cowHeaderSize, sampleSize, &size, &beOk);
+		double be_diff = endiannessHeuristicValue(data, size, maxSamples);
+		delete [] data;
 		// Set the big endian flag
-		_bigEndianSpeech = (be_diff_sum < le_diff_sum);
+		if (leOk && !beOk)
+			_bigEndianSpeech = false;
+		else if (beOk && !leOk)
+			_bigEndianSpeech = true;
+		else
+			_bigEndianSpeech = (be_diff < le_diff);
 		if (_bigEndianSpeech)
 			debug(6, "Mac version: using big endian speech file");
 		else
 			debug(6, "Mac version: using little endian speech file");
-		debug(8, "Speech endianness heuristic: average = %f for BE and %f for LE, computed on %d samples)", be_diff_sum / (size - 1), le_diff_sum / (size - 1), size);
+		debug(8, "Speech decompression memory check: big endian = %s, little endian = %s", beOk ? "good" : "bad", leOk ? "good" : "bad");
+		debug(8, "Speech endianness heuristic: average = %f for BE and %f for LE (%d samples)", be_diff, le_diff, maxSamples);
 	}
+}
+
+double Sound::endiannessHeuristicValue(int16* data, uint32 dataSize, uint32 &maxSamples) {
+	if (!data)
+		return 50000.; // the heuristic value for the wrong endianess is about 21000 (1/3rd of the 16 bits range)
+
+	double diff_sum = 0.;
+	uint32 cpt = 0;
+	int16 prev_value = (int16)FROM_LE_16(*((uint16 *)(data)));
+	for (uint32 i = 1; i < dataSize && cpt < maxSamples; ++i) {
+		int16 value = (int16)FROM_LE_16(*((uint16 *)(data + i)));
+		if (value != prev_value) {
+			diff_sum += fabs((double)(value - prev_value));
+			++cpt;
+			prev_value = value;
+		}
+	}
+	if (cpt == 0)
+		return 50000.;
+	maxSamples = cpt;
+	return diff_sum / cpt;
 }
 
 
@@ -433,7 +452,7 @@ bool Sound::startSpeech(uint16 roomNo, uint16 localNo) {
 		return false;
 }
 
-int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
+int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size, bool* ok) {
 	uint8 *fBuf = (uint8 *)malloc(cSize);
 	_cowFile.seek(index);
 	_cowFile.read(fBuf, cSize);
@@ -443,6 +462,8 @@ int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
 		headerPos++;
 
 	if (headerPos < 100) {
+		if (ok != 0)
+			*ok = true;
 		int32 resSize;
 		int16 *srcData;
 		uint32 srcPos;
@@ -495,8 +516,11 @@ int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
 			srcPos++;
 			if (length < 0) {
 				length = -length;
-				if (length > samplesLeft)
+				if (length > samplesLeft) {
 					length = samplesLeft;
+					if (ok != 0)
+						*ok = false;
+				}
 				int16 value;
 				if (_bigEndianSpeech) {
 					value = (int16)SWAP_BYTES_16(*((uint16 *)(srcData + srcPos)));
@@ -507,8 +531,11 @@ int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
 					dstData[dstPos++] = value;
 				srcPos++;
 			} else {
-				if (length > samplesLeft)
+				if (length > samplesLeft) {
 					length = samplesLeft;
+					if (ok != 0)
+						*ok = false;
+				}
 				if (_bigEndianSpeech) {
 					for (uint16 cnt = 0; cnt < (uint16)length; cnt++)
 						dstData[dstPos++] = (int16)SWAP_BYTES_16(*((uint16 *)(srcData + (srcPos++))));
@@ -522,6 +549,8 @@ int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
 		}
 		if (samplesLeft > 0) {
 			memset(dstData + dstPos, 0, samplesLeft * 2);
+			if (ok != 0)
+				*ok = false;
 		}
 		if (_cowMode == CowDemo) // demo has wave output size embedded in the compressed data
 			*(uint32 *)dstData = 0;
@@ -530,6 +559,8 @@ int16 *Sound::uncompressSpeech(uint32 index, uint32 cSize, uint32 *size) {
 		calcWaveVolume(dstData, resSize);
 		return dstData;
 	} else {
+		if (ok != 0)
+			*ok = false;
 		free(fBuf);
 		warning("Sound::uncompressSpeech(): DATA tag not found in wave header");
 		*size = 0;

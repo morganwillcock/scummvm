@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -37,6 +37,7 @@
 
 #include "hugo/hugo.h"
 #include "hugo/display.h"
+#include "hugo/file.h"
 #include "hugo/inventory.h"
 #include "hugo/util.h"
 #include "hugo/object.h"
@@ -331,7 +332,7 @@ int16 Screen::mergeLists(Rect *list, Rect *blist, const int16 len, int16 blen) {
  * Process the display list
  * Trailing args are int16 x,y,dx,dy for the D_ADD operation
  */
-void Screen::displayList(Dupdate update, ...) {
+void Screen::displayList(int update, ...) {
 	debugC(6, kDebugDisplay, "displayList()");
 
 	int16         blitLength = 0;                   // Length of blit list

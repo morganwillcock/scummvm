@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -26,6 +26,7 @@
 #include "scumm/scumm.h"
 #include "audio/audiostream.h"
 #include "audio/mixer.h"
+#include "common/mutex.h"
 
 namespace Audio {
 class RateConverter;
@@ -55,6 +56,7 @@ public:
 
 	// AudioStream API
 	int readBuffer(int16 *buffer, const int numSamples) {
+		Common::StackLock lock(_mutex);
 		do_mix(buffer, numSamples / 2);
 		return numSamples;
 	}
@@ -80,6 +82,7 @@ private:
 
 	Audio::Mixer *_mixer;
 	Audio::SoundHandle _soundHandle;
+	Common::Mutex _mutex;
 
 	uint32 _mixamt;
 	uint32 _mixpos;

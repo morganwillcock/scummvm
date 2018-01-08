@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,20 +25,30 @@
 
 #include "common/scummsys.h"
 #include "common/str.h"
-#include "audio/audiostream.h"
-#include "audio/decoders/wave.h"
 #include "audio/mixer.h"
+
+namespace Audio {
+class RewindableAudioStream;
+}
+
+namespace Common {
+class SeekableReadStream;
+}
 
 namespace Hopkins {
 
 class VoiceItem {
 public:
+	VoiceItem() : _status(false), _wavIndex(0) {}
+
 	bool _status;
 	int _wavIndex;
 };
 
 class SwavItem {
 public:
+	SwavItem() : _active(false), _audioStream(NULL), _freeSampleFl(false) {}
+
 	bool _active;
 	Audio::RewindableAudioStream *_audioStream;
 	Audio::SoundHandle _soundHandle;
@@ -47,11 +57,15 @@ public:
 
 class MusicItem {
 public:
+	MusicItem() : _active(false) {}
+
 	bool _active;
 };
 
 class SoundItem {
 public:
+	SoundItem() : _active(false) {}
+
 	bool _active;
 };
 
@@ -108,7 +122,7 @@ public:
 	~SoundManager();
 
 	void loadAnimSound();
-	void playAnimSound(int soundNumber);
+	void playAnimSound(int animFrame);
 
 	void loadSample(int wavIndex, const Common::String &file);
 	void playSample(int wavIndex, int voiceMode = 9);

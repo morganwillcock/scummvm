@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -46,7 +46,7 @@ public:
 	SoundCommandParser(ResourceManager *resMan, SegManager *segMan, Kernel *kernel, AudioPlayer *audio, SciVersion soundVersion);
 	~SoundCommandParser();
 
-	//reg_t parseCommand(int argc, reg_t *argv, reg_t acc);
+	//reg_t parseCommand(EngineState *s, int argc, reg_t *argv);
 
 	// Functions used for game state loading
 	void clearPlayList();
@@ -56,6 +56,9 @@ public:
 	// Functions used for the ScummVM menus
 	void setMasterVolume(int vol);
 	void pauseAll(bool pause);
+#ifdef ENABLE_SCI32
+	void setVolume(const reg_t obj, const int vol);
+#endif
 
 	// Debug console functions
 	void startNewSound(int number);
@@ -63,11 +66,18 @@ public:
 	void printPlayList(Console *con);
 	void printSongInfo(reg_t obj, Console *con);
 
-	void processPlaySound(reg_t obj);
+	void processPlaySound(reg_t obj, bool playBed);
 	void processStopSound(reg_t obj, bool sampleFinishedPlaying);
 	void initSoundResource(MusicEntry *newSound);
 
 	MusicType getMusicType() const;
+
+	ResourceType getSoundResourceType(const uint16 resourceNo) const {
+		if (_useDigitalSFX && _resMan->testResource(ResourceId(kResourceTypeAudio, resourceNo)))
+			return kResourceTypeAudio;
+		else
+			return kResourceTypeSound;
+	}
 
 	/**
 	 * Synchronizes the current state of the music list to the rest of the engine, so that
@@ -78,29 +88,29 @@ public:
 	 */
 	void updateSci0Cues();
 
-	reg_t kDoSoundInit(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundPlay(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundRestore(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundMute(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundPause(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundResumeAfterRestore(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundStop(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundStopAll(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundDispose(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundMasterVolume(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundFade(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundGetPolyphony(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundUpdate(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundUpdateCues(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSendMidi(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundGlobalReverb(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSetHold(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundDummy(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundGetAudioCapability(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSetVolume(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSetPriority(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSetLoop(int argc, reg_t *argv, reg_t acc);
-	reg_t kDoSoundSuspend(int argc, reg_t *argv, reg_t acc);
+	reg_t kDoSoundInit(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundPlay(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundRestore(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundMute(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundPause(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundResumeAfterRestore(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundStop(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundStopAll(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundDispose(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundMasterVolume(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundFade(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundGetPolyphony(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundUpdate(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundUpdateCues(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSendMidi(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundGlobalReverb(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSetHold(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundDummy(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundGetAudioCapability(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSetVolume(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSetPriority(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSetLoop(EngineState *s, int argc, reg_t *argv);
+	reg_t kDoSoundSuspend(EngineState *s, int argc, reg_t *argv);
 
 private:
 	//typedef Common::Array<MusicEntryCommand *> SoundCommandContainer;

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "common/language.h"
@@ -34,6 +35,7 @@ const LanguageDescription g_languages[] = {
 	{    "en",    "en", "English", EN_ANY }, // Generic English (when only one game version exist)
 	{    "gb", "en_GB", "English (GB)", EN_GRB },
 	{    "us", "en_US", "English (US)", EN_USA },
+	{    "et", "et_EE", "Estonian", ET_EST },
 	{    "fr", "fr_FR", "French", FR_FRA },
 	{    "de", "de_DE", "German", DE_DEU },
 	{    "gr", "el_GR", "Greek", GR_GRE },

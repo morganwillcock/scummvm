@@ -1,6 +1,7 @@
 MODULE := engines/fullpipe
 
 MODULE_OBJS = \
+	anihandler.o \
 	behavior.o \
 	console.o \
 	detection.o \
@@ -22,9 +23,11 @@ MODULE_OBJS = \
 	scenes.o \
 	sound.o \
 	stateloader.o \
+	statesaver.o \
 	statics.o \
 	utils.o \
 	scenes/sceneIntro.o \
+	scenes/sceneIntroDemo.o \
 	scenes/scene01.o \
 	scenes/scene02.o \
 	scenes/scene03.o \
@@ -33,6 +36,7 @@ MODULE_OBJS = \
 	scenes/scene06.o \
 	scenes/scene07.o \
 	scenes/scene08.o \
+	scenes/scene09.o \
 	scenes/scene10.o \
 	scenes/scene11.o \
 	scenes/scene12.o \
@@ -49,7 +53,9 @@ MODULE_OBJS = \
 	scenes/scene24.o \
 	scenes/scene25.o \
 	scenes/scene26.o \
+	scenes/scene27.o \
 	scenes/scene28.o \
+	scenes/scene29.o \
 	scenes/scene30.o \
 	scenes/scene31.o \
 	scenes/scene32.o \

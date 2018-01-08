@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -322,7 +322,7 @@ static const ADExtraGuiOptionsMap optionsList[] = {
 class GroovieMetaEngine : public AdvancedMetaEngine {
 public:
 	GroovieMetaEngine() : AdvancedMetaEngine(gameDescriptions, sizeof(GroovieGameDescription), groovieGames, optionsList) {
-		_singleid = "groovie";
+		_singleId = "groovie";
 
 		// Use kADFlagUseExtraAsHint in order to distinguish the 11th hour from
 		// its "Making of" as well as the Clandestiny Trailer; they all share
@@ -333,7 +333,7 @@ public:
 		// to the detection entries. In the latter case, this TODO should be
 		// replaced with an according explanation.
 		_flags = kADFlagUseExtraAsHint;
-		_guioptions = GUIO3(GUIO_NOSUBTITLES, GUIO_NOSFX, GUIO_NOASPECT);
+		_guiOptions = GUIO3(GUIO_NOSUBTITLES, GUIO_NOSFX, GUIO_NOASPECT);
 
 		// Need MIDI directory to detect 11H Mac Installed
 		_maxScanDepth = 2;

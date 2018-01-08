@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -40,6 +40,11 @@ struct MessageTuple {
 
 	MessageTuple(byte noun_ = 0, byte verb_ = 0, byte cond_ = 0, byte seq_ = 1)
 		: noun(noun_), verb(verb_), cond(cond_), seq(seq_) { }
+
+	Common::String toString() const {
+		return Common::String::format("noun %d, verb %d, cond %d, seq %d",
+									  noun, verb, cond, seq);
+	}
 };
 
 class CursorStack : public Common::Stack<MessageTuple> {
@@ -73,7 +78,7 @@ private:
 	bool getRecord(CursorStack &stack, bool recurse, MessageRecord &record);
 	void outputString(reg_t buf, const Common::String &str);
 	Common::String processString(const char *s);
-	int hexDigitToInt(char h);
+	int hexDigitToWrongInt(char h);
 	bool stringHex(Common::String &outStr, const Common::String &inStr, uint &index);
 	bool stringLit(Common::String &outStr, const Common::String &inStr, uint &index);
 	bool stringStage(Common::String &outStr, const Common::String &inStr, uint &index);

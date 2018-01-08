@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,7 +28,7 @@
 
 namespace Gob {
 
-ADLPlayer::ADLPlayer(Audio::Mixer &mixer) : AdLib(mixer),
+ADLPlayer::ADLPlayer() : AdLib(1000),
 	_songData(0), _songDataSize(0), _playPos(0) {
 
 }
@@ -135,14 +135,7 @@ uint32 ADLPlayer::pollMusic(bool first) {
 	if (delay & 0x80)
 		delay = ((delay & 3) << 8) | *_playPos++;
 
-	return getSampleDelay(delay);
-}
-
-uint32 ADLPlayer::getSampleDelay(uint16 delay) const {
-	if (delay == 0)
-		return 0;
-
-	return ((uint32)delay * getSamplesPerSecond()) / 1000;
+	return delay;
 }
 
 void ADLPlayer::rewind() {

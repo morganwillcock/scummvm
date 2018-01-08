@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -66,12 +66,16 @@ public:
 	virtual int getDefaultGraphicsMode() const;
 	virtual bool setGraphicsMode(int mode);
 	virtual int getGraphicsMode() const;
+	virtual const GraphicsMode *getSupportedShaders() const;
+	virtual int getShader() const;
+	virtual bool setShader(int id);
 	virtual void resetGraphicsScale();
 #ifdef USE_RGB_COLOR
 	virtual Graphics::PixelFormat getScreenFormat() const;
 	virtual Common::List<Graphics::PixelFormat> getSupportedFormats() const;
 #endif
 	virtual void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL);
+	virtual void initSizeHint(const Graphics::ModeList &modes) override;
 	virtual int getScreenChangeID() const;
 
 	virtual void beginGFXTransaction();
@@ -127,6 +131,7 @@ public:
 
 	virtual void quit();
 	virtual void displayMessageOnOSD(const char *msg);
+	virtual void displayActivityIconOnOSD(const Graphics::Surface *icon);
 
 	//@}
 

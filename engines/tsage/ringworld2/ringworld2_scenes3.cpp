@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -359,7 +359,7 @@ void Scene3125::signal() {
 		break;
 	case 3126:
 		R2_GLOBALS.setFlag(79);
-	// No break on purpose
+		// fall through
 	case 3176:
 		R2_GLOBALS._sceneManager.changeScene(3250);
 		break;
@@ -1275,7 +1275,7 @@ void Scene3250::signal() {
 }
 
 void Scene3250::dispatch() {
-	if ((R2_GLOBALS._player._visage == 3250) && (R2_GLOBALS._player._strip == 3) && (R2_GLOBALS._player._effect == 0)) {
+	if ((R2_GLOBALS._player._visage == 3250) && (R2_GLOBALS._player._strip == 3) && (R2_GLOBALS._player._effect == EFFECT_NONE)) {
 		R2_GLOBALS._player._effect = EFFECT_SHADED2;
 		R2_GLOBALS._player._shade = 6;
 	}
@@ -2221,24 +2221,24 @@ void Scene3375::signal() {
 }
 
 void Scene3375::dispatch() {
-	if ((R2_GLOBALS._player._position.y >= 168) && (R2_GLOBALS._player._effect == 1))
+	if ((R2_GLOBALS._player._position.y >= 168) && (R2_GLOBALS._player._effect == EFFECT_SHADED))
 		R2_GLOBALS._player._effect = EFFECT_SHADED2;
-	else if ((R2_GLOBALS._player._position.y < 168) && (R2_GLOBALS._player._effect == 6))
+	else if ((R2_GLOBALS._player._position.y < 168) && (R2_GLOBALS._player._effect == EFFECT_SHADED2))
 		R2_GLOBALS._player._effect = EFFECT_SHADED;
 
-	if ((_companion1._position.y >= 168) && (_companion1._effect == 1))
+	if ((_companion1._position.y >= 168) && (_companion1._effect == EFFECT_SHADED))
 		_companion1._effect = EFFECT_SHADED2;
-	else if ((_companion1._position.y < 168) && (_companion1._effect == 6))
+	else if ((_companion1._position.y < 168) && (_companion1._effect == EFFECT_SHADED2))
 		_companion1._effect = EFFECT_SHADED;
 
-	if ((_companion2._position.y >= 168) && (_companion2._effect == 1))
+	if ((_companion2._position.y >= 168) && (_companion2._effect == EFFECT_SHADED))
 		_companion2._effect = EFFECT_SHADED2;
-	else if ((_companion2._position.y < 168) && (_companion2._effect == 6))
+	else if ((_companion2._position.y < 168) && (_companion2._effect == EFFECT_SHADED2))
 		_companion2._effect = EFFECT_SHADED;
 
-	if ((_webbster._position.y >= 168) && (_webbster._effect == 1))
+	if ((_webbster._position.y >= 168) && (_webbster._effect == EFFECT_SHADED))
 		_webbster._effect = EFFECT_SHADED2;
-	else if ((_webbster._position.y < 168) && (_webbster._effect == 6))
+	else if ((_webbster._position.y < 168) && (_webbster._effect == EFFECT_SHADED2))
 		_webbster._effect = EFFECT_SHADED;
 
 	Scene::dispatch();
@@ -2843,8 +2843,8 @@ void Scene3400::signal() {
 		R2_INVENTORY.setObjectScene(R2_SAPPHIRE_BLUE, 0);
 		_stripManager.start(3307, this);
 		if (R2_GLOBALS._player._characterIndex == R2_SEEKER) {
-			_sceneMode = 3400;
-			R2_GLOBALS._player.setAction(&_sequenceManager, this, 3400, &R2_GLOBALS._player, &_teal, &_sapphire, NULL);
+			_sceneMode = 3404;
+			R2_GLOBALS._player.setAction(&_sequenceManager, this, 3404, &R2_GLOBALS._player, &_teal, &_sapphire, NULL);
 		} else {
 			_sceneMode = 3408;
 			_companion1.setAction(&_sequenceManager, this, 3408, &_companion1, &_teal, &_sapphire, NULL);
@@ -3027,7 +3027,7 @@ void Scene3500::Action1::turnShuttle(bool arg1) {
 	case 4:
 		scene->_shuttle._frameChange = _direction;
 		scene->_shuttle.setFrame(scene->_shuttle.changeFrame());
-	// No break on purpose
+		// fall through
 	case 3:
 		_actionIndex = 10;
 		setDelay(0);
@@ -3050,7 +3050,7 @@ void Scene3500::Action1::turnShuttle(bool arg1) {
 		scene->_shuttle._frameChange = _direction;
 		scene->_shuttle.setFrame(scene->_shuttle.changeFrame());
 		setDelay(1);
-	// No break on purpose
+		// fall through
 	case 8:
 		scene->_tunnelHorzCircle.setStrip(2);
 		_actionIndex = 1;
@@ -3079,7 +3079,7 @@ void Scene3500::Action1::signal() {
 			setDelay(1);
 			return;
 		}
-	// No break on purpose
+		// fall through
 	case 3:
 		scene->_shuttle._frameChange = _direction;
 		scene->_shuttle.setFrame(scene->_shuttle.changeFrame());
@@ -3158,7 +3158,7 @@ void Scene3500::Action1::signal() {
 			break;
 		}
 		}
-	// No break on purpose
+		// fall through
 	case 2: {
 		scene->_tunnelVertCircle.setPosition(Common::Point(160, 73));
 		scene->_tunnelVertCircle._moveDiff.x = 160 - scene->_mazeChangeAmount;
@@ -3668,11 +3668,12 @@ void Scene3500::postInit(SceneObjectList *OwnerList) {
 	_horizontalSpeedDisplay.setPosition(Common::Point(126, 108));
 	_horizontalSpeedDisplay.fixPriority(200);
 
+	_action1._turningFl = false;
+
+	_mazeUI.postInit();
 	_mazeUI.setDisplayBounds(Rect(160, 89, 299, 182));
 	_mazeUI.load(2);
 	_mazeUI.setMazePosition(_mazePosition);
-
-	_action1._turningFl = false;
 	_mazeUI.draw();
 	_directionChangesEnabled = true;
 
@@ -3876,6 +3877,11 @@ void Scene3500::dispatch() {
 	Rect tmpRect;
 	Scene::dispatch();
 
+	// WORKAROUND: The _mazeUI wasn't originally added to the scene in postInit.
+	// This is only needed to fix old savegames
+	if (!R2_GLOBALS._sceneObjects->contains(&_mazeUI))
+		_mazeUI.draw();
+
 	if (((_shuttle._frame % 2) == 0) && (!_action1._turningFl)) {
 		_shuttle.setFrame(_shuttle.changeFrame());
 		_mazeDirection = _shuttle._frame;
@@ -3896,7 +3902,6 @@ void Scene3500::dispatch() {
 	int16 mazePosY = 0;
 	int deltaX = 0;
 	int deltaY = 0;
-	int tmpCellId = 0;
 	int cellId = 0;
 
 	if ((_mazeChangeAmount == 0) && !_postFixupFl) {
@@ -3912,7 +3917,7 @@ void Scene3500::dispatch() {
 		mazePosY = _mazeUI.cellFromY(_mazePosition.y + 46) - 46;
 		deltaX = abs(mazePosX - newMazeX);
 		deltaY = abs(mazePosY - newMazeY);
-		tmpCellId = 0;
+		int tmpCellId = 0;
 
 		switch (_mazeDirection) {
 		case MAZEDIR_NORTH:
@@ -3956,7 +3961,7 @@ void Scene3500::dispatch() {
 					if ( (((cellId == 23) || (cellId == 24) || (cellId == 4)) && (newMazeY <= mazePosY) && (_mazePosition.y>= mazePosY))
 						|| (((cellId == 25) || (cellId == 26) || (cellId == 5) || (cellId == 14) || (cellId == 15)) && (_mazeChangeAmount >= deltaY) && (_mazeChangeAmount > 3) && (_action1._turningFl != 0)) ) {
 						newMazeY = mazePosY;
-						if ((cellId != 25) && (cellId != 26) && (cellId != 5) && (cellId != 14) && (cellId == 15))
+						if ((cellId != 25) && (cellId != 26) && (cellId != 5) && (cellId != 14) && (cellId != 15))
 							R2_GLOBALS._sound2.play(339);
 						_rotation->_idxChange = 0;
 						_speed = 0;
@@ -4216,7 +4221,6 @@ void Scene3500::dispatch() {
 				_rotation->_idxChange = 0;
 			}
 
-			_mazeUI.draw();
 			if (_exitCounter != 0)
 				++_exitCounter;
 		}
@@ -4341,7 +4345,7 @@ void Scene3600::Action2::signal() {
 		R2_GLOBALS._player.enableControl();
 		_actionIndex = 3619;
 		scene->_protector._state = 0;
-	// No break on purpose
+		// fall through
 	case 3619: {
 		++_actionIndex;
 		scene->_protector.setup(3127, 2, 1);
@@ -5049,6 +5053,7 @@ void Scene3700::signal() {
 
 Scene3800::Scene3800() {
 	_desertDirection = 0;
+	_skylineRect.set(0, 0, 320, 87);
 }
 
 void Scene3800::synchronize(Serializer &s) {
@@ -5221,7 +5226,8 @@ void Scene3800::initExits() {
 }
 
 void Scene3800::enterArea() {
-	R2_GLOBALS._player.disableControl();
+	R2_GLOBALS._player.disableControl(CURSOR_WALK);
+
 	switch (_desertDirection) {
 	case 0:
 		R2_GLOBALS._player.postInit();
@@ -5347,7 +5353,6 @@ void Scene3800::postInit(SceneObjectList *OwnerList) {
 	_westExit.setDetails(Rect(0, 87, 14, 168), EXITCURSOR_W, 3800);
 	_westExit.setDest(Common::Point(7, 145));
 
-	_skylineRect.set(0, 0, 320, 87);
 	_background.setDetails(Rect(0, 0, 320, 200), 3800, 0, 1, 2, 1, (SceneItem *) NULL);
 
 	enterArea();

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -23,8 +23,6 @@
 #include "audio/mods/protracker.h"
 #include "audio/mods/paula.h"
 #include "audio/mods/module.h"
-
-#include "audio/audiostream.h"
 
 #include "common/textconsole.h"
 
@@ -219,11 +217,10 @@ void ProtrackerStream::updateRow() {
 		case 0x0:
 			if (exy) {
 				_track[track].arpeggio = true;
-				if (note.period) {
-					_track[track].arpeggioNotes[0] = note.note;
-					_track[track].arpeggioNotes[1] = note.note + ex;
-					_track[track].arpeggioNotes[2] = note.note + ey;
-				}
+				byte trackNote = _module.periodToNote(_track[track].period);
+				_track[track].arpeggioNotes[0] = trackNote;
+				_track[track].arpeggioNotes[1] = trackNote + ex;
+				_track[track].arpeggioNotes[2] = trackNote + ey;
 			}
 			break;
 		case 0x1:

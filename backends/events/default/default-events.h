@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -67,12 +67,11 @@ class DefaultEventManager : public Common::EventManager, Common::EventObserver {
 		kKeyRepeatSustainDelay = 100
 	};
 
-	struct {
-		uint16 ascii;
-		byte flags;
-		int keycode;
-	} _currentKeyDown;
+	bool _shouldGenerateKeyRepeatEvents;
+	Common::KeyState _currentKeyDown;
 	uint32 _keyRepeatTime;
+
+	void handleKeyRepeat();
 public:
 	DefaultEventManager(Common::EventSource *boss);
 	~DefaultEventManager();
@@ -80,6 +79,7 @@ public:
 	virtual void init();
 	virtual bool pollEvent(Common::Event &event);
 	virtual void pushEvent(const Common::Event &event);
+	virtual void purgeMouseEvents() override;
 
 	virtual Common::Point getMousePos() const { return _mousePos; }
 	virtual int getButtonState() const { return _buttonState; }
@@ -96,6 +96,17 @@ public:
 	 // this, please talk to tsoliman and/or LordHoto.
 	virtual Common::Keymapper *getKeymapper() { return _keymapper; }
 #endif
+
+	/**
+	 * Controls whether repeated key down events are generated while a key is pressed
+	 *
+	 * Backends that generate their own keyboard repeat events should disable this.
+	 *
+	 * @param generateKeyRepeatEvents
+	 */
+	void setGenerateKeyRepeatEvents(bool generateKeyRepeatEvents) {
+		_shouldGenerateKeyRepeatEvents = generateKeyRepeatEvents;
+	}
 };
 
 #endif

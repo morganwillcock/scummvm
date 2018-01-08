@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -43,6 +43,8 @@ namespace Fullpipe {
 #define MV_LFT_OPEN 1048
 #define MV_MAN_GOLADDER 451
 #define MV_MAN_GOLADDER2 2844
+#define MV_MAN_HMRKICK 1028
+#define MV_MAN_HMRKICK_COINLESS 1445
 #define MV_MAN_LIFTDOWN 1052
 #define MV_MAN_LIFTUP 1051
 #define MV_MAN_LOOKUP 4773
@@ -60,6 +62,8 @@ namespace Fullpipe {
 #define PIC_CSR_DEFAULT_INV 4892
 #define PIC_CSR_ITN 4893
 #define PIC_CSR_ITN_INV 4894
+#define PIC_CSR_ITN_GREEN 5330
+#define PIC_CSR_ITN_RED 5329
 #define PIC_CSR_GOFAR_L 4895
 #define PIC_CSR_GOFAR_R 4896
 #define PIC_CSR_ARCADE1 4901
@@ -73,19 +77,11 @@ namespace Fullpipe {
 #define PIC_CSR_ARCADE7 4909
 #define PIC_CSR_ARCADE7_D 4910
 #define PIC_CSR_ARCADE8 4911
-#define PIC_CSR_DEFAULT 4891
-#define PIC_CSR_DEFAULT_INV 4892
 #define PIC_CSR_GOD 4900
-#define PIC_CSR_GOFAR_L 4895
-#define PIC_CSR_GOFAR_R 4896
 #define PIC_CSR_GOL 4897
 #define PIC_CSR_GOR 4898
 #define PIC_CSR_GOU 4899
 #define PIC_CSR_HELPERBGR 5331
-#define PIC_CSR_ITN 4893
-#define PIC_CSR_ITN_GREEN 5330
-#define PIC_CSR_ITN_INV 4894
-#define PIC_CSR_ITN_RED 5329
 #define PIC_CSR_LIFT 5176
 #define PIC_CSR_MAP 5339
 #define PIC_HLP_BGR 3562
@@ -108,6 +104,7 @@ namespace Fullpipe {
 #define PIC_MAP_A14 5276
 #define PIC_MAP_I01 5295
 #define PIC_MAP_I02 5296
+#define PIC_MAP_I03 5395
 #define PIC_MAP_P01 5277
 #define PIC_MAP_P02 5278
 #define PIC_MAP_P03 5279
@@ -166,6 +163,44 @@ namespace Fullpipe {
 #define PIC_MAP_S36 5260
 #define PIC_MAP_S37 5261
 #define PIC_MAP_S38 5262
+#define PIC_MAP_H01 5357
+#define PIC_MAP_H02 5358
+#define PIC_MAP_H03 5359
+#define PIC_MAP_H04 5360
+#define PIC_MAP_H05 5361
+#define PIC_MAP_H06 5362
+#define PIC_MAP_H07 5363
+#define PIC_MAP_H08 5364
+#define PIC_MAP_H09 5365
+#define PIC_MAP_H10 5366
+#define PIC_MAP_H11 5367
+#define PIC_MAP_H12 5368
+#define PIC_MAP_H13 5369
+#define PIC_MAP_H14 5370
+#define PIC_MAP_H15 5371
+#define PIC_MAP_H16 5372
+#define PIC_MAP_H17 5373
+#define PIC_MAP_H18 5394
+#define PIC_MAP_H19 5393
+#define PIC_MAP_H20 5374
+#define PIC_MAP_H21 5375
+#define PIC_MAP_H22 5376
+#define PIC_MAP_H23 5377
+#define PIC_MAP_H24 5378
+#define PIC_MAP_H25 5379
+#define PIC_MAP_H26 5380
+#define PIC_MAP_H27 5381
+#define PIC_MAP_H28 5382
+#define PIC_MAP_H29 5383
+#define PIC_MAP_H30 5384
+#define PIC_MAP_H31 5385
+#define PIC_MAP_H32 5386
+#define PIC_MAP_H33 5387
+#define PIC_MAP_H34 5388
+#define PIC_MAP_H35 5389
+#define PIC_MAP_H36 5390
+#define PIC_MAP_H37 5391
+#define PIC_MAP_H38 5392
 #define PIC_TTL_CREDITS 5172
 #define QU_INTR_STARTINTRO 5133
 #define SC_1 301
@@ -219,8 +254,12 @@ namespace Fullpipe {
 #define SC_MAINMENU 4620
 #define SC_MAP 5222
 #define SC_TITLES 5166
+#define SND_CMN_015 3139
 #define SND_CMN_031 3516
 #define SND_CMN_032 3517
+#define SND_CMN_054 4762
+#define SND_CMN_055 4763
+#define SND_CMN_056 4772
 #define SND_CMN_060 4921
 #define SND_CMN_061 4922
 #define SND_CMN_070 5199
@@ -265,6 +304,75 @@ namespace Fullpipe {
 #define TrubaDown 697
 #define TrubaLeft 474
 #define TrubaUp 680
+
+// Main Menu
+#define PIC_MNU_AUTHORS_L 4624
+#define PIC_MNU_CONTINUE_L 4626
+#define PIC_MNU_DEBUG_L 4632
+#define PIC_MNU_EXIT_L 4622
+#define PIC_MNU_LOAD_L 4628
+#define PIC_MNU_MUSICSLIDER_D 4914
+#define PIC_MNU_MUSICSLIDER_L 4915
+#define PIC_MNU_RESTART_L 5299
+#define PIC_MNU_SAVE_L 4630
+#define PIC_MNU_SLIDER_D 4913
+#define PIC_MNU_SLIDER_L 4912
+
+// Query dialog
+#define PIC_MEX_BGR 5300
+#define PIC_MEX_CANCEL 5302
+#define PIC_MEX_OK 5301
+#define PIC_MOV_BGR 5343
+#define PIC_MOV_CANCEL 5345
+#define PIC_MOV_OK 5344
+
+// Saveload dialog
+#define PIC_MLD_BGR 4645
+#define PIC_MLD_CANCEL_D 4648
+#define PIC_MLD_CANCEL_L 4649
+#define PIC_MLD_OK_D 4646
+#define PIC_MLD_OK_L 4647
+#define PIC_MSV_0_D 4643
+#define PIC_MSV_0_L 4644
+#define PIC_MSV_1_D 4651
+#define PIC_MSV_1_L 4660
+#define PIC_MSV_2_D 4652
+#define PIC_MSV_2_L 4661
+#define PIC_MSV_3_D 4653
+#define PIC_MSV_3_L 4662
+#define PIC_MSV_4_D 4654
+#define PIC_MSV_4_L 4663
+#define PIC_MSV_5_D 4655
+#define PIC_MSV_5_L 4664
+#define PIC_MSV_6_D 4656
+#define PIC_MSV_6_L 4665
+#define PIC_MSV_7_D 4657
+#define PIC_MSV_7_L 4666
+#define PIC_MSV_8_D 4658
+#define PIC_MSV_8_L 4667
+#define PIC_MSV_9_D 4659
+#define PIC_MSV_9_L 4668
+#define PIC_MSV_BGR 4634
+#define PIC_MSV_CANCEL_D 4637
+#define PIC_MSV_CANCEL_L 4638
+#define PIC_MSV_DOTS_D 4670
+#define PIC_MSV_DOTS_L 4669
+#define PIC_MSV_DOT_D 5188
+#define PIC_MSV_DOT_L 5189
+#define PIC_MSV_EMPTY_D 4639
+#define PIC_MSV_EMPTY_L 4640
+#define PIC_MSV_FULL_D 4641
+#define PIC_MSV_FULL_L 4642
+#define PIC_MSV_OK_D 4635
+#define PIC_MSV_OK_L 4636
+#define PIC_MSV_SPACE_D 5190
+#define PIC_MSV_SPACE_L 5191
+
+// Demo screen
+#define PIC_POST_BGR 5396
+#define PIC_POST_TEXT 5397
+#define PIC_POST_BUTTON 5398
+#define SND_CMN_069 4969
 
 // Intro
 #define ANI_IN1MAN 5110
@@ -394,7 +502,6 @@ namespace Fullpipe {
 #define MV_SC4_COIN_default 1029
 #define MV_SPK4_PLAY 3276
 #define MV_SPR_LOWER 543
-#define PIC_MAP_P03 5279
 #define PIC_SC4_BOTTLE 568
 #define PIC_SC4_BOTTLE2 2936
 #define PIC_SC4_DOWNTRUBA 619
@@ -523,7 +630,7 @@ namespace Fullpipe {
 #define ST_NBL_NORM 1076
 
 // Scene 7
-#define ANI_CORNERSITTER 71
+#define ANI_CORNERSITTER 711
 #define ANI_HOOLIGAN 808
 #define ANI_LUKE 803
 #define ANI_PLUSMINUS 2938
@@ -584,6 +691,37 @@ namespace Fullpipe {
 #define ST_MAN8_HANDSUP 773
 #define ST_MAN8_STAND 774
 #define ST_VMT_MIN 766
+
+// Scene 9
+#define ANI_BALL9 933
+#define ANI_GLOTATEL 924
+#define ANI_GRIT_9 2719
+#define ANI_PLEVATEL 919
+#define ANI_VISUNCHIK 904
+#define MSG_SC9_EATBALL 941
+#define MSG_SC9_FLOWN 943
+#define MSG_SC9_FROMLADDER 4207
+#define MSG_SC9_PLVCLICK 965
+#define MSG_SC9_SETSCROLL 964
+#define MSG_SC9_SHOWBALL 936
+#define MSG_SC9_STARTTIOTIA 4942
+#define MSG_SC9_TOLADDER 4206
+#define MV_BALL9_EXPLODE 939
+#define MV_GLT_FLYAWAY 931
+#define MV_MAN9_SHOOT 922
+#define MV_VSN_CYCLE2 2987
+#define PIC_SC9_LADDER_R 2700
+#define QU_SC9_BALLEXPLODE 938
+#define QU_SC9_EATBALL 942
+#define QU_TTA9_GOL 4937
+#define SND_9_006 3650
+#define SND_9_018 4200
+#define SND_9_019 4201
+#define ST_GLT_SIT 926
+#define ST_GRT9_GRIT 2722
+#define ST_GRT9_NORM 2721
+#define ST_PLV_SIT 921
+#define ST_VSN_NORMAL 906
 
 // Scene 10
 #define ANI_GUM 978
@@ -841,10 +979,70 @@ namespace Fullpipe {
 #define ST_SMG_SIT 1399
 
 // Scene 18
+#define ANI_BOY18 1477
+#define ANI_DOMINO_18 3174
+#define ANI_GIRL18 1484
+#define ANI_KRESLO 1459
+#define ANI_WHIRLIGIG_18 829
+#define MSG_SC18_CLICKBOARD 3297
+#define MSG_SC18_MANCLIMBEDDOWN 1540
+#define MSG_SC18_MANCLIMBEDUP 1539
+#define MSG_SC18_MANREADY 1507
+#define MSG_SC18_SHOWBOYJUMP 1495
+#define MSG_SC18_SHOWBOYJUMPTO 1497
+#define MSG_SC18_SHOWGIRLJUMP 1496
+#define MSG_SC18_SHOWGIRLJUMPTO 1499
+#define MSG_SC18_SHOWMANJUMP 1510
+#define MSG_SC18_SHOWMANJUMPTO 1508
+#define MV_BOY18_JUMPFROM 1478
+#define MV_BOY18_JUMPTO 1481
+#define MV_GRL18_JUMPFROM 1485
+#define MV_GRL18_JUMPTO 1488
+#define MV_KSL_CALMDOWN 1476
+#define MV_KSL_INBOY 1491
+#define MV_KSL_INGIRL 1493
+#define MV_KSL_INMAN 1504
+#define MV_KSL_JUMPBOY 1473
+#define MV_KSL_JUMPGIRL 1475
+#define MV_KSL_JUMPMAN 1509
+#define MV_KSL_SWING 1460
+#define MV_KSL_SWINGBOY 1462
+#define MV_KSL_SWINGGIRL 1464
+#define MV_KSL_SWINGMAN 1502
+#define MV_MAN18_JUMPTOTRUBA 1511
+#define MV_MAN18_STANDKRESLO 1500
+#define MV_WHR18_SPIN 1300
+#define PIC_SC18_DOMIN 5184
+#define PIC_SC18_LADDER1 1471
+#define PIC_SC18_LADDER2 1472
+#define PIC_SC18_LADDER3 3299
 #define PIC_SC18_RTRUBA 1520
+#define QU_SC19_MANJUMP1 1516
+#define QU_SC19_MANJUMP2 1517
+#define QU_SC19_MANJUMP3 1518
+#define SND_18_006 3906
+#define SND_18_010 4994
+#define ST_KSL_BOY 1463
+#define ST_KSL_GIRL 1465
+#define ST_KSL_JUMPBOY 1492
+#define ST_KSL_JUMPGIRL 1494
+#define ST_KSL_JUMPMAN 1505
+#define ST_KSL_MAN 1503
+#define ST_KSL_REACT 1474
 
 // Scene 19
+#define ANI_CORDIE 1529
+#define ANI_WHIRLGIG_19 1302
+#define MSG_SC19_UPDATENUMRIDES 5203
+#define MV_WHR19_SPIN 1317
+#define PIC_SC19_RTRUBA1 1513
+#define PIC_SC19_RTRUBA2 1514
 #define PIC_SC19_RTRUBA3 1515
+#define PIC_SC19_RTRUBA31 5320
+#define SND_19_015 3928
+#define SND_19_016 4995
+#define ST_CDI_EMPTY2 1543
+#define ST_KSL_NORM 1461
 
 // Scene 20
 #define ANI_GRANDMA_20 2427
@@ -978,7 +1176,6 @@ namespace Fullpipe {
 #define ST_WTR24_FLOWLOWER 1843
 
 // Scene 25
-#define ANI_BEARDED_CMN 3420
 #define ANI_BOARD25 1898
 #define ANI_DROP_25 3499
 #define ANI_INV_BOARD 1872
@@ -1083,6 +1280,52 @@ namespace Fullpipe {
 #define ST_VNT26_RIGHT2 3348
 #define ST_VNT26_UP2 1948
 
+// Scene 27
+#define ANI_BITA 2026
+#define ANI_BITAHANDLER 3349
+#define ANI_MAID 2015
+#define ANI_VODILLA 1994
+#define MSG_SC27_CLICKBET 2048
+#define MSG_SC27_HANDLERTOBACK 3372
+#define MSG_SC27_HANDLERTOFRONT 3371
+#define MSG_SC27_SHOWNEXTBET 3369
+#define MSG_SC27_STARTBET 2047
+#define MSG_SC27_STARTWIPE 2057
+#define MSG_SC27_TAKEVENT 4584
+#define MV_BTA_FALL 2049
+#define MV_BTH_1_0 3366
+#define MV_BTH_2_1 3364
+#define MV_BTH_3_2 3362
+#define MV_BTH_4_3 3360
+#define MV_BTH_5_4 3358
+#define MV_MAN27_FLOW 1990
+#define MV_MAN27_THROWBET 1989
+#define PIC_SC27_HITZONE2 4756
+#define QU_DRV_GIVEVENT 2040
+#define QU_DRV_PUSHBUTTON 2056
+#define QU_DRV_PUSHBUTTON_NOVENT 4578
+#define QU_MID_CLEANVENT 4583
+#define QU_MID_SWITCHBACK 2044
+#define QU_SC27_RESTARTBETS 3370
+#define QU_SC27_SHOWBET 3368
+#define SND_27_026 4127
+#define SND_27_027 4128
+#define SND_27_044 4687
+#define ST_BTA_FALL 2054
+#define ST_BTA_HILITE 2052
+#define ST_BTA_NORM 2028
+#define ST_BTH_1 3365
+#define ST_BTH_2 3363
+#define ST_BTH_3 3361
+#define ST_BTH_4 3359
+#define ST_BTH_5 3357
+#define ST_DRV_SITNOVENT 1999
+#define ST_DRV_VENT 1996
+#define ST_MID_BROOM 2022
+#define ST_MID_SPADE 3489
+#define ST_MID_SWAB 2017
+#define ST_MID_SWAB2 2019
+
 // Scene 28
 #define ANI_LIFT 982
 #define ANI_LIFT_28 4238
@@ -1138,6 +1381,65 @@ namespace Fullpipe {
 #define QU_SC28_LIFT6_START2 4295
 #define QU_SC28_WMN_START 3452
 #define ST_MAN28_RIGHT 4249
+
+// Scene 29
+#define ANI_ASS 2120
+#define ANI_PORTER 2082
+#define ANI_SHELL_GREEN 2116
+#define ANI_SHELL_RED 2130
+#define ANI_SHOOTER1 2108
+#define ANI_SHOOTER2 2111
+#define MSG_SC29_DISABLEPORTER 2097
+#define MSG_SC29_DISABLERIDEBACK 2106
+#define MSG_SC29_ENABLEPORTER 2096
+#define MSG_SC29_ENABLERIDEBACK 2105
+#define MSG_SC29_LAUGH 4760
+#define MSG_SC29_SHOOTGREEN 2119
+#define MSG_SC29_SHOOTRED 2137
+#define MSG_SC29_SHOWLASTGREEN 2730
+#define MSG_SC29_SHOWLASTRED 2731
+#define MSG_SC29_STOPRIDE 2107
+#define MV_ASS_HITGREEN 2138
+#define MV_ASS_HITRED 2139
+#define MV_BRDCMN_GOR 4735
+#define MV_MAN29_BEND 2091
+#define MV_MAN29_HIT 2088
+#define MV_MAN29_JUMP 2090
+#define MV_MAN29_RUN 2095
+#define MV_MAN29_STANDUP 2092
+#define MV_MAN29_STANDUP_NORM 2093
+#define MV_PTR_MOVEFAST 2102
+#define MV_SHG_HITASS 2151
+#define MV_SHG_HITMAN 2147
+#define MV_SHG_NORM 2117
+#define MV_SHR_HITASS 2152
+#define MV_SHR_HITMAN 2149
+#define MV_SHR_NORM 2131
+#define MV_STR1_SHOOT 2109
+#define MV_STR2_SHOOT 2112
+#define PIC_SC29_LTRUBA 2081
+#define QU_SC29_BRD1 4741
+#define QU_SC29_BRD2 4742
+#define QU_SC29_BRDOUT1 4743
+#define QU_SC29_BRDOUT2 4744
+#define QU_SC29_ESCAPE 2129
+#define QU_SC29_MANFROM_L 2101
+#define QU_SC29_MANFROM_R 2104
+#define QU_SC29_MANTO_L 2103
+#define QU_SC29_MANTO_R 2100
+#define SND_29_014 4348
+#define SND_29_027 4757
+#define SND_29_028 4758
+#define SND_29_029 4759
+#define ST_ASS_NORM 2122
+#define ST_BRDCMN_GOR 4734
+#define ST_BRDCMN_RIGHT 4732
+#define ST_MAN29_RUNR 2140
+#define ST_MAN29_SITR 2141
+#define ST_STR1_RIGHT 2143
+#define ST_STR2_RIGHT 2144
+#define ST_STR1_STAND 2110
+#define ST_STR2_STAND 2113
 
 // Scene 30
 #define ANI_LEG 2322

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -41,7 +41,7 @@
 #include "audio/mixer.h"
 #include "audio/mixer_intern.h"
 
-#include "osys_main.h"
+#include "backends/platform/iphone/osys_main.h"
 
 
 const OSystem::GraphicsMode OSystem_IPHONE::s_supportedGraphicsModes[] = {
@@ -90,7 +90,7 @@ int OSystem_IPHONE::timerHandler(int t) {
 }
 
 void OSystem_IPHONE::initBackend() {
-#ifdef IPHONE_OFFICIAL
+#ifdef IPHONE_SANDBOXED
 	_savefileManager = new DefaultSaveFileManager(iPhone_getDocumentsDir());
 #else
 	_savefileManager = new DefaultSaveFileManager(SCUMMVM_SAVE_PATH);
@@ -252,7 +252,7 @@ OSystem *OSystem_IPHONE_create() {
 }
 
 Common::String OSystem_IPHONE::getDefaultConfigFileName() {
-#ifdef IPHONE_OFFICIAL
+#ifdef IPHONE_SANDBOXED
 	Common::String path = iPhone_getDocumentsDir();
 	path += "/Preferences";
 	return path;
@@ -305,7 +305,7 @@ void iphone_main(int argc, char *argv[]) {
 		//gDebugLevel = 10;
 	}
 
-#ifdef IPHONE_OFFICIAL
+#ifdef IPHONE_SANDBOXED
 	chdir(iPhone_getDocumentsDir());
 #else
 	system("mkdir " SCUMMVM_ROOT_PATH);

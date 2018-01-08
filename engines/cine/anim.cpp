@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -287,7 +287,7 @@ void AnimData::load(byte *d, int type, uint16 w, uint16 h, int16 file,
 	_fileIdx = file;
 	_frameIdx = frame;
 	memset(_name, 0, sizeof(_name));
-	strcpy(_name, n);
+	Common::strlcpy(_name, n, sizeof(_name));
 	_realWidth = w;
 
 	switch (type) {
@@ -535,7 +535,7 @@ int loadSpl(const char *resourceName, int16 idx) {
 
 	entry = idx < 0 ? emptyAnimSpace() : idx;
 	assert(entry >= 0);
-	g_cine->_animDataTable[entry].load(dataPtr + 0x16, ANIM_RAW, g_cine->_partBuffer[foundFileIdx].unpackedSize - 0x16, 1, foundFileIdx, 0, currentPartName);
+	g_cine->_animDataTable[entry].load(dataPtr, ANIM_RAW, g_cine->_partBuffer[foundFileIdx].unpackedSize, 1, foundFileIdx, 0, currentPartName);
 
 	free(dataPtr);
 	return entry + 1;

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,23 +33,23 @@ struct MystScriptEntry;
 
 namespace MystStacks {
 
-#define DECLARE_OPCODE(x) void x(uint16 op, uint16 var, uint16 argc, uint16 *argv)
+#define DECLARE_OPCODE(x) void x(uint16 var, const ArgumentsArray &args)
 
 class Channelwood : public MystScriptParser {
 public:
 	Channelwood(MohawkEngine_Myst *vm);
 	~Channelwood();
 
-	void disablePersistentScripts();
-	void runPersistentScripts();
+	void disablePersistentScripts() override;
+	void runPersistentScripts() override;
 
 private:
 	void setupOpcodes();
-	uint16 getVar(uint16 var);
-	void toggleVar(uint16 var);
-	bool setVarValue(uint16 var, uint16 value);
+	uint16 getVar(uint16 var) override;
+	void toggleVar(uint16 var) override;
+	bool setVarValue(uint16 var, uint16 value) override;
 
-	virtual uint16 getMap() { return 9932; }
+	virtual uint16 getMap() override { return 9932; }
 
 	DECLARE_OPCODE(o_bridgeToggle);
 	DECLARE_OPCODE(o_pipeExtend);
@@ -94,7 +94,7 @@ private:
 	uint16 _doorOpened; // 68
 
 	bool _leverPulled;
-	MystResourceType5 *_leverAction; // 72
+	MystArea *_leverAction; // 72
 
 	bool pipeChangeValve(bool open, uint16 mask);
 };

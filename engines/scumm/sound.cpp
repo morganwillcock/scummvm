@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,7 @@
 #include "common/substream.h"
 
 #include "scumm/actor.h"
+#include "scumm/cdda.h"
 #include "scumm/file.h"
 #include "scumm/imuse/imuse.h"
 #include "scumm/imuse_digi/dimuse.h"
@@ -34,11 +35,9 @@
 #include "scumm/resource.h"
 #include "scumm/scumm.h"
 #include "scumm/sound.h"
-#include "scumm/util.h"
 
-#include "backends/audiocd/audiocd.h"
-
-#include "audio/decoders/adpcm.h"
+#include "audio/audiostream.h"
+#include "audio/timestamp.h"
 #include "audio/decoders/flac.h"
 #include "audio/mididrv.h"
 #include "audio/mixer.h"
@@ -46,7 +45,6 @@
 #include "audio/decoders/raw.h"
 #include "audio/decoders/voc.h"
 #include "audio/decoders/vorbis.h"
-#include "audio/decoders/wave.h"
 
 namespace Scumm {
 
@@ -89,15 +87,30 @@ Sound::Sound(ScummEngine *parent, Audio::Mixer *mixer)
 	memset(_mouthSyncTimes, 0, sizeof(_mouthSyncTimes));
 
 	_musicType = MDT_NONE;
+
+	_loomSteamCD.playing = false;
+	_loomSteamCD.track = 0;
+	_loomSteamCD.start = 0;
+	_loomSteamCD.duration = 0;
+	_loomSteamCD.numLoops = 0;
+	_loomSteamCD.volume = Audio::Mixer::kMaxChannelVolume;
+	_loomSteamCD.balance = 0;
+
+	_isLoomSteam = _vm->_game.id == GID_LOOM && Common::File::exists("CDDA.SOU");
+
+	_loomSteamCDAudioHandle = new Audio::SoundHandle();
+	_talkChannelHandle = new Audio::SoundHandle();
 }
 
 Sound::~Sound() {
 	stopCDTimer();
-	g_system->getAudioCDManager()->stop();
+	stopCD();
 	free(_offsetTable);
+	delete _loomSteamCDAudioHandle;
+	delete _talkChannelHandle;
 }
 
-void Sound::addSoundToQueue(int sound, int heOffset, int heChannel, int heFlags) {
+void Sound::addSoundToQueue(int sound, int heOffset, int heChannel, int heFlags, int heFreq, int hePan, int heVol) {
 	if (_vm->VAR_LAST_SOUND != 0xFF)
 		_vm->VAR(_vm->VAR_LAST_SOUND) = sound;
 	_lastSound = sound;
@@ -106,15 +119,18 @@ void Sound::addSoundToQueue(int sound, int heOffset, int heChannel, int heFlags)
 	if (sound <= _vm->_numSounds)
 		_vm->ensureResourceLoaded(rtSound, sound);
 
-	addSoundToQueue2(sound, heOffset, heChannel, heFlags);
+	addSoundToQueue2(sound, heOffset, heChannel, heFlags, heFreq, hePan, heVol);
 }
 
-void Sound::addSoundToQueue2(int sound, int heOffset, int heChannel, int heFlags) {
+void Sound::addSoundToQueue2(int sound, int heOffset, int heChannel, int heFlags, int heFreq, int hePan, int heVol) {
 	assert(_soundQue2Pos < ARRAYSIZE(_soundQue2));
 	_soundQue2[_soundQue2Pos].sound = sound;
 	_soundQue2[_soundQue2Pos].offset = heOffset;
 	_soundQue2[_soundQue2Pos].channel = heChannel;
 	_soundQue2[_soundQue2Pos].flags = heFlags;
+	_soundQue2[_soundQue2Pos].freq = heFreq;
+	_soundQue2[_soundQue2Pos].pan = hePan;
+	_soundQue2[_soundQue2Pos].vol = heVol;
 	_soundQue2Pos++;
 }
 
@@ -231,7 +247,7 @@ void Sound::playSound(int soundID) {
 		// mentioned in the bug report above; in case it is, I put a check here.
 		assert(soundID == 39);
 
-		// The samplerate is copied from the sound resouce 39 of the PC CD/VGA
+		// The samplerate is copied from the sound resource 39 of the PC CD/VGA
 		// version of Monkey Island.
 
 		// Read info from the header
@@ -343,7 +359,7 @@ void Sound::playSound(int soundID) {
 			_currentCDSound = soundID;
 		} else {
 			// All other sound types are ignored
-			warning("Scumm::Sound::playSound: encountered audio resoure with chunk type 'SOUN' and sound type %d", type);
+			warning("Scumm::Sound::playSound: encountered audio resource with chunk type 'SOUN' and sound type %d", type);
 		}
 	}
 	else if ((_vm->_game.platform == Common::kPlatformMacintosh) && (_vm->_game.id == GID_INDY3) && READ_BE_UINT16(ptr + 8) == 0x1C) {
@@ -417,7 +433,7 @@ void Sound::processSfxQueues() {
 		if (_talk_sound_mode & 1)
 			startTalkSound(_talk_sound_a1, _talk_sound_b1, 1);
 		if (_talk_sound_mode & 2)
-			startTalkSound(_talk_sound_a2, _talk_sound_b2, 2, &_talkChannelHandle);
+			startTalkSound(_talk_sound_a2, _talk_sound_b2, 2, _talkChannelHandle);
 		_talk_sound_mode = 0;
 	}
 
@@ -431,7 +447,7 @@ void Sound::processSfxQueues() {
 		} else if (_vm->_game.heversion >= 60) {
 			finished = !isSoundRunning(1);
 		} else {
-			finished = !_mixer->isSoundHandleActive(_talkChannelHandle);
+			finished = !_mixer->isSoundHandleActive(*_talkChannelHandle);
 		}
 
 		if ((uint) act < 0x80 && ((_vm->_game.version == 8) || (_vm->_game.version <= 7 && !_vm->_string[0].no_talk_anim))) {
@@ -649,7 +665,11 @@ void Sound::startTalkSound(uint32 offset, uint32 b, int mode, Audio::SoundHandle
 			_vm->_imuseDigital->startVoice(kTalkSoundID, input);
 #endif
 		} else {
-			_mixer->playStream(Audio::Mixer::kSpeechSoundType, handle, input, id);
+			if (mode == 1) {
+				_mixer->playStream(Audio::Mixer::kSFXSoundType, handle, input, id);
+			} else {
+				_mixer->playStream(Audio::Mixer::kSpeechSoundType, handle, input, id);
+			}
 		}
 	}
 }
@@ -663,7 +683,7 @@ void Sound::stopTalkSound() {
 		} else if (_vm->_game.heversion >= 60) {
 			stopSound(1);
 		} else {
-			_mixer->stopHandle(_talkChannelHandle);
+			_mixer->stopHandle(*_talkChannelHandle);
 		}
 		_sfxMode &= ~2;
 	}
@@ -789,6 +809,9 @@ void Sound::stopSound(int sound) {
 			_soundQue2[i].offset = 0;
 			_soundQue2[i].channel = 0;
 			_soundQue2[i].flags = 0;
+			_soundQue2[i].freq = 0;
+			_soundQue2[i].pan = 0;
+			_soundQue2[i].vol = 0;
 		}
 	}
 }
@@ -838,9 +861,6 @@ void Sound::soundKludge(int *list, int num) {
 }
 
 void Sound::talkSound(uint32 a, uint32 b, int mode, int channel) {
-	if (_vm->_game.version >= 5 && ConfMan.getBool("speech_mute"))
-		return;
-
 	if (mode == 1) {
 		_talk_sound_a1 = a;
 		_talk_sound_b1 = b;
@@ -1033,7 +1053,7 @@ void Sound::playCDTrack(int track, int numLoops, int startFrame, int duration) {
 
 	// Play it
 	if (!_soundsPaused)
-		g_system->getAudioCDManager()->play(track, numLoops, startFrame, duration);
+		playCDTrackInternal(track, numLoops, startFrame, duration);
 
 	// Start the timer after starting the track. Starting an MP3 track is
 	// almost instantaneous, but a CD player may take some time. Hopefully
@@ -1041,16 +1061,59 @@ void Sound::playCDTrack(int track, int numLoops, int startFrame, int duration) {
 	startCDTimer();
 }
 
+void Sound::playCDTrackInternal(int track, int numLoops, int startFrame, int duration) {
+	_loomSteamCD.track = track;
+	_loomSteamCD.numLoops = numLoops;
+	_loomSteamCD.start = startFrame;
+	_loomSteamCD.duration = duration;
+
+	if (!_isLoomSteam) {
+		g_system->getAudioCDManager()->play(track, numLoops, startFrame, duration);
+	} else {
+		// Stop any currently playing track
+		_mixer->stopHandle(*_loomSteamCDAudioHandle);
+
+		Common::File *cddaFile = new Common::File();
+		if (cddaFile->open("CDDA.SOU")) {
+			Audio::Timestamp start = Audio::Timestamp(0, startFrame, 75);
+			Audio::Timestamp end = Audio::Timestamp(0, startFrame + duration, 75);
+			Audio::SeekableAudioStream *stream = makeCDDAStream(cddaFile, DisposeAfterUse::YES);
+
+			_mixer->playStream(Audio::Mixer::kMusicSoundType, _loomSteamCDAudioHandle,
+			                    Audio::makeLoopingAudioStream(stream, start, end, (numLoops < 1) ? numLoops + 1 : numLoops));
+		} else {
+			delete cddaFile;
+		}
+	}
+}
+
 void Sound::stopCD() {
-	g_system->getAudioCDManager()->stop();
+	if (!_isLoomSteam)
+		g_system->getAudioCDManager()->stop();
+	else
+		_mixer->stopHandle(*_loomSteamCDAudioHandle);
 }
 
 int Sound::pollCD() const {
-	return g_system->getAudioCDManager()->isPlaying();
+	if (!_isLoomSteam)
+		return g_system->getAudioCDManager()->isPlaying();
+	else
+		return _mixer->isSoundHandleActive(*_loomSteamCDAudioHandle);
 }
 
 void Sound::updateCD() {
-	g_system->getAudioCDManager()->updateCD();
+	if (!_isLoomSteam)
+		g_system->getAudioCDManager()->update();
+}
+
+AudioCDManager::Status Sound::getCDStatus() {
+	if (!_isLoomSteam)
+		return g_system->getAudioCDManager()->getStatus();
+	else {
+		AudioCDManager::Status info = _loomSteamCD;
+		info.playing = _mixer->isSoundHandleActive(*_loomSteamCDAudioHandle);
+		return info;
+	}
 }
 
 void Sound::saveLoadWithSerializer(Serializer *ser) {

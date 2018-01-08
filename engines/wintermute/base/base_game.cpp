@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -70,6 +70,11 @@
 #include "common/keyboard.h"
 #include "common/system.h"
 #include "common/file.h"
+#include "graphics/scaler.h"
+
+#if EXTENDED_DEBUGGER_ENABLED
+#include "engines/wintermute/base/scriptables/debuggable/debuggable_script_engine.h"
+#endif
 
 namespace Wintermute {
 
@@ -167,7 +172,12 @@ BaseGame::BaseGame(const Common::String &targetName) : BaseObject(this), _target
 
 	_forceNonStreamedSounds = false;
 
-	_thumbnailWidth = _thumbnailHeight = 0;
+	// These are NOT the actual engine defaults (they are 0, 0),
+	// but we have a use for thumbnails even for games that don't
+	// use them in-game, hence we set a default that is suitably
+	// sized for the GMM (expecting 4:3 ratio)
+	_thumbnailWidth = kThumbnailWidth;
+	_thumbnailHeight = kThumbnailHeight2;
 
 	_localSaveDir = "saves";
 
@@ -351,6 +361,12 @@ bool BaseGame::initConfManSettings() {
 		_debugShowFPS = false;
 	}
 
+	if (ConfMan.hasKey("bilinear_filtering")) {
+		_bilinearFiltering = ConfMan.getBool("bilinear_filtering");
+	} else {
+		_bilinearFiltering = false;
+	}
+
 	if (ConfMan.hasKey("disable_smartcache")) {
 		_smartCache = ConfMan.getBool("disable_smartcache");
 	} else {
@@ -398,7 +414,11 @@ bool BaseGame::initialize1() {
 			break;
 		}
 
+#if EXTENDED_DEBUGGER_ENABLED
+		_scEngine = new DebuggableScEngine(this);
+#else
 		_scEngine = new ScEngine(this);
+#endif
 		if (_scEngine == nullptr) {
 			break;
 		}
@@ -3110,6 +3130,10 @@ bool BaseGame::persist(BasePersistenceManager *persistMgr) {
 	persistMgr->transferUint32(TMEMBER(_autoSaveSlot));
 	persistMgr->transferBool(TMEMBER(_cursorHidden));
 
+	if (persistMgr->checkVersion(1, 3, 1)) {
+		_settings->persist(persistMgr);
+	}
+
 	if (!persistMgr->getIsSaving()) {
 		_quitting = false;
 	}
@@ -3889,6 +3913,11 @@ bool BaseGame::loadSettings(const char *filename) {
 
 //////////////////////////////////////////////////////////////////////////
 void BaseGame::expandStringByStringTable(char **str) const {
+	_settings->expandStringByStringTable(str);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void BaseGame::expandStringByStringTable(Common::String &str) const {
 	_settings->expandStringByStringTable(str);
 }
 

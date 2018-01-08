@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -140,13 +140,13 @@ void Inter_v5::o5_initScreen() {
 		_vm->_width = 320;
 		_vm->_height = 200;
 
-		_vm->_video->setSize(false);
+		_vm->_video->setSize();
 
 	} else if (_vm->_global->_videoMode == 0x13) {
 		width = _vm->_width = 640;
 		height = _vm->_height = 480;
 
-		_vm->_video->setSize(true);
+		_vm->_video->setSize();
 	}
 
 	_vm->_global->_fakeVideoMode = videoMode;

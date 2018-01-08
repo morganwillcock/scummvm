@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -977,19 +977,15 @@ void Script::opSpeak(SCRIPTOP_PARAMS) {
 
 	// now data contains last string index
 
-#if 0
-	if (_vm->getFeatures() & GF_OLD_ITE_DOS) { // special ITE dos
+	if (_vm->getFeatures() & GF_ITE_DOS_DEMO) {
 		if ((_vm->_scene->currentSceneNumber() == ITE_DEFAULT_SCENE) &&
 			(iparam1 >= 288) && (iparam1 <= (RID_SCENE1_VOICE_END - RID_SCENE1_VOICE_START + 288))) {
 			sampleResourceId = RID_SCENE1_VOICE_START + iparam1 - 288;
 		}
 	} else {
-#endif
 		if (thread->_voiceLUT->size() > uint16(first))
 			sampleResourceId = (*thread->_voiceLUT)[uint16(first)];
-#if 0
 	}
-#endif
 
 	if (sampleResourceId < 0 || sampleResourceId > 4000)
 		sampleResourceId = -1;
@@ -1713,15 +1709,16 @@ void Script::whichObject(const Point& mousePoint) {
 					if (_vm->getGameId() == GID_IHNM && objectId == 8199)
 						newRightButtonVerb = getVerbType(kVerbLookAt);
 
-					if ((_currentVerb == getVerbType(kVerbPickUp)) ||
-						(_currentVerb == getVerbType(kVerbOpen)) ||
-						(_currentVerb == getVerbType(kVerbClose)) ||
-						((_currentVerb == getVerbType(kVerbGive)) && !_firstObjectSet) ||
-						((_currentVerb == getVerbType(kVerbUse)) && !(actor->_flags & kFollower))) {
-							if (_vm->getGameId() == GID_ITE) {
-								objectId = ID_NOTHING;
-								newObjectId = ID_NOTHING;
-							}
+					bool actorIsFollower = (actor->_flags & kFollower);
+					bool actorCanBeUsed = (actor->_flags & kUsable);
+
+					if ( _currentVerb == getVerbType(kVerbPickUp) ||
+						 _currentVerb == getVerbType(kVerbOpen) ||
+						 _currentVerb == getVerbType(kVerbClose) ||
+						(_currentVerb == getVerbType(kVerbGive) && !_firstObjectSet) ||
+						(_currentVerb == getVerbType(kVerbUse) && !_firstObjectSet && !(actorIsFollower || actorCanBeUsed))) {
+							objectId = ID_NOTHING;
+							newObjectId = ID_NOTHING;
 						}
 				}
 			}

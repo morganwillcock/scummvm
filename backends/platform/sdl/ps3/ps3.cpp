@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,7 +31,6 @@
 #include "backends/saves/default/default-saves.h"
 #include "backends/fs/ps3/ps3-fs-factory.h"
 #include "backends/events/ps3sdl/ps3sdl-events.h"
-#include "backends/mixer/sdl13/sdl13-mixer.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -67,14 +66,6 @@ void OSystem_PS3::initBackend() {
 	// Create the savefile manager
 	if (_savefileManager == 0)
 		_savefileManager = new DefaultSaveFileManager(PREFIX "/saves");
-
-	// Create the mixer manager
-	if (_mixer == 0) {
-		_mixerManager = new Sdl13MixerManager();
-
-		// Setup and start mixer
-		_mixerManager->init();
-	}
 
 	// Event source
 	if (_eventSource == 0)

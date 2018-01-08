@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -56,7 +56,7 @@ void scene02_initScene(Scene *sc) {
 		g_vars->scene02_boxOpen = false;
 	} else {
 		g_vars->scene02_boxOpen = true;
-		g_vars->scene02_boxDelay = 100 * g_fp->_rnd->getRandomNumber(32767) + 150;
+		g_vars->scene02_boxDelay = 100 * g_fp->_rnd.getRandomNumber(32767) + 150;
 	}
 
 	g_fp->_floaters->init(g_fp->_gameLoader->_gameVar->getSubVarByName("SC_2"));
@@ -113,16 +113,16 @@ int sceneHandler02(ExCommand *ex) {
 			if (g_vars->scene02_boxDelay >= 1) {
 				--g_vars->scene02_boxDelay;
 			} else if (g_fp->_floaters->_array2.size() >= 1) {
-				if (g_fp->_floaters->_array2[0]->val5 == -50) {
+				if (g_fp->_floaters->_array2[0].val5 == -50) {
 					g_fp->_floaters->stopAll();
 					g_vars->scene02_boxOpen = false;
-					g_vars->scene02_boxDelay = 100 * g_fp->_rnd->getRandomNumber(32767) + 150;
+					g_vars->scene02_boxDelay = 100 * g_fp->_rnd.getRandomNumber(32767) + 150;
 				} else {
-					g_fp->_floaters->_array2[0]->val3 = -50;
+					g_fp->_floaters->_array2[0].val3 = -50;
 				}
 			} else {
-				g_fp->_floaters->genFlies(g_fp->_currentScene, g_fp->_rnd->getRandomNumber(700) + 100, -50, 0, 0);
-				g_vars->scene02_boxDelay = 500 * g_fp->_rnd->getRandomNumber(32767) + 1000;
+				g_fp->_floaters->genFlies(g_fp->_currentScene, g_fp->_rnd.getRandomNumber(700) + 100, -50, 0, 0);
+				g_vars->scene02_boxDelay = 500 * g_fp->_rnd.getRandomNumber(32767) + 1000;
 			}
 		}
 
@@ -134,5 +134,5 @@ int sceneHandler02(ExCommand *ex) {
 
 	return res;
 }
-	
+
 } // End of namespace Fullpipe

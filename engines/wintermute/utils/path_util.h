@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -35,13 +35,14 @@ namespace Wintermute {
 
 class PathUtil {
 public:
-	static AnsiString unifySeparators(const AnsiString &path);
-	static AnsiString normalizeFileName(const AnsiString &path);
-	static AnsiString combine(const AnsiString &path1, const AnsiString &path2);
-	static AnsiString getDirectoryName(const AnsiString &path);
-	static AnsiString getFileName(const AnsiString &path);
-	static AnsiString getFileNameWithoutExtension(const AnsiString &path);
-	static AnsiString getExtension(const AnsiString &path);
+	static Common::String unifySeparators(const Common::String &path);
+	static Common::String normalizeFileName(const Common::String &path);
+	static Common::String combine(const Common::String &path1, const Common::String &path2);
+	static Common::String getDirectoryName(const Common::String &path);
+	static Common::String getFileName(const Common::String &path);
+	static Common::String getFileNameWithoutExtension(const Common::String &path);
+	static Common::String getExtension(const Common::String &path);
+	static bool hasTrailingSlash(const Common::String &path);	
 };
 
 } // End of namespace Wintermute

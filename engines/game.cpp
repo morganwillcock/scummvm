@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -26,8 +26,8 @@
 
 const PlainGameDescriptor *findPlainGameDescriptor(const char *gameid, const PlainGameDescriptor *list) {
 	const PlainGameDescriptor *g = list;
-	while (g->gameid) {
-		if (0 == scumm_stricmp(gameid, g->gameid))
+	while (g->gameId) {
+		if (0 == scumm_stricmp(gameid, g->gameId))
 			return g;
 		g++;
 	}
@@ -40,7 +40,7 @@ GameDescriptor::GameDescriptor() {
 }
 
 GameDescriptor::GameDescriptor(const PlainGameDescriptor &pgd, Common::String guioptions) {
-	setVal("gameid", pgd.gameid);
+	setVal("gameid", pgd.gameId);
 	setVal("description", pgd.description);
 
 	if (!guioptions.empty())

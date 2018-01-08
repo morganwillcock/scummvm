@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -87,7 +87,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::EN_ANY,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -104,7 +104,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::FR_FRA,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -121,7 +121,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::FR_FRA,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -138,7 +138,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::DE_DEU,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -151,7 +151,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::IT_ITA,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -168,7 +168,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::IT_ITA,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -181,7 +181,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::ES_ESP,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -198,7 +198,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::ES_ESP,
 			Common::kPlatformDOS,
 			GF_PACKED,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -213,7 +213,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::EN_ANY,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -226,7 +226,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::FR_FRA,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -239,7 +239,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::FR_FRA,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -252,7 +252,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::DE_DEU,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -265,7 +265,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::IT_ITA,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -278,7 +278,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::IT_ITA,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -291,7 +291,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 			Common::ES_ESP,
 			Common::kPlatformDOS,
 			ADGF_NO_FLAGS,
-			GUIO0()
+			GUIO1(GUIO_LINKSPEECHTOSFX)
 		},
 	},
 
@@ -300,7 +300,7 @@ static const DrasculaGameDescription gameDescriptions[] = {
 
 static const ExtraGuiOption drasculaExtraGuiOption = {
 	_s("Use original save/load screens"),
-	_s("Use the original save/load screens, instead of the ScummVM ones"),
+	_s("Use the original save/load screens instead of the ScummVM ones"),
 	"originalsaveload",
 	false
 };
@@ -310,8 +310,8 @@ SaveStateDescriptor loadMetaData(Common::ReadStream *s, int slot, bool setPlayTi
 class DrasculaMetaEngine : public AdvancedMetaEngine {
 public:
 	DrasculaMetaEngine() : AdvancedMetaEngine(Drascula::gameDescriptions, sizeof(Drascula::DrasculaGameDescription), drasculaGames) {
-		_singleid = "drascula";
-		_guioptions = GUIO1(GUIO_NOMIDI);
+		_singleId = "drascula";
+		_guiOptions = GUIO1(GUIO_NOMIDI);
 	}
 
 	virtual const char *getName() const {
@@ -339,7 +339,8 @@ bool DrasculaMetaEngine::hasFeature(MetaEngineFeature f) const {
 		(f == kSavesSupportMetaInfo) ||
 		(f == kSavesSupportThumbnail) ||
 		(f == kSavesSupportCreationDate) ||
-		(f == kSavesSupportPlayTime);
+		(f == kSavesSupportPlayTime) ||
+		(f == kSimpleSavesNames);
 }
 
 const ExtraGuiOptions DrasculaMetaEngine::getExtraGuiOptions(const Common::String &target) const {
@@ -352,10 +353,9 @@ SaveStateList DrasculaMetaEngine::listSaves(const char *target) const {
 	Common::SaveFileManager *saveFileMan = g_system->getSavefileManager();
 	Common::StringArray filenames;
 	Common::String pattern = target;
-	pattern += ".???";
+	pattern += ".###";
 
 	filenames = saveFileMan->listSavefiles(pattern);
-	sort(filenames.begin(), filenames.end());	// Sort (hopefully ensuring we are sorted numerically..)
 
 	SaveStateList saveList;
 	int slotNum = 0;
@@ -378,12 +378,13 @@ SaveStateList DrasculaMetaEngine::listSaves(const char *target) const {
 		}
 	}
 
+	// Sort saves based on slot number.
+	Common::sort(saveList.begin(), saveList.end(), SaveStateDescriptorSlotComparator());
 	return saveList;
 }
 
 SaveStateDescriptor DrasculaMetaEngine::querySaveMetaInfos(const char *target, int slot) const {
-	char fileName[MAXPATHLEN];
-	sprintf(fileName, "%s.%03d", target, slot);
+	Common::String fileName = Common::String::format("%s.%03d", target, slot);
 
 	Common::InSaveFile *in = g_system->getSavefileManager()->openForLoading(fileName);
 

@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,6 +25,8 @@
 
 #include "common/events.h"
 #include "common/system.h"
+
+#include "gui/gui-manager.h"
 
 #include "pegasus/cursor.h"
 #include "pegasus/input.h"
@@ -57,9 +59,10 @@ InputDeviceManager::InputDeviceManager() {
 	_keyMap[Common::KEYCODE_p] = false;
 	_keyMap[Common::KEYCODE_TILDE] = false;
 	_keyMap[Common::KEYCODE_BACKQUOTE] = false;
-	_keyMap[Common::KEYCODE_NUMLOCK] = false;
+	_keyMap[Common::KEYCODE_KP7] = false;
 	_keyMap[Common::KEYCODE_BACKSPACE] = false;
 	_keyMap[Common::KEYCODE_KP_MULTIPLY] = false;
+	_keyMap[Common::KEYCODE_KP9] = false;
 	_keyMap[Common::KEYCODE_LALT] = false;
 	_keyMap[Common::KEYCODE_RALT] = false;
 	_keyMap[Common::KEYCODE_e] = false;
@@ -81,9 +84,7 @@ void InputDeviceManager::getInput(Input &input, const InputBits filter) {
 	// (ie. if one uses enter to access the restore menu, we never receive
 	// the key up event, which leads to bad things)
 	// This is to closely emulate what the GetKeys() function did on Mac OS
-	Common::Event event;
-	while (g_system->getEventManager()->pollEvent(event))
-		;
+	pumpEvents();
 
 	// Now create the bitfield
 	InputBits currentBits = 0;
@@ -115,10 +116,19 @@ void InputDeviceManager::getInput(Input &input, const InputBits filter) {
 	if (_keyMap[Common::KEYCODE_ESCAPE] || _keyMap[Common::KEYCODE_p])
 		currentBits |= (kRawButtonDown << kMod3ButtonShift);
 
-	if (_keyMap[Common::KEYCODE_TILDE] || _keyMap[Common::KEYCODE_BACKQUOTE] || _keyMap[Common::KEYCODE_NUMLOCK])
+	// The original also used clear (aka "num lock" on Mac keyboards) here, but it doesn't
+	// work right on most systems. Either SDL or the OS treats num lock specially and the
+	// events don't come as expected. In many cases, the key down event is sent many times
+	// causing the drawer to open and close constantly until pressed again. It only causes
+	// more grief than anything else.
+
+	// The original doesn't use KP7 for inventory, but we're using it as an alternative for
+	// num lock. KP9 is used for the biochip drawer to balance things out.
+
+	if (_keyMap[Common::KEYCODE_TILDE] || _keyMap[Common::KEYCODE_BACKQUOTE] || _keyMap[Common::KEYCODE_KP7])
 		currentBits |= (kRawButtonDown << kLeftFireButtonShift);
 
-	if (_keyMap[Common::KEYCODE_BACKSPACE] || _keyMap[Common::KEYCODE_KP_MULTIPLY])
+	if (_keyMap[Common::KEYCODE_BACKSPACE] || _keyMap[Common::KEYCODE_KP_MULTIPLY] || _keyMap[Common::KEYCODE_KP9])
 		currentBits |= (kRawButtonDown << kRightFireButtonShift);
 
 	// Update mouse button state
@@ -140,6 +150,7 @@ void InputDeviceManager::getInput(Input &input, const InputBits filter) {
 
 	// Set the console to be requested or not
 	input.setConsoleRequested(_consoleRequested);
+	_consoleRequested = false;
 
 	// WORKAROUND: The original had this in currentBits, but then
 	// pressing alt would count as an event (and mess up someone
@@ -165,9 +176,14 @@ void InputDeviceManager::waitInput(const InputBits filter) {
 }
 
 bool InputDeviceManager::notifyEvent(const Common::Event &event) {
+	if (GUI::GuiManager::instance().isActive()) {
+		// For some reason, the engine hooks in the event system using an EventObserver.
+		// So we need to explicitly ignore events that happen while ScummVM's GUI is open.
+		return false;
+	}
+
 	// We're mapping from ScummVM events to pegasus events, which
 	// are based on pippin events.
-	_consoleRequested = false;
 
 	switch (event.type) {
 	case Common::EVENT_KEYDOWN:
@@ -204,6 +220,21 @@ bool InputDeviceManager::notifyEvent(const Common::Event &event) {
 	}
 
 	return false;
+}
+
+void InputDeviceManager::pumpEvents() {
+	PegasusEngine *vm = ((PegasusEngine *)g_engine);
+
+	bool saveAllowed = vm->swapSaveAllowed(false);
+	bool openAllowed = vm->swapLoadAllowed(false);
+
+	// Just poll for events. notifyEvent() will pick up on them.
+	Common::Event event;
+	while (g_system->getEventManager()->pollEvent(event))
+		;
+
+	vm->swapSaveAllowed(saveAllowed);
+	vm->swapLoadAllowed(openAllowed);
 }
 
 int operator==(const Input &arg1, const Input &arg2) {

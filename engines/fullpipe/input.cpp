@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -56,6 +56,9 @@ InputController::~InputController() {
 	removeMessageHandler(126, -1);
 
 	g_fp->_inputController = 0;
+
+	for (uint i = 0; i < _cursorsArray.size(); i++)
+		delete _cursorsArray[i];
 }
 
 void InputController::setInputDisabled(bool state) {
@@ -68,13 +71,11 @@ void setInputDisabled(bool state) {
 }
 
 void InputController::addCursor(CursorInfo *cursor) {
-	CursorInfo *newc = new CursorInfo(cursor);
-	Common::Point p;
-	
-	cursor->picture->getDimensions(&p);
+	CursorInfo *newc = new CursorInfo(*cursor);
+	const Dims dims = cursor->picture->getDimensions();
 
-	newc->width = p.x;
-	newc->height = p.y;
+	newc->width = dims.x;
+	newc->height = dims.y;
 
 	newc->picture->_x = -1;
 	newc->picture->_y = -1;
@@ -118,28 +119,6 @@ void InputController::setCursor(int cursorId) {
 	}
 }
 
-CursorInfo::CursorInfo() {
-	pictureId = 0;
-	picture = 0;
-	hotspotX = 0;
-	hotspotY = 0;
-	itemPictureOffsX = 0;
-	itemPictureOffsY = 0;
-	width = 0;
-	height = 0;
-}
-
-CursorInfo::CursorInfo(CursorInfo *src) {
-	pictureId = src->pictureId;
-	picture = src->picture;
-	hotspotX = src->hotspotX;
-	hotspotY = src->hotspotY;
-	itemPictureOffsX = src->itemPictureOffsX;
-	itemPictureOffsY = src->itemPictureOffsY;
-	width = src->width;
-	height = src->height;
-}
-
 void FullpipeEngine::setCursor(int id) {
 	if (_inputController)
 		_inputController->setCursor(id);
@@ -175,20 +154,20 @@ void FullpipeEngine::defHandleKeyDown(int key) {
 
 	if (!input_cheats[_currentCheat][_currentCheatPos]) {
 		switch (_currentCheat) {
-		case 0:                               // HELP
+		case 0:								// HELP
 			winArcade();
 			break;
-		case 1:                               // STUFF
+		case 1:								// STUFF
 			getAllInventory();
 			break;
-		case 2:                               // FASTER
+		case 2:								// FASTER
 			_normalSpeed = !_normalSpeed;
 			break;
-		case 3:                               // OHWAIT
-			_gamePaused = 1;
-			_flgGameIsRunning = 0;
+		case 3:								// OHWAIT
+			_gamePaused = true;
+			_flgGameIsRunning = false;
 			break;
-		case 4:                               // MUSOFF
+		case 4:								// MUSOFF
 			if (_musicAllowed & 2)
 				setMusicAllowed(_musicAllowed & 0xFFFFFFFD);
 			else
@@ -214,7 +193,7 @@ void FullpipeEngine::winArcade() {
 void FullpipeEngine::updateCursorCommon() {
 	GameObject *ani = _currentScene->getStaticANIObjectAtPos(_mouseVirtX, _mouseVirtY);
 
-	GameObject *pic = _currentScene->getPictureObjectAtPos(_mouseVirtX, _mouseVirtY);
+	PictureObject *pic = _currentScene->getPictureObjectAtPos(_mouseVirtX, _mouseVirtY);
 	if (!ani || (pic && pic->_priority < ani->_priority))
 		ani = pic;
 
@@ -240,7 +219,7 @@ void FullpipeEngine::updateCursorCommon() {
 			_cursorId = PIC_CSR_DEFAULT_INV;
 			return;
 		}
-		if (_objectIdAtCursor == ANI_LIFTBUTTON && lift_getButtonIdP(((StaticANIObject *)ani)->_statics->_staticsId)) {
+		if (_objectIdAtCursor == ANI_LIFTBUTTON && ani->_objtype == kObjTypeStaticANIObject && lift_getButtonIdP(static_cast<StaticANIObject *>(ani)->_statics->_staticsId)) {
 			_cursorId = PIC_CSR_LIFT;
 			return;
 		}
@@ -275,40 +254,67 @@ void FullpipeEngine::updateCursorCommon() {
 }
 
 void FullpipeEngine::initArcadeKeys(const char *varname) {
+	_arcadeKeys.clear();
+
 	GameVar *var = getGameLoaderGameVar()->getSubVarByName(varname)->getSubVarByName("KEYPOS");
 
 	if (!var)
 		return;
 
 	int cnt = var->getSubVarsCount();
-
+	_arcadeKeys.resize(cnt);
 	for (int i = 0; i < cnt; i++) {
-		Common::Point *point = new Common::Point;
-
+		Common::Point &point = _arcadeKeys[i];
 		GameVar *sub = var->getSubVarByIndex(i);
-
-		point->x = sub->getSubVarAsInt("X");
-		point->y = sub->getSubVarAsInt("Y");
-
-		_arcadeKeys.push_back(point);
+		point.x = sub->getSubVarAsInt("X");
+		point.y = sub->getSubVarAsInt("Y");
 	}
 }
 
-void FullpipeEngine::setArcadeOverlay(int picId) {
-	Common::Point point;
-	Common::Point point2;
+void FullpipeEngine::processArcade(ExCommand *cmd) {
+	if (!g_fp->_aniMan2)
+		return;
 
+	int idx;
+
+	if (cmd->_sceneClickX <= g_fp->_aniMan2->_ox) {
+		for (idx = (int)_arcadeKeys.size() - 1; idx >= 0; idx--) {
+			if (_arcadeKeys[idx].x < g_fp->_aniMan2->_ox)
+				break;
+		}
+
+		if (idx < 0)
+			return;
+	} else {
+		for (idx = 0; idx < (int)_arcadeKeys.size(); idx++) {
+			if (_arcadeKeys[idx].x > g_fp->_aniMan2->_ox)
+				break;
+		}
+
+		if (idx >= (int)_arcadeKeys.size())
+			return;
+	}
+
+	cmd->_sceneClickX = _arcadeKeys[idx].x;
+	cmd->_sceneClickY = _arcadeKeys[idx].y;
+
+	cmd->_x = cmd->_sceneClickX - g_fp->_sceneRect.left;
+	cmd->_y = cmd->_sceneClickY - g_fp->_sceneRect.top;
+}
+
+void FullpipeEngine::setArcadeOverlay(int picId) {
 	_arcadeOverlayX = 800;
 	_arcadeOverlayY = 545;
 
 	_arcadeOverlayHelper = accessScene(SC_INV)->getPictureObjectById(PIC_CSR_HELPERBGR, 0);
 	_arcadeOverlay = accessScene(SC_INV)->getPictureObjectById(picId, 0);
 
-	_arcadeOverlay->getDimensions(&point);
-	_arcadeOverlayHelper->getDimensions(&point2);
+	const Dims dims = _arcadeOverlay->getDimensions();
+	const Dims dims2 = _arcadeOverlayHelper->getDimensions();
 
-	_arcadeOverlayMidX = (point2.x - point.x) / 2;
-	_arcadeOverlayMidY = abs(point2.y - point.y) / 2;
+	// TODO: Only Y gets abs?
+	_arcadeOverlayMidX = (dims2.x - dims.x) / 2;
+	_arcadeOverlayMidY = abs(dims2.y - dims.y) / 2;
 }
 
 int FullpipeEngine::drawArcadeOverlay(int adjust) {

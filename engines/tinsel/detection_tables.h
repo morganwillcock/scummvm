@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -542,6 +542,27 @@ static const TinselGameDescription gameDescriptions[] = {
 			{
 				{"dw.scn", 0, "133041bde59d05c1bf084fd6f1bdce4b", 776524},
 				{"english.txt", 0, "f73dcbd7b136b37c2adf7c9448ea336d", 231821},
+				{"english.smp", 0, NULL, -1},
+				{NULL, 0, NULL, 0}
+			},
+			Common::RU_RUS,
+			Common::kPlatformDOS,
+			ADGF_CD,
+			GUIO1(GUIO_NOASPECT)
+		},
+		GID_DW1,
+		0,
+		GF_SCNFILES | GF_ENHANCED_AUDIO_SUPPORT,
+		TINSEL_V1,
+	},
+
+	{	// Russian Discworld 1. Fan translation v1.1
+		{
+			"dw",
+			"CD v1.1",
+			{
+				{"dw.scn", 0, "133041bde59d05c1bf084fd6f1bdce4b", 776524},
+				{"english.txt", 0, "317542cf2e50106d9c9421ddcf821e22", 221656},
 				{"english.smp", 0, NULL, -1},
 				{NULL, 0, NULL, 0}
 			},

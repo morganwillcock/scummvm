@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef POSIX_FILESYSTEM_H
@@ -72,6 +73,7 @@ public:
 
 	virtual Common::SeekableReadStream *createReadStream();
 	virtual Common::WriteStream *createWriteStream();
+	virtual bool create(bool isDirectoryFlag);
 
 private:
 	/**
@@ -79,5 +81,19 @@ private:
 	 */
 	virtual void setFlags();
 };
+
+namespace Posix {
+
+/**
+ * Assure that a directory path exists.
+ *
+ * @param dir The path which is required to exist.
+ * @param prefix An (optional) prefix which should not be created if non existent.
+ *               prefix is prepended to dir if supplied.
+ * @return true in case the directoy exists (or was created), false otherwise.
+ */
+bool assureDirectoryExists(const Common::String &dir, const char *prefix = nullptr);
+
+} // End of namespace Posix
 
 #endif

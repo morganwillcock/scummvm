@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -36,10 +36,10 @@
 #include "engines/wintermute/base/gfx/base_image.h"
 #include "engines/wintermute/base/save_thumb_helper.h"
 #include "engines/wintermute/base/sound/base_sound.h"
-#include "engines/wintermute/graphics/transparent_surface.h"
+#include "graphics/transparent_surface.h"
 #include "engines/wintermute/wintermute.h"
-#include "graphics/decoders/bmp.h"
 #include "graphics/scaler.h"
+#include "image/bmp.h"
 #include "common/memstream.h"
 #include "common/str.h"
 #include "common/system.h"
@@ -56,7 +56,7 @@ namespace Wintermute {
 #define SAVE_MAGIC_3    0x12564154
 
 //////////////////////////////////////////////////////////////////////////
-BasePersistenceManager::BasePersistenceManager(const char *savePrefix, bool deleteSingleton) {
+BasePersistenceManager::BasePersistenceManager(const Common::String &savePrefix, bool deleteSingleton) {
 	_saving = false;
 	_offset = 0;
 	_saveStream = nullptr;
@@ -91,7 +91,7 @@ BasePersistenceManager::BasePersistenceManager(const char *savePrefix, bool dele
 
 	_thumbnailDataSize = 0;
 	_thumbnailData = nullptr;
-	if (savePrefix) {
+	if (savePrefix != "") {
 		_savePrefix = savePrefix;
 	} else if (_gameRef) {
 		_savePrefix = _gameRef->getGameTargetName();
@@ -170,10 +170,10 @@ void BasePersistenceManager::getSaveStateDesc(int slot, SaveStateDescriptor &des
 
 	if (thumbSize > 0) {
 		Common::MemoryReadStream thumbStream(thumbData, thumbSize, DisposeAfterUse::NO);
-		Graphics::BitmapDecoder bmpDecoder;
+		Image::BitmapDecoder bmpDecoder;
 		if (bmpDecoder.loadStream(thumbStream)) {
 			const Graphics::Surface *bmpSurface = bmpDecoder.getSurface();
-			TransparentSurface *scaleableSurface = new TransparentSurface(*bmpSurface, false);
+			Graphics::TransparentSurface *scaleableSurface = new Graphics::TransparentSurface(*bmpSurface, false);
 			Graphics::Surface *scaled = scaleableSurface->scale(kThumbnailWidth, kThumbnailHeight2);
 			Graphics::Surface *thumb = scaled->convertTo(g_system->getOverlayFormat());
 			desc.setThumbnail(thumb);
@@ -183,7 +183,7 @@ void BasePersistenceManager::getSaveStateDesc(int slot, SaveStateDescriptor &des
 		}
 	}
 
-	desc.setSaveDate(_savedTimestamp.tm_year, _savedTimestamp.tm_mon, _savedTimestamp.tm_mday);
+	desc.setSaveDate(_savedTimestamp.tm_year + 1900, _savedTimestamp.tm_mon + 1, _savedTimestamp.tm_mday);
 	desc.setSaveTime(_savedTimestamp.tm_hour, _savedTimestamp.tm_min);
 	desc.setPlayTime(0);
 }
@@ -215,8 +215,8 @@ bool BasePersistenceManager::getSaveExists(int slot) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool BasePersistenceManager::initSave(const char *desc) {
-	if (!desc) {
+bool BasePersistenceManager::initSave(const Common::String &desc) {
+	if (desc == "") {
 		return STATUS_FAILED;
 	}
 
@@ -297,11 +297,11 @@ bool BasePersistenceManager::initSave(const char *desc) {
 
 		uint32 dataOffset = _offset +
 		                    sizeof(uint32) + // data offset
-		                    sizeof(uint32) + strlen(desc) + 1 + // description
+		                    sizeof(uint32) + strlen(desc.c_str()) + 1 + // description
 		                    sizeof(uint32); // timestamp
 
 		putDWORD(dataOffset);
-		putString(desc);
+		putString(desc.c_str());
 
 		g_system->getTimeAndDate(_savedTimestamp);
 		putTimeDate(_savedTimestamp);

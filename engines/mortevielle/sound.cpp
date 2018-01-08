@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,6 +28,7 @@
 #include "mortevielle/mortevielle.h"
 #include "mortevielle/sound.h"
 
+#include "audio/audiostream.h"
 #include "audio/decoders/raw.h"
 #include "common/scummsys.h"
 
@@ -91,13 +92,12 @@ int SoundManager::decodeMusic(const byte *PSrc, byte *PDest, int size) {
 	static const int tab[16] = { -96, -72, -48, -32, -20, -12, -8, -4, 0, 4, 8, 12, 20, 32, 48, 72 };
 
 	uint seed = 128;
-	int v;
 	int decompSize = 0;
 	int skipSize = 0;
 
 	for (int idx1 = 0; idx1 < size; ++idx1) {
 		byte srcByte = *PSrc++;
-		v = tab[srcByte >> 4];
+		int v = tab[srcByte >> 4];
 		seed += v;
 		*PDest++ = seed & 0xff;
 
@@ -140,22 +140,44 @@ void SoundManager::loadAmbiantSounds() {
  * @remarks	Originally called 'charge_bruit' and 'charge_bruit5'
  */
 void SoundManager::loadNoise() {
-	Common::File f1, f2;
+	Common::File f1, f5;
 
-	if (!f1.open("bruits"))               //Translation: "noise"
-		error("Missing file - bruits");
-	if (!f2.open("bruit5"))
+	if (!f5.open("bruit5"))
 		error("Missing file - bruit5");
 
-	_noiseBuf = (byte *)malloc(sizeof(byte) * (f1.size() + f2.size()));
-	assert(f1.size() > 32000);
+	if (f1.open("bruits")) { //Translation: "noise"
+		assert(f1.size() > 32000);
+		_noiseBuf = (byte *)malloc(sizeof(byte) * (f1.size() + f5.size()));
 
-	f1.read(_noiseBuf, 32000); // 250 * 128
-	f2.read(&_noiseBuf[32000], f2.size());
-	f1.read(&_noiseBuf[32000 + f2.size()], f1.size() - 32000); // 19072
+		f1.read(_noiseBuf, 32000); // 250 * 128
+		f5.read(&_noiseBuf[32000], f5.size());
+		f1.read(&_noiseBuf[32000 + f5.size()], f1.size() - 32000); // 19072
 
-	f1.close();
-	f2.close();
+		f1.close();
+	} else {
+		Common::File f2, f3, f4;
+		if (!f1.open("bruit1") || !f2.open("bruit2") || !f3.open("bruit3") || !f4.open("bruit4"))
+			error("Missing file - bruits");
+
+		assert(f4.size() == 32000);
+		_noiseBuf = (byte *)malloc(sizeof(byte) * (f1.size() + f2.size() + f3.size() + f4.size() + f5.size()));
+
+		f4.read(_noiseBuf, f4.size());
+		int pos = f4.size();
+		f5.read(&_noiseBuf[pos], f5.size());
+		pos += f5.size();
+		f1.read(&_noiseBuf[pos], f1.size());
+		pos += f1.size();
+		f2.read(&_noiseBuf[pos], f2.size());
+		pos += f2.size();
+		f3.read(&_noiseBuf[pos], f3.size());
+
+		f1.close();
+		f2.close();
+		f3.close();
+		f4.close();
+	}
+	f5.close();
 }
 
 void SoundManager::regenbruit() {
@@ -204,7 +226,7 @@ void SoundManager::litph(tablint &t, int typ, int tempo) {
 				}
 			} else { // 2
 				debugC(5, kMortevielleSounds, "litph - vadson");
-				const static int ambiantNoiseAdr[] = {0,     14020, 
+				const static int ambiantNoiseAdr[] = {0,     14020,
 													  14020, 18994,
 													  18994, 19630,
 													  19630, 22258,
@@ -696,7 +718,7 @@ void SoundManager::handlePhoneme() {
 	uint16 startPos = _cfiphBuffer[_phonemeNumb - 1] + deca[_soundType];
 	uint16 endPos = _cfiphBuffer[_phonemeNumb] + deca[_soundType];
 	int wordCount = endPos - startPos;
-	
+
 	startPos /= 2;
 	endPos /= 2;
 	assert((endPos - startPos) < 1711);

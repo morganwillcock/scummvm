@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -134,8 +134,9 @@ public:
 
 class IntMapResourceSource : public ResourceSource {
 public:
-	IntMapResourceSource(const Common::String &name, int volNum)
-		: ResourceSource(kSourceIntMap, name, volNum) {
+	uint16 _mapNumber;
+	IntMapResourceSource(const Common::String &name, int volNum, int mapNum)
+		: ResourceSource(kSourceIntMap, name, volNum), _mapNumber(mapNum) {
 	}
 
 	virtual void scanSource(ResourceManager *resMan);
@@ -143,17 +144,35 @@ public:
 
 class AudioVolumeResourceSource : public VolumeResourceSource {
 protected:
+	struct CompressedTableEntry {
+		uint32 offset;
+		uint32 size;
+	};
+
 	uint32 _audioCompressionType;
-	int32 *_audioCompressionOffsetMapping;
+	Common::HashMap<uint32, CompressedTableEntry> _compressedOffsets;
 
 public:
 	AudioVolumeResourceSource(ResourceManager *resMan, const Common::String &name, ResourceSource *map, int volNum);
 
-	virtual ~AudioVolumeResourceSource();
-
 	virtual void loadResource(ResourceManager *resMan, Resource *res);
 
 	virtual uint32 getAudioCompressionType() const;
+
+	bool relocateMapOffset(uint32 &offset, uint32 &size) const {
+		if (_audioCompressionType == 0) {
+			return true;
+		}
+
+		if (!_compressedOffsets.contains(offset)) {
+			return false;
+		}
+
+		const CompressedTableEntry &entry = _compressedOffsets.getVal(offset);
+		offset = entry.offset;
+		size = entry.size;
+		return true;
+	}
 };
 
 class ExtAudioMapResourceSource : public ResourceSource {
@@ -202,6 +221,8 @@ public:
 
 	virtual void scanSource(ResourceManager *resMan);
 	virtual void loadResource(ResourceManager *resMan, Resource *res);
+
+	uint16 getNumber() const { return _number; }
 
 protected:
 	uint16 _number;

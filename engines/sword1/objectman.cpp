@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -119,7 +119,7 @@ char *ObjectMan::lockText(uint32 textId, uint8 lang) {
 		return NULL;
 	addr += sizeof(Header);
 	if ((textId & ITM_ID) >= _resMan->readUint32(addr)) {
-		// Workaround for missing sentences in some langages in the demo.
+		// Workaround for missing sentences in some languages in the demo.
 		switch(textId) {
 		case 8455194:
 			return const_cast<char *>(_translationId8455194[lang]);
@@ -160,7 +160,7 @@ char *ObjectMan::lockText(uint32 textId, uint8 lang) {
 	}
 	uint32 offset = _resMan->readUint32(addr + ((textId & ITM_ID) + 1) * 4);
 	if (offset == 0) {
-		// Workaround bug for missing sentence in some langages in Syria (see bug #1977094).
+		// Workaround bug for missing sentence in some languages in Syria (see bug #1977094).
 		// We use the hardcoded text in this case.
 		if (textId == 2950145)
 			return const_cast<char *>(_translationId2950145[lang]);
@@ -223,7 +223,7 @@ void ObjectMan::saveLiveList(uint16 *dest) {
 }
 
 // String displayed when a subtitle sentence is missing in the cluster file.
-// It happens with at least one sentence in Syria in some langages (see bug
+// It happens with at least one sentence in Syria in some languages (see bug
 // #1977094).
 // Note: an empty string or a null pointer causes a crash.
 

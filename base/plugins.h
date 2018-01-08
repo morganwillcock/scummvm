@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -79,8 +79,12 @@ extern int pluginTypeVersions[PLUGIN_TYPE_MAX];
 #define PLUGIN_ENABLED_STATIC(ID) \
 	(ENABLE_##ID && !PLUGIN_ENABLED_DYNAMIC(ID))
 
-#define PLUGIN_ENABLED_DYNAMIC(ID) \
-	(ENABLE_##ID && (ENABLE_##ID == DYNAMIC_PLUGIN) && defined(DYNAMIC_MODULES))
+#ifdef DYNAMIC_MODULES
+	#define PLUGIN_ENABLED_DYNAMIC(ID) \
+		(ENABLE_##ID && (ENABLE_##ID == DYNAMIC_PLUGIN))
+#else
+	#define PLUGIN_ENABLED_DYNAMIC(ID) 0
+#endif
 
 // see comments in backends/plugins/elf/elf-provider.cpp
 #if defined(USE_ELF_LOADER) && defined(ELF_LOADER_CXA_ATEXIT)
@@ -186,6 +190,15 @@ public:
 	PluginType getType() const;
 	const char *getName() const;
 
+	template <class T>
+	T &get() const {
+		T *pluginObject = dynamic_cast<T *>(_pluginObject);
+		if (!pluginObject) {
+			error("Invalid cast of plugin %s", getName());
+		}
+		return *pluginObject;
+	}
+
 	/**
 	 * The getFileName() function gets the name of the plugin file for those
 	 * plugins that have files (ie. not static). It doesn't require the plugin
@@ -196,25 +209,6 @@ public:
 
 /** List of Plugin instances. */
 typedef Common::Array<Plugin *> PluginList;
-
-/**
- * Convenience template to make it easier defining normal Plugin
- * subclasses. Namely, the PluginSubclass will manage PluginObjects
- * of a type specified via the PO_t template parameter.
- */
-template<class PO_t>
-class PluginSubclass : public Plugin {
-public:
-	PO_t &operator*() const {
-		return *(PO_t *)_pluginObject;
-	}
-
-	PO_t *operator->() const {
-		return (PO_t *)_pluginObject;
-	}
-
-	typedef Common::Array<PluginSubclass *> List;
-};
 
 /**
  * Abstract base class for Plugin factories. Subclasses of this

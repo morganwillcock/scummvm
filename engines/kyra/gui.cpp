@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -47,23 +47,16 @@ GUI::~GUI() {
 }
 
 void GUI::updateSaveFileList(Common::String targetName, bool excludeQuickSaves) {
-	Common::String pattern = targetName + ".???";
+	Common::String pattern = targetName + ".###";
 	Common::StringArray saveFileList = _vm->_saveFileMan->listSavefiles(pattern);
 	_saveSlots.clear();
 
 	for (Common::StringArray::const_iterator i = saveFileList.begin(); i != saveFileList.end(); ++i) {
-		char s1 = 0, s2 = 0, s3 = 0;
-		s1 = (*i)[i->size() - 3];
-		s2 = (*i)[i->size() - 2];
-		s3 = (*i)[i->size() - 1];
-		if (!Common::isDigit(s1) || !Common::isDigit(s2) || !Common::isDigit(s3))
+		// The last 3 digits of the filename correspond to the save slot.
+		const int slotNum = atoi(i->c_str() + i->size() - 3);
+		if (excludeQuickSaves && slotNum >= 990)
 			continue;
-		s1 -= '0';
-		s2 -= '0';
-		s3 -= '0';
-		if (excludeQuickSaves && s1 == 9 && s2 == 9)
-			continue;
-		_saveSlots.push_back(s1 * 100 + s2 * 10 + s3);
+		_saveSlots.push_back(slotNum);
 	}
 
 	if (_saveSlots.begin() == _saveSlots.end())

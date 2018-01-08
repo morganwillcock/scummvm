@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 
 #include "common/scummsys.h"
-#include "common/util.h"
 
+#include "audio/audiostream.h"
 #include "audio/decoders/flac.h"
 #include "audio/decoders/voc.h"
 #include "audio/decoders/vorbis.h"
@@ -30,8 +31,6 @@
 
 #include "scumm/resource.h"
 #include "scumm/scumm.h"
-#include "scumm/util.h"
-#include "scumm/imuse_digi/dimuse.h"
 #include "scumm/imuse_digi/dimuse_bndmgr.h"
 #include "scumm/imuse_digi/dimuse_codecs.h"
 #include "scumm/imuse_digi/dimuse_sndmgr.h"
@@ -663,7 +662,7 @@ int32 ImuseDigiSndMgr::getDataFromRegion(SoundDesc *soundDesc, int region, byte 
 	} else if ((soundDesc->bundle) && (soundDesc->compressed)) {
 		*buf = (byte *)malloc(size);
 		assert(*buf);
-		char fileName[24];
+		char fileName[26];
 		int offsetMs = (((offset * 8 * 10) / soundDesc->bits) / (soundDesc->channels * soundDesc->freq)) * 100;
 		sprintf(fileName, "%s_reg%03d", soundDesc->name, region);
 		if (scumm_stricmp(fileName, soundDesc->lastFileName) != 0) {

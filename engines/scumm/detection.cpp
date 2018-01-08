@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -29,6 +29,7 @@
 #include "common/md5.h"
 #include "common/savefile.h"
 #include "common/system.h"
+#include "common/translation.h"
 
 #include "audio/mididrv.h"
 
@@ -79,10 +80,12 @@ Common::String ScummEngine::generateFilename(const int room) const {
 	} else {
 		switch (_filenamePattern.genMethod) {
 		case kGenDiskNum:
+		case kGenDiskNumSteam:
 			result = Common::String::format(_filenamePattern.pattern, diskNumber);
 			break;
 
 		case kGenRoomNum:
+		case kGenRoomNumSteam:
 			result = Common::String::format(_filenamePattern.pattern, room);
 			break;
 
@@ -183,6 +186,11 @@ Common::String ScummEngine_v70he::generateFilename(const int room) const {
 		}
 
 		if (_filenamePattern.genMethod == kGenHEPC || _filenamePattern.genMethod == kGenHEIOS) {
+			if (id == '3' && _game.id == GID_MOONBASE) {
+				result = Common::String::format("%s.u32", _filenamePattern.pattern);
+				break;
+			}
+
 			// For HE >= 98, we already called snprintf above.
 			if (_game.heversion < 98 || room < 0)
 				result = Common::String::format("%s.he%c", _filenamePattern.pattern, id);
@@ -209,7 +217,32 @@ Common::String ScummEngine_v70he::generateFilename(const int room) const {
 	return result;
 }
 
-static Common::String generateFilenameForDetection(const char *pattern, FilenameGenMethod genMethod) {
+// The following table includes all the index files, which are embedded in the
+// main game executables in Steam versions.
+static const SteamIndexFile steamIndexFiles[] = {
+	{ GID_INDY3, Common::kPlatformWindows,   "%02d.LFL",      "00.LFL",        "Indiana Jones and the Last Crusade.exe",     162056,  6295 },
+	{ GID_INDY3, Common::kPlatformMacintosh, "%02d.LFL",      "00.LFL",        "The Last Crusade",                           150368,  6295 },
+	{ GID_INDY4, Common::kPlatformWindows,   "atlantis.%03d", "ATLANTIS.000",  "Indiana Jones and the Fate of Atlantis.exe", 224336, 12035 },
+	{ GID_INDY4, Common::kPlatformMacintosh, "atlantis.%03d", "ATLANTIS.000",  "The Fate of Atlantis",                       260224, 12035 },
+	{ GID_LOOM,  Common::kPlatformWindows,   "%03d.LFL",      "000.LFL",       "Loom.exe",                                   187248,  8307 },
+	{ GID_LOOM,  Common::kPlatformMacintosh, "%03d.LFL",      "000.LFL",       "Loom",                                       170464,  8307 },
+#ifdef ENABLE_SCUMM_7_8
+	{ GID_DIG,   Common::kPlatformWindows,   "dig.la%d",      "DIG.LA0",       "The Dig.exe",                                340632, 16304 },
+	{ GID_DIG,   Common::kPlatformMacintosh, "dig.la%d",      "DIG.LA0",       "The Dig",                                    339744, 16304 },
+#endif
+	{ 0,         Common::kPlatformUnknown,   nullptr,         nullptr,         nullptr,                                           0,     0 }
+};
+
+const SteamIndexFile *lookUpSteamIndexFile(Common::String pattern, Common::Platform platform) {
+	for (const SteamIndexFile *indexFile = steamIndexFiles; indexFile->len; ++indexFile) {
+		if (platform == indexFile->platform && pattern.equalsIgnoreCase(indexFile->pattern))
+			return indexFile;
+	}
+
+	return nullptr;
+}
+
+static Common::String generateFilenameForDetection(const char *pattern, FilenameGenMethod genMethod, Common::Platform platform) {
 	Common::String result;
 
 	switch (genMethod) {
@@ -217,6 +250,16 @@ static Common::String generateFilenameForDetection(const char *pattern, Filename
 	case kGenRoomNum:
 		result = Common::String::format(pattern, 0);
 		break;
+
+	case kGenDiskNumSteam:
+	case kGenRoomNumSteam: {
+		const SteamIndexFile *indexFile = lookUpSteamIndexFile(pattern, platform);
+		if (!indexFile) {
+			error("Unable to find Steam executable from detection pattern");
+		} else {
+			result = indexFile->executableName;
+		}
+		} break;
 
 	case kGenHEPC:
 	case kGenHEIOS:
@@ -286,6 +329,8 @@ static BaseScummFile *openDiskImage(const Common::FSNode &node, const GameFilena
 		gs.gameid = gfp->gameid;
 		gs.id = (Common::String(gfp->gameid) == "maniac" ? GID_MANIAC : GID_ZAK);
 		gs.platform = gfp->platform;
+		if (strcmp(gfp->pattern, "maniacdemo.d64") == 0)
+			gs.features |= GF_DEMO;
 
 		// determine second disk file name
 		Common::String disk2(disk1);
@@ -465,12 +510,7 @@ static void computeGameSettingsFromMD5(const Common::FSList &fslist, const GameF
 				// (since they have identical MD5):
 				if (dr.game.id == GID_MANIAC && !strcmp(gfp->pattern, "%02d.MAN")) {
 					dr.extra = "V1 Demo";
-				}
-
-				// HACK: If 'Demo' occurs in the extra string, set the GF_DEMO flag,
-				// required by some game demos (e.g. Dig, FT and COMI).
-				if (dr.extra && strstr(dr.extra, "Demo")) {
-					dr.game.features |= GF_DEMO;
+					dr.game.features = GF_DEMO;
 				}
 
 				// HACK: Try to detect languages for translated games
@@ -528,7 +568,8 @@ static void detectGames(const Common::FSList &fslist, Common::List<DetectorResul
 	DetectorResult dr;
 
 	// Dive one level down since mac indy3/loom has its files split into directories. See Bug #1438631
-	composeFileHashMap(fileMD5Map, fslist, 2, directoryGlobs);
+	// Dive two levels down for Mac Steam games
+	composeFileHashMap(fileMD5Map, fslist, 3, directoryGlobs);
 
 	// Iterate over all filename patterns.
 	for (const GameFilenamePattern *gfp = gameFilenamesTable; gfp->gameid; ++gfp) {
@@ -540,7 +581,7 @@ static void detectGames(const Common::FSList &fslist, Common::List<DetectorResul
 		// Generate the detectname corresponding to the gfp. If the file doesn't
 		// exist in the directory we are looking at, we can skip to the next
 		// one immediately.
-		Common::String file(generateFilenameForDetection(gfp->pattern, gfp->genMethod));
+		Common::String file(generateFilenameForDetection(gfp->pattern, gfp->genMethod, gfp->platform));
 		if (!fileMD5Map.contains(file))
 			continue;
 
@@ -619,6 +660,12 @@ static void detectGames(const Common::FSList &fslist, Common::List<DetectorResul
 		if (d.md5Entry)
 			continue;
 
+		// Prevent executables being detected as Steam variant. If we don't
+		// know the md5, then it's just the regular executable. Otherwise we
+		// will most likely fail on trying read the index from the executable.
+		// Fixes bug #10290
+		if (gfp->genMethod == kGenRoomNumSteam || gfp->genMethod == kGenDiskNumSteam)
+			continue;
 
 		//  ____            _     ____
 		// |  _ \ __ _ _ __| |_  |___ \ *
@@ -922,6 +969,7 @@ public:
 	virtual int getMaximumSaveSlot() const;
 	virtual void removeSaveState(const char *target, int slot) const;
 	virtual SaveStateDescriptor querySaveMetaInfos(const char *target, int slot) const;
+	virtual const ExtraGuiOptions getExtraGuiOptions(const Common::String &target) const;
 };
 
 bool ScummMetaEngine::hasFeature(MetaEngineFeature f) const {
@@ -932,7 +980,8 @@ bool ScummMetaEngine::hasFeature(MetaEngineFeature f) const {
 		(f == kSavesSupportMetaInfo) ||
 		(f == kSavesSupportThumbnail) ||
 		(f == kSavesSupportCreationDate) ||
-		(f == kSavesSupportPlayTime);
+		(f == kSavesSupportPlayTime) ||
+		(f == kSimpleSavesNames);
 }
 
 bool ScummEngine::hasFeature(EngineFeature f) const {
@@ -1025,7 +1074,7 @@ Common::Error ScummMetaEngine::createInstance(OSystem *syst, Engine **engine) co
 	Common::FSNode dir(ConfMan.get("path"));
 	if (!dir.isDirectory())
 		return Common::kPathNotDirectory;
-	if (!dir.getChildren(fslist, Common::FSNode::kListFilesOnly))
+	if (!dir.getChildren(fslist, Common::FSNode::kListAll))
 		return Common::kNoGameDataFoundError;
 
 	// Invoke the detector, but fixed to the specified gameid.
@@ -1074,14 +1123,14 @@ Common::Error ScummMetaEngine::createInstance(OSystem *syst, Engine **engine) co
 	if (!findInMD5Table(res.md5.c_str())) {
 		Common::String md5Warning;
 
-		md5Warning = "Your game version appears to be unknown. If this is *NOT* a fan-modified\n";
-		md5Warning += "version (in particular, not a fan-made translation), please, report the\n";
-		md5Warning += "following data to the ScummVM team along with name of the game you tried\n";
-		md5Warning += "to add and its version/language/etc.:\n";
+		md5Warning = _("Your game version appears to be unknown. If this is *NOT* a fan-modified\n"
+		               "version (in particular, not a fan-made translation), please, report the\n"
+		               "following data to the ScummVM team along with the name of the game you tried\n"
+		               "to add and its version, language, etc.:\n");
 
 		md5Warning += Common::String::format("  SCUMM gameid '%s', file '%s', MD5 '%s'\n\n",
 				res.game.gameid,
-				generateFilenameForDetection(res.fp.pattern, res.fp.genMethod).c_str(),
+				generateFilenameForDetection(res.fp.pattern, res.fp.genMethod, res.game.platform).c_str(),
 				res.md5.c_str());
 
 		g_system->logMessage(LogMessageType::kWarning, md5Warning.c_str());
@@ -1092,8 +1141,8 @@ Common::Error ScummMetaEngine::createInstance(OSystem *syst, Engine **engine) co
 	// We don't support the "Lite" version off puttzoo iOS because it contains
 	// the full game.
 	if (!strcmp(res.game.gameid, "puttzoo") && !strcmp(res.extra, "Lite")) {
-		GUIErrorMessage("The Lite version of Putt-Putt Saves the Zoo iOS is not supported to avoid piracy.\n"
-		                "The full version is available for purchase from the iTunes Store.");
+		GUIErrorMessage(_("The Lite version of Putt-Putt Saves the Zoo iOS is not supported to avoid piracy.\n"
+		                  "The full version is available for purchase from the iTunes Store."));
 		return Common::kUnsupportedGameidError;
 	}
 
@@ -1233,10 +1282,9 @@ SaveStateList ScummMetaEngine::listSaves(const char *target) const {
 	Common::StringArray filenames;
 	Common::String saveDesc;
 	Common::String pattern = target;
-	pattern += ".s??";
+	pattern += ".s##";
 
 	filenames = saveFileMan->listSavefiles(pattern);
-	sort(filenames.begin(), filenames.end());	// Sort (hopefully ensuring we are sorted numerically..)
 
 	SaveStateList saveList;
 	for (Common::StringArray::const_iterator file = filenames.begin(); file != filenames.end(); ++file) {
@@ -1253,6 +1301,8 @@ SaveStateList ScummMetaEngine::listSaves(const char *target) const {
 		}
 	}
 
+	// Sort saves based on slot number.
+	Common::sort(saveList.begin(), saveList.end(), SaveStateDescriptorSlotComparator());
 	return saveList;
 }
 
@@ -1291,6 +1341,21 @@ SaveStateDescriptor ScummMetaEngine::querySaveMetaInfos(const char *target, int 
 	}
 
 	return desc;
+}
+
+static const ExtraGuiOption comiObjectLabelsOption = {
+	_s("Show Object Line"),
+	_s("Show the names of objects at the bottom of the screen"),
+	"object_labels",
+	true
+};
+
+const ExtraGuiOptions ScummMetaEngine::getExtraGuiOptions(const Common::String &target) const {
+	ExtraGuiOptions options;
+	if (target.empty() || ConfMan.get("gameid", target) == "comi") {
+		options.push_back(comiObjectLabelsOption);
+	}
+	return options;
 }
 
 #if PLUGIN_ENABLED_DYNAMIC(SCUMM)

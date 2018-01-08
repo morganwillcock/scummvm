@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_SAVELOAD_H
 #define GUI_SAVELOAD_H
 
-#include "gui/dialog.h"
+#include "common/str.h"
 #include "engines/metaengine.h"
 
 namespace GUI {
@@ -50,7 +51,7 @@ public:
 	 * @return The selcted save slot. -1 in case none is selected.
 	 */
 	int runModalWithCurrentTarget();
-	int runModalWithPluginAndTarget(const EnginePlugin *plugin, const String &target);
+	int runModalWithPluginAndTarget(const Plugin *plugin, const String &target);
 
 	const Common::String &getResultString() const;
 

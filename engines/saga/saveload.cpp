@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -56,7 +56,7 @@ SaveFileData *SagaEngine::getSaveFile(uint idx) {
 		return &_saveFiles[_saveFilesCount - idx - 1];
 	} else {
 		if (!emptySlot.name[0])
-			strcpy(emptySlot.name, getTextString(kTextNewSave));
+			Common::strlcpy(emptySlot.name, getTextString(kTextNewSave), SAVE_TITLE_SIZE);
 
 		return (idx == 0) ? &emptySlot : &_saveFiles[_saveFilesCount - idx];
 	}
@@ -185,7 +185,7 @@ void SagaEngine::save(const char *fileName, const char *saveName) {
 
 	// Original game title
 	memset(title, 0, TITLESIZE);
-	strncpy(title, _gameTitle.c_str(), TITLESIZE);
+	Common::strlcpy(title, _gameTitle.c_str(), TITLESIZE);
 	out->write(title, TITLESIZE);
 
 	// Thumbnail
@@ -215,8 +215,7 @@ void SagaEngine::save(const char *fileName, const char *saveName) {
 #ifdef ENABLE_IHNM
 	if (getGameId() == GID_IHNM) {
 		out->writeSint32LE(_scene->currentChapterNumber());
-		// Protagonist
-		out->writeSint32LE(_scene->currentProtag());
+		out->writeSint32LE(0);	// obsolete, was used for the protagonist
 		out->writeSint32LE(_scene->getCurrentMusicTrack());
 		out->writeSint32LE(_scene->getCurrentMusicRepeat());
 	}
@@ -316,7 +315,7 @@ void SagaEngine::load(const char *fileName) {
 	if (getGameId() == GID_IHNM) {
 		int currentChapter = _scene->currentChapterNumber();
 		_scene->setChapterNumber(in->readSint32LE());
-		_scene->setProtag(in->readSint32LE());
+		in->skip(4);	// obsolete, was used for setting the protagonist
 		if (_scene->currentChapterNumber() != currentChapter)
 			_scene->changeScene(-2, 0, kTransitionFade, _scene->currentChapterNumber());
 		_scene->setCurrentMusicTrack(in->readSint32LE());
@@ -366,30 +365,6 @@ void SagaEngine::load(const char *fileName) {
 	int volume = _music->getVolume();
 	_music->setVolume(0);
 
-#ifdef ENABLE_IHNM
-	// Protagonist swapping
-	if (getGameId() == GID_IHNM) {
-		if (_scene->currentProtag() != 0 && _scene->currentChapterNumber() != 6) {
-			ActorData *actor1 = _actor->getFirstActor();
-			ActorData *actor2;
-			// The original gets actor2 from the current protagonist ID, but this is sometimes wrong
-			// If the current protagonist ID is not correct, use the stored protagonist
-			if (!_actor->validActorId(_scene->currentProtag())) {
-				actor2 = _actor->_protagonist;
-			} else {
-				actor2 = _actor->getActor(_scene->currentProtag());
-			}
-
-			SWAP(actor1->_location, actor2->_location);
-
-			actor2->_flags &= ~kProtagonist;
-			actor1->_flags |= kProtagonist;
-			_actor->_protagonist = _actor->_centerActor = actor1;
-			_scene->setProtag(actor1->_id);
-		}
-	}
-#endif
-
 	_scene->clearSceneQueue();
 	_scene->changeScene(sceneNumber, ACTOR_NO_ENTRANCE, kTransitionNoFade);
 
@@ -406,6 +381,12 @@ void SagaEngine::load(const char *fileName) {
 	_music->setVolume(volume);
 
 	_interface->draw();
+
+	// Abort any scene entry protagonist animations and auto-cue speeches.
+	// Fixes bug #10009.
+	_actor->abortAllSpeeches();
+	_actor->_protagonist->_location = _actor->_protagonist->_finalTarget;
+	_actor->actorEndWalk(ID_PROTAG, true);
 }
 
 } // End of namespace Saga

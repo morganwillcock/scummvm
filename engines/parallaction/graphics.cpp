@@ -9,12 +9,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -731,7 +731,7 @@ Gfx::Gfx(Parallaction* vm) :
 	_gameType = _vm->getGameType();
 	_doubleBuffering = _gameType != GType_Nippon;
 
-	initGraphics(_vm->_screenWidth, _vm->_screenHeight, _gameType == GType_BRA);
+	initGraphics(_vm->_screenWidth, _vm->_screenHeight);
 
 	setPalette(_palette);
 
@@ -742,6 +742,8 @@ Gfx::Gfx(Parallaction* vm) :
 	_halfbrite = false;
 	_nextProjectorPos = 0;
 	_hbCircleRadius = 0;
+
+	_overlayMode = false;
 
 	_unpackedBitmap = new byte[MAXIMUM_UNPACKED_BITMAP_SIZE];
 	assert(_unpackedBitmap);

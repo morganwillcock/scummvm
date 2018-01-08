@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -211,6 +211,24 @@
 		{
 			{"playtoon.stk", 0, "55a85036dd93cce93532d8f743d90074", 17467154},
 			{"spirou.stk", 0, "e3e1b6148dd72fafc3637f1a8e5764f5", 9812043},
+			{0, 0, 0, 0}
+		},
+		FR_FRA,
+		kPlatformDOS,
+		ADGF_NO_FLAGS,
+		GUIO3(GUIO_NOSUBTITLES, GUIO_NOSPEECH, GUIO_NOASPECT)
+	},
+	kGameTypePlaytoons,
+	kFeatures640x480,
+	"intro2.stk", 0, 0
+},
+{ // Version 1.002. Bug #7052
+	{
+		"playtoons2",
+		"",
+		{
+			{"playtoon.stk", 0, "8c98e9a11be9bb203a55e8c6e68e519b", 25574338},
+			{"spirou.stk", 0, "91080dc148de1bbd6a97321c1a1facf3", 9817086},
 			{0, 0, 0, 0}
 		},
 		FR_FRA,

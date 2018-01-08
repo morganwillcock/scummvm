@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -81,6 +81,18 @@ int ModularBackend::getGraphicsMode() const {
 	return _graphicsManager->getGraphicsMode();
 }
 
+const OSystem::GraphicsMode *ModularBackend::getSupportedShaders() const {
+	return _graphicsManager->getSupportedShaders();
+}
+
+bool ModularBackend::setShader(int id) {
+	return _graphicsManager->setShader(id);
+}
+
+int ModularBackend::getShader() const {
+	return _graphicsManager->getShader();
+}
+
 void ModularBackend::resetGraphicsScale() {
 	_graphicsManager->resetGraphicsScale();
 }
@@ -99,6 +111,10 @@ Common::List<Graphics::PixelFormat> ModularBackend::getSupportedFormats() const 
 
 void ModularBackend::initSize(uint w, uint h, const Graphics::PixelFormat *format ) {
 	_graphicsManager->initSize(w, h, format);
+}
+
+void ModularBackend::initSizeHint(const Graphics::ModeList &modes) {
+	_graphicsManager->initSizeHint(modes);
 }
 
 int ModularBackend::getScreenChangeID() const {
@@ -201,6 +217,7 @@ bool ModularBackend::showMouse(bool visible) {
 }
 
 void ModularBackend::warpMouse(int x, int y) {
+	_eventManager->purgeMouseEvents();
 	_graphicsManager->warpMouse(x, y);
 }
 
@@ -239,6 +256,10 @@ Audio::Mixer *ModularBackend::getMixer() {
 
 void ModularBackend::displayMessageOnOSD(const char *msg) {
 	_graphicsManager->displayMessageOnOSD(msg);
+}
+
+void ModularBackend::displayActivityIconOnOSD(const Graphics::Surface *icon) {
+	_graphicsManager->displayActivityIconOnOSD(icon);
 }
 
 void ModularBackend::quit() {

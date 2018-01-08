@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -204,7 +204,7 @@ bool MidiParser_SMF::loadMusic(byte *data, uint32 size) {
 	int tracksRead = 0;
 	while (tracksRead < _numTracks) {
 		if (memcmp(pos, "MTrk", 4) && !isGMF) {
-			warning("Position: %p ('%c')", pos, *pos);
+			warning("Position: %p ('%c')", (void *)pos, *pos);
 			warning("Hit invalid block '%c%c%c%c' while scanning for track locations", pos[0], pos[1], pos[2], pos[3]);
 			return false;
 		}

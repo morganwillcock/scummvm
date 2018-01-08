@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -46,7 +46,6 @@
 #include "common/file.h"
 #include "common/memstream.h"
 #include "common/stream.h"
-#include "common/textconsole.h"
 
 #include "agi/agi.h"
 
@@ -153,9 +152,15 @@ unsigned char instr[] = {50, 51, 19};
 static void writeDelta(Common::MemoryWriteStreamDynamic *st, int32 delta) {
 	int32 i;
 
-	i = delta >> 21; if (i > 0) st->writeByte((i & 127) | 128);
-	i = delta >> 14; if (i > 0) st->writeByte((i & 127) | 128);
-	i = delta >> 7;  if (i > 0) st->writeByte((i & 127) | 128);
+	i = delta >> 21;
+	if (i > 0)
+		st->writeByte((i & 127) | 128);
+	i = delta >> 14;
+	if (i > 0)
+		st->writeByte((i & 127) | 128);
+	i = delta >> 7;
+	if (i > 0)
+		st->writeByte((i & 127) | 128);
 	st->writeByte(delta & 127);
 }
 
@@ -164,7 +169,7 @@ static uint32 convertSND2MIDI(byte *snddata, byte **data) {
 	int n;
 	double ll;
 
-	Common::MemoryWriteStreamDynamic st;
+	Common::MemoryWriteStreamDynamic st(DisposeAfterUse::NO);
 
 	ll = log10(pow(2.0, 1.0 / 12.0));
 
@@ -190,7 +195,7 @@ static uint32 convertSND2MIDI(byte *snddata, byte **data) {
 		for (pos = start; pos < end; pos += 5) {
 			uint16 freq,  dur;
 			dur = (snddata[pos + 0] | (snddata[pos + 1] << 8)) * SPEED_FACTOR;
-			freq = ((snddata[pos + 2] & 0x3F)  <<  4)  +  (snddata[pos + 3] & 0x0F);
+			freq = ((snddata[pos + 2] & 0x3F)  <<  4)  + (snddata[pos + 3] & 0x0F);
 			if (snddata[pos + 2] > 0) {
 				double fr;
 				int note;

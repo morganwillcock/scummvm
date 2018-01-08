@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 
@@ -397,6 +398,7 @@ Instrument_Program::Instrument_Program(byte program, bool mt32) :
 
 Instrument_Program::Instrument_Program(Serializer *s) {
 	_program = 255;
+	_mt32 = false;
 	if (!s->isSaving())
 		saveOrLoad(s);
 }

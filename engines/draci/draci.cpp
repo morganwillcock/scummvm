@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -71,18 +71,6 @@ const uint kDubbingFrequency = 22050;
 
 DraciEngine::DraciEngine(OSystem *syst, const ADGameDescription *gameDesc)
  : Engine(syst), _rnd("draci") {
-
-	// Put your engine in a sane state, but do nothing big yet;
-	// in particular, do not load data from files; rather, if you
-	// need to do such things, do them from init().
-
-	// Do not initialize graphics here
-
-	// However this is the place to specify all default directories
-	//const Common::FSNode gameDataDir(ConfMan.get("path"));
-	//SearchMan.addSubDirectoryMatching(gameDataDir, "sound");
-
-	// Here is the right place to set up the engine specific debug levels
 	DebugMan.addDebugChannel(kDraciGeneralDebugLevel, "general", "Draci general debug info");
 	DebugMan.addDebugChannel(kDraciBytecodeDebugLevel, "bytecode", "GPL bytecode instructions");
 	DebugMan.addDebugChannel(kDraciArchiverDebugLevel, "archiver", "BAR archiver debug info");
@@ -162,7 +150,7 @@ static SoundArchive* openAnyPossibleDubbing() {
 
 int DraciEngine::init() {
 	// Initialize graphics using following:
-	initGraphics(kScreenWidth, kScreenHeight, false);
+	initGraphics(kScreenWidth, kScreenHeight);
 
 	// Open game's archives
 	_initArchive = new BArchive(initPath);

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -543,6 +543,15 @@ bool CineEngine::loadTempSaveOS(Common::SeekableReadStream &in) {
 			loadRel(currentRelName);
 		}
 
+		// Reset background music in CD version of Future Wars
+		if (getGameType() == GType_FW && (getFeatures() & GF_CD)) {
+			if (strlen(bgNames[0])) {
+				char buffer[20];
+				removeExtention(buffer, bgNames[0]);
+				g_sound->setBgMusic(atoi(buffer + 1));
+			}
+		}
+
 		// Load first background (Uses loadBg)
 		if (strlen(bgNames[0])) {
 			loadBg(bgNames[0]);
@@ -682,6 +691,11 @@ bool CineEngine::loadPlainSaveFW(Common::SeekableReadStream &in, CineSaveGameFor
 	}
 
 	if (strlen(bgName)) {
+		if (g_cine->getGameType() == GType_FW && (g_cine->getFeatures() & GF_CD)) {
+			char buffer[20];
+			removeExtention(buffer, bgName);
+			g_sound->setBgMusic(atoi(buffer + 1));
+		}
 		loadBg(bgName);
 	}
 
@@ -960,7 +974,7 @@ void CineEngine::makeSaveOS(Common::OutSaveFile &out) {
 	saveBgIncrustList(out);
 }
 
-void CineEngine::makeSave(char *saveFileName) {
+void CineEngine::makeSave(const Common::String &saveFileName) {
 	Common::SharedPtr<Common::OutSaveFile> fHandle(_saveFileMan->openForSaving(saveFileName));
 
 	setMouseCursor(MOUSE_CURSOR_DISK);

@@ -1,24 +1,24 @@
 /* ScummVM - Graphic Adventure Engine
-*
-* ScummVM is the legal property of its developers, whose names
-* are too numerous to list here. Please refer to the COPYRIGHT
-* file distributed with this source distribution.
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*
-*/
+ *
+ * ScummVM is the legal property of its developers, whose names
+ * are too numerous to list here. Please refer to the COPYRIGHT
+ * file distributed with this source distribution.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
+ */
 
 #include "common/debug.h"
 #include "common/system.h"
@@ -226,6 +226,11 @@ bool Character::walkTo(int16 newPosX, int16 newPosY) {
 					}
 
 					setFacing(getFacingFromDirection(smoothDx, smoothDy));
+					if (_currentWalkStamp != localWalkStamp) {
+						// another walkTo was started in setFacing, we need to cancel this one.
+						return false;
+					}
+
 					playWalkAnim(0, 0);
 				}
 
@@ -1060,11 +1065,13 @@ void Character::playAnim(int32 animId, int32 unused, int32 flags) {
 
 	_animSpecialId = animId;
 
-	_animationInstance->setAnimation(_specialAnim);
-	_animationInstance->setAnimationRange(0, _specialAnim->_numFrames - 1);
-	_animationInstance->reset();
-	_animationInstance->stopAnimation();
-	_animationInstance->setLooping(false);
+	if (_animationInstance) {
+		_animationInstance->setAnimation(_specialAnim);
+		_animationInstance->setAnimationRange(0, _specialAnim->_numFrames - 1);
+		_animationInstance->reset();
+		_animationInstance->stopAnimation();
+		_animationInstance->setLooping(false);
+	}
 }
 
 int32 Character::getAnimFlag() {

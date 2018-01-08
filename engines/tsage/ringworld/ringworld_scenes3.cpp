@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -494,7 +494,7 @@ void Scene2100::Action1::signal() {
 			setDelay(1);
 		else {
 			setAction(&scene->_sequenceManager, this, 2102, &g_globals->_player, NULL);
-			scene->_sitFl = 0;
+			scene->_sitFl = false;
 		}
 		break;
 	case 1: {
@@ -532,7 +532,7 @@ void Scene2100::Action1::signal() {
 			// Wait for an event
 			Event event;
 			if (!g_globals->_events.getEvent(event)) {
-				GLOBALS._screenSurface.updateScreen();
+				GLOBALS._screen.update();
 				g_system->delayMillis(10);
 				continue;
 			}
@@ -1548,6 +1548,7 @@ Scene2100::Scene2100() :
 	_area3._pt = Common::Point(200, 75);
 	_area4.setup(2153, 1, 1, OBJECT_TRANSLATOR);
 	_area4._pt = Common::Point(237, 77);
+	_sitFl = false;
 }
 
 void Scene2100::postInit(SceneObjectList *OwnerList) {
@@ -1688,7 +1689,7 @@ void Scene2100::postInit(SceneObjectList *OwnerList) {
 	g_globals->_player._moveDiff.x = 4;
 	g_globals->_player.changeZoom(-1);
 	g_globals->_player.disableControl();
-	_sitFl = 0;
+	_sitFl = false;
 
 	switch (g_globals->_sceneManager._previousScene) {
 	case 2120:
@@ -1824,7 +1825,7 @@ void Scene2100::postInit(SceneObjectList *OwnerList) {
 		g_globals->_player.fixPriority(152);
 		g_globals->_player.setStrip(2);
 
-		_sitFl = 1;
+		_sitFl = true;
 
 		_object4.postInit();
 		_object4.setVisage(2102);
@@ -1858,7 +1859,7 @@ void Scene2100::postInit(SceneObjectList *OwnerList) {
 			g_globals->_player.fixPriority(152);
 			g_globals->_player.setStrip(2);
 
-			_sitFl = 1;
+			_sitFl = true;
 			setAction(&_action16);
 		}
 		break;
@@ -1932,12 +1933,12 @@ void Scene2100::stripCallback(int v) {
 void Scene2100::signal() {
 	switch (_sceneMode) {
 	case 2101:
-		_sitFl = 1;
+		_sitFl = true;
 		g_globals->_player._uiEnabled = true;
 		g_globals->_events.setCursor(CURSOR_USE);
 		break;
 	case 2102:
-		_sitFl = 0;
+		_sitFl = false;
 		g_globals->_player.enableControl();
 		break;
 	case 2103:
@@ -2264,7 +2265,7 @@ void Scene2150::Action1::signal() {
 			// Wait for an event
 			Event event;
 			if (!g_globals->_events.getEvent(event)) {
-				GLOBALS._screenSurface.updateScreen();
+				GLOBALS._screen.update();
 				g_system->delayMillis(10);
 				continue;
 			}
@@ -4946,8 +4947,6 @@ void Scene2310::synchronize(Serializer &s) {
 }
 
 void Scene2310::process(Event &event) {
-	int frameNum = 0;
-
 	if (!event.handled && (event.eventType == EVENT_BUTTON_DOWN)) {
 		int idx = 0;
 		while (idx < 5) {
@@ -4961,7 +4960,7 @@ void Scene2310::process(Event &event) {
 			if (_wireIndex == 5) {
 				// No wire is currently active, so start moving designated wire
 				_wireIndex = idx;
-				frameNum = idx + 2;
+				int frameNum = idx + 2;
 
 				if (event.mousePos.y > 105)
 					idx = findObject(idx);
@@ -5120,7 +5119,7 @@ void Scene2320::Action3::signal() {
 			// Wait for an event
 			Event event;
 			if (!g_globals->_events.getEvent(event)) {
-				GLOBALS._screenSurface.updateScreen();
+				GLOBALS._screen.update();
 				g_system->delayMillis(10);
 				continue;
 			}
@@ -5791,6 +5790,7 @@ Scene2320::Scene2320() :
 	_area3._pt = Common::Point(200, 75);
 	_area4.setup(2153, 1, 1, 10);
 	_area4._pt = Common::Point(237, 77);
+	_hotspotPtr = nullptr;
 }
 
 void Scene2320::postInit(SceneObjectList *OwnerList) {
@@ -5907,7 +5907,7 @@ void Scene2320::postInit(SceneObjectList *OwnerList) {
 			_hotspot11.setPosition(Common::Point(178, 118));
 			_hotspot11.animate(ANIM_MODE_1, NULL);
 		}
-		// Deliberate fall-through
+		// fall through
 	case 4250:
 	case 5000:
 	case 7000:

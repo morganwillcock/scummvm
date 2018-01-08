@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -309,7 +309,7 @@ Common::File *ResMan::resFile(uint32 id) {
 			_openCluEnd = cluster;
 		}
 		cluster->file = new Common::File();
-		char fileName[15];
+		char fileName[36];
 		// Supposes that big endian means mac cluster file and little endian means PC cluster file.
 		// This works, but we may want to separate the file name from the endianess or try .CLM extension if opening.clu file fail.
 		if (_isBigEndian)
@@ -327,13 +327,12 @@ Common::File *ResMan::resFile(uint32 id) {
 			Clu *closeClu = _openCluStart;
 			_openCluStart = _openCluStart->nextOpen;
 
-			if (closeClu) {
-				if (closeClu->file)
-					closeClu->file->close();
-				delete closeClu->file;
-				closeClu->file = NULL;
-				closeClu->nextOpen = NULL;
-			}
+			if (closeClu->file)
+				closeClu->file->close();
+			delete closeClu->file;
+			closeClu->file = NULL;
+			closeClu->nextOpen = NULL;
+
 			_openClus--;
 		}
 	}

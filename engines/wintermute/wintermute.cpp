@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -41,6 +41,7 @@
 #include "engines/wintermute/base/base_file_manager.h"
 #include "engines/wintermute/base/gfx/base_renderer.h"
 #include "engines/wintermute/base/scriptables/script_engine.h"
+#include "engines/wintermute/debugger/debugger_controller.h"
 
 namespace Wintermute {
 
@@ -49,11 +50,12 @@ namespace Wintermute {
 WintermuteEngine::WintermuteEngine() : Engine(g_system) {
 	_game = new AdGame("");
 	_debugger = nullptr;
+	_dbgController = nullptr;
 	_trigDebug = false;
 	_gameDescription = nullptr;
 }
 
-WintermuteEngine::WintermuteEngine(OSystem *syst, const ADGameDescription *desc)
+WintermuteEngine::WintermuteEngine(OSystem *syst, const WMEGameDescription *desc)
 	: Engine(syst), _gameDescription(desc) {
 	// Put your engine in a sane state, but do nothing big yet;
 	// in particular, do not load data from files; rather, if you
@@ -76,6 +78,7 @@ WintermuteEngine::WintermuteEngine(OSystem *syst, const ADGameDescription *desc)
 
 	_game = nullptr;
 	_debugger = nullptr;
+	_dbgController = nullptr;
 	_trigDebug = false;
 }
 
@@ -106,12 +109,13 @@ bool WintermuteEngine::hasFeature(EngineFeature f) const {
 Common::Error WintermuteEngine::run() {
 	// Initialize graphics using following:
 	Graphics::PixelFormat format(4, 8, 8, 8, 8, 24, 16, 8, 0);
-	initGraphics(800, 600, true, &format);
+	initGraphics(800, 600, &format);
 	if (g_system->getScreenFormat() != format) {
 		error("Wintermute currently REQUIRES 32bpp");
 	}
 
 	// Create debugger console. It requires GFX to be initialized
+	_dbgController = new DebuggerController(this);
 	_debugger = new Console(this);
 
 //	DebugMan.enableDebugChannel("enginelog");
@@ -133,7 +137,7 @@ Common::Error WintermuteEngine::run() {
 }
 
 int WintermuteEngine::init() {
-	BaseEngine::createInstance(_targetName, _gameDescription->gameid, _gameDescription->language);
+	BaseEngine::createInstance(_targetName, _gameDescription->adDesc.gameId, _gameDescription->adDesc.language, _gameDescription->targetExecutable);
 	_game = new AdGame(_targetName);
 	if (!_game) {
 		return 1;
@@ -171,7 +175,6 @@ int WintermuteEngine::init() {
 	}
 
 	_game->initialize3();
-
 	// initialize sound manager (non-fatal if we fail)
 	ret = _game->_soundMgr->initialize();
 	if (DID_FAIL(ret)) {
@@ -199,6 +202,8 @@ int WintermuteEngine::init() {
 		int slot = ConfMan.getInt("save_slot");
 		_game->loadGame(slot);
 	}
+
+	_game->_scEngine->attachMonitor(_dbgController);
 
 	// all set, ready to go
 	return 0;
@@ -365,6 +370,17 @@ bool WintermuteEngine::getGameInfo(const Common::FSList &fslist, Common::String 
 					name = value;
 				} else if (key == "CAPTION") {
 					retVal = true;
+					// Remove any translation tags, if they are included in the game description.
+					// This can potentially remove parts of a string that has translation tags
+					// and contains a "/" in its description (e.g. /tag/Name start / name end will
+					// result in "name end"), but it's a very rare case, and this code is just used
+					// for fallback anyway.
+					if (value.hasPrefix("/")) {
+						value.deleteChar(0);
+						while (value.contains("/")) {
+							value.deleteChar(0);
+						}
+					}
 					caption = value;
 				}
 			}

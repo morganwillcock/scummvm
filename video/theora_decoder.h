@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,7 +33,12 @@
 #include "graphics/surface.h"
 
 #include <theora/theoradec.h>
+
+#ifdef USE_TREMOR
+#include <tremor/ivorbiscodec.h>
+#else
 #include <vorbis/codec.h>
+#endif
 
 namespace Common {
 class SeekableReadStream;
@@ -50,12 +55,13 @@ namespace Video {
  *
  * Decoder for Theora videos.
  * Video decoder used in engines:
+ *  - pegasus
  *  - sword25
  *  - wintermute
  */
 class TheoraDecoder : public VideoDecoder {
 public:
-	TheoraDecoder(Audio::Mixer::SoundType soundType = Audio::Mixer::kMusicSoundType);
+	TheoraDecoder();
 	virtual ~TheoraDecoder();
 
 	/**
@@ -104,8 +110,6 @@ private:
 		VorbisAudioTrack(Audio::Mixer::SoundType soundType, vorbis_info &vorbisInfo);
 		~VorbisAudioTrack();
 
-		Audio::Mixer::SoundType getSoundType() const { return _soundType; }
-
 		bool decodeSamples();
 		bool hasAudio() const;
 		bool needsAudio() const;
@@ -120,7 +124,6 @@ private:
 		int _audioBufferFill;
 		ogg_int16_t *_audioBuffer;
 
-		Audio::Mixer::SoundType _soundType;
 		Audio::QueuingAudioStream *_audStream;
 
 		vorbis_block _vorbisBlock;
@@ -135,8 +138,6 @@ private:
 	void ensureAudioBufferSize();
 
 	Common::SeekableReadStream *_fileStream;
-
-	Audio::Mixer::SoundType _soundType;
 
 	ogg_sync_state _oggSync;
 	ogg_page _oggPage;

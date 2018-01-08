@@ -36,6 +36,7 @@
         .global _ARM_LinearRate_S
         .global _ARM_LinearRate_R
 
+        .align 2
 _ARM_CopyRate_M:
         @ r0 = len
         @ r1 = obuf
@@ -73,6 +74,7 @@ CopyRate_M_loop:
 
         LDMFD   r13!,{r4-r7,PC}
 
+        .align 2
 _ARM_CopyRate_S:
         @ r0 = len
         @ r1 = obuf
@@ -111,6 +113,7 @@ CopyRate_S_loop:
 
         LDMFD   r13!,{r4-r7,PC}
 
+        .align 2
 _ARM_CopyRate_R:
         @ r0 = len
         @ r1 = obuf
@@ -149,6 +152,7 @@ CopyRate_R_loop:
 
         LDMFD   r13!,{r4-r7,PC}
 
+        .align 2
 _ARM_SimpleRate_M:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -229,6 +233,7 @@ SimpleRate_M_read:
         B       SimpleRate_M_read_return
 
 
+        .align 2
 _ARM_SimpleRate_S:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -308,6 +313,7 @@ SimpleRate_S_read:
 
 
 
+        .align 2
 _ARM_SimpleRate_R:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -386,6 +392,7 @@ SimpleRate_R_read:
         B       SimpleRate_R_read_return
 
 
+        .align 2
 _ARM_LinearRate_M:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -434,17 +441,17 @@ LinearRate_M_part2:
 
         LDRSH   r4, [r3]                @ r4 = obuf[0]
         LDRSH   r5, [r3,#2]             @ r5 = obuf[1]
-        MOV     r6, r6, ASR #16         @ r6 = tmp0 = tmp1 >>= 16
+        MOV     r6, r6, ASR #15         @ r6 = tmp0 = tmp1 >>= 15
         MUL     r7, r12,r6              @ r7 = tmp0*vol_l
         MUL     r6, r14,r6              @ r6 = tmp1*vol_r
 
-        ADDS    r7, r7, r4, LSL #16     @ r7 = obuf[0]<<16 + tmp0*vol_l
+        ADDS    r7, r7, r4, LSL #15     @ r7 = obuf[0]<<15 + tmp0*vol_l
         RSCVS   r7, r10, #0x80000000    @ Clamp r7
-        ADDS    r6, r6, r5, LSL #16     @ r6 = obuf[1]<<16 + tmp1*vol_r
+        ADDS    r6, r6, r5, LSL #15     @ r6 = obuf[1]<<15 + tmp1*vol_r
         RSCVS   r6, r10, #0x80000000    @ Clamp r6
 
-        MOV     r7, r7, LSR #16         @ Shift back to halfword
-        MOV     r6, r6, LSR #16         @ Shift back to halfword
+        MOV     r7, r7, LSR #15         @ Shift back to halfword
+        MOV     r6, r6, LSR #15         @ Shift back to halfword
 
         LDR     r5, [r2,#12]            @ r5 = opos_inc
         STRH    r7, [r3],#2             @ Store output value
@@ -478,6 +485,7 @@ LinearRate_M_read:
         BLT     LinearRate_M_end
         B       LinearRate_M_read_return
 
+        .align 2
 _ARM_LinearRate_S:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -530,23 +538,23 @@ LinearRate_S_part2:
         LDR     r7, [r2,#24]            @ r7 = ilast[1]<<16 + 32768
         LDRSH   r5, [r2,#18]            @ r5 = icur[1]
         LDRSH   r10,[r3]                @ r10= obuf[0]
-        MOV     r6, r6, ASR #16         @ r6 = tmp1 >>= 16
+        MOV     r6, r6, ASR #15         @ r6 = tmp1 >>= 15
         SUB     r5, r5, r7, ASR #16     @ r5 = icur[1] - ilast[1]
         MLA     r7, r4, r5, r7  @ r7 = (icur[1]-ilast[1])*opos_frac+ilast[1]
 
         LDRSH   r5, [r3,#2]             @ r5 = obuf[1]
-        MOV     r7, r7, ASR #16         @ r7 = tmp0 >>= 16
+        MOV     r7, r7, ASR #15         @ r7 = tmp0 >>= 15
         MUL     r7, r12,r7              @ r7 = tmp0*vol_l
         MUL     r6, r14,r6              @ r6 = tmp1*vol_r
 
-        ADDS    r7, r7, r10, LSL #16    @ r7 = obuf[0]<<16 + tmp0*vol_l
+        ADDS    r7, r7, r10, LSL #15    @ r7 = obuf[0]<<15 + tmp0*vol_l
         MOV     r4, #0
         RSCVS   r7, r4, #0x80000000     @ Clamp r7
-        ADDS    r6, r6, r5, LSL #16     @ r6 = obuf[1]<<16 + tmp1*vol_r
+        ADDS    r6, r6, r5, LSL #15     @ r6 = obuf[1]<<15 + tmp1*vol_r
         RSCVS   r6, r4, #0x80000000     @ Clamp r6
 
-        MOV     r7, r7, LSR #16         @ Shift back to halfword
-        MOV     r6, r6, LSR #16         @ Shift back to halfword
+        MOV     r7, r7, LSR #15         @ Shift back to halfword
+        MOV     r6, r6, LSR #15         @ Shift back to halfword
 
         LDR     r5, [r2,#12]            @ r5 = opos_inc
         STRH    r7, [r3],#2             @ Store output value
@@ -580,6 +588,7 @@ LinearRate_S_read:
         BLT     LinearRate_S_end
         B       LinearRate_S_read_return
 
+        .align 2
 _ARM_LinearRate_R:
         @ r0 = AudioStream &input
         @ r1 = input.readBuffer
@@ -632,23 +641,23 @@ LinearRate_R_part2:
         LDR     r7, [r2,#24]            @ r7 = ilast[1]<<16 + 32768
         LDRSH   r5, [r2,#18]            @ r5 = icur[1]
         LDRSH   r10,[r3,#2]             @ r10= obuf[1]
-        MOV     r6, r6, ASR #16         @ r6 = tmp1 >>= 16
+        MOV     r6, r6, ASR #15         @ r6 = tmp1 >>= 15
         SUB     r5, r5, r7, ASR #16     @ r5 = icur[1] - ilast[1]
         MLA     r7, r4, r5, r7  @ r7 = (icur[1]-ilast[1])*opos_frac+ilast[1]
 
         LDRSH   r5, [r3]                @ r5 = obuf[0]
-        MOV     r7, r7, ASR #16         @ r7 = tmp0 >>= 16
+        MOV     r7, r7, ASR #15         @ r7 = tmp0 >>= 15
         MUL     r7, r12,r7              @ r7 = tmp0*vol_l
         MUL     r6, r14,r6              @ r6 = tmp1*vol_r
 
-        ADDS    r7, r7, r10, LSL #16    @ r7 = obuf[1]<<16 + tmp0*vol_l
+        ADDS    r7, r7, r10, LSL #15    @ r7 = obuf[1]<<15 + tmp0*vol_l
         MOV     r4, #0
         RSCVS   r7, r4, #0x80000000     @ Clamp r7
-        ADDS    r6, r6, r5, LSL #16     @ r6 = obuf[0]<<16 + tmp1*vol_r
+        ADDS    r6, r6, r5, LSL #15     @ r6 = obuf[0]<<15 + tmp1*vol_r
         RSCVS   r6, r4, #0x80000000     @ Clamp r6
 
-        MOV     r7, r7, LSR #16         @ Shift back to halfword
-        MOV     r6, r6, LSR #16         @ Shift back to halfword
+        MOV     r7, r7, LSR #15         @ Shift back to halfword
+        MOV     r6, r6, LSR #15         @ Shift back to halfword
 
         LDR     r5, [r2,#12]            @ r5 = opos_inc
         STRH    r6, [r3],#2             @ Store output value

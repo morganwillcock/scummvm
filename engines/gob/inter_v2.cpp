@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,9 +25,6 @@
 #include "common/translation.h"
 
 #include "gui/message.h"
-
-#include "audio/mixer.h"
-#include "audio/mods/infogrames.h"
 
 #include "gob/gob.h"
 #include "gob/inter.h"
@@ -800,7 +797,7 @@ void Inter_v2::o2_initScreen() {
 			height = _vm->_height = 400;
 			_vm->_global->_colorCount = 16;
 
-			_vm->_video->setSize(true);
+			_vm->_video->setSize();
 
 		} else if (_vm->_global->_videoMode == 0x10) {
 
@@ -813,7 +810,7 @@ void Inter_v2::o2_initScreen() {
 			_vm->_height = 200;
 			_vm->_global->_colorCount = 256;
 
-			_vm->_video->setSize(false);
+			_vm->_video->setSize();
 
 		}
 	}
@@ -1467,7 +1464,7 @@ void Inter_v2::o2_readData(OpFuncParams &params) {
 
 		if (!_vm->_saveLoad->load(file, dataVar, size, offset)) {
 
-			GUI::MessageDialog dialog(_("Failed to load game state from file."));
+			GUI::MessageDialog dialog(_("Failed to load saved game from file."));
 			dialog.runModal();
 
 		} else
@@ -1537,7 +1534,7 @@ void Inter_v2::o2_writeData(OpFuncParams &params) {
 
 		if (!_vm->_saveLoad->save(file, dataVar, size, offset)) {
 
-			GUI::MessageDialog dialog(_("Failed to save game state to file."));
+			GUI::MessageDialog dialog(_("Failed to save game to file."));
 			dialog.runModal();
 
 		} else

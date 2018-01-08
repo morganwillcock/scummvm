@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -42,8 +42,8 @@
 #include "backends/platform/wince/CEScaler.h"
 #include "backends/platform/wince/CEgui/ItemAction.h"
 
-WINCESdlGraphicsManager::WINCESdlGraphicsManager(SdlEventSource *sdlEventSource)
-	: SurfaceSdlGraphicsManager(sdlEventSource),
+WINCESdlGraphicsManager::WINCESdlGraphicsManager(SdlEventSource *sdlEventSource, SdlWindow *window)
+	: SurfaceSdlGraphicsManager(sdlEventSource, window),
 	  _panelInitialized(false), _noDoubleTapRMB(false), _noDoubleTapPT(false),
 	  _toolbarHighDrawn(false), _newOrientation(0), _orientationLandscape(0),
 	  _panelVisible(true), _saveActiveToolbar(NAME_MAIN_PANEL), _panelStateForced(false),
@@ -115,7 +115,7 @@ const OSystem::GraphicsMode *WINCESdlGraphicsManager::getSupportedGraphicsModes(
 		return s_supportedGraphicsModesLow;
 }
 
-bool WINCESdlGraphicsManager::hasFeature(OSystem::Feature f) {
+bool WINCESdlGraphicsManager::hasFeature(OSystem::Feature f) const {
 	return (f == OSystem::kFeatureVirtualKeyboard);
 }
 
@@ -153,7 +153,7 @@ void WINCESdlGraphicsManager::setFeatureState(OSystem::Feature f, bool enable) {
 	}
 }
 
-bool WINCESdlGraphicsManager::getFeatureState(OSystem::Feature f) {
+bool WINCESdlGraphicsManager::getFeatureState(OSystem::Feature f) const {
 	switch (f) {
 	case OSystem::kFeatureFullscreenMode:
 		return false;
@@ -934,7 +934,7 @@ bool WINCESdlGraphicsManager::loadGFXMode() {
 		_toolbarHigh = NULL;
 
 	// keyboard cursor control, some other better place for it?
-	_eventSource->resetKeyboadEmulation(_videoMode.screenWidth * _scaleFactorXm / _scaleFactorXd - 1, _videoMode.screenHeight * _scaleFactorXm / _scaleFactorXd - 1);
+	_eventSource->resetKeyboardEmulation(_videoMode.screenWidth * _scaleFactorXm / _scaleFactorXd - 1, _videoMode.screenHeight * _scaleFactorXm / _scaleFactorXd - 1);
 
 	return true;
 }

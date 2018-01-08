@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -263,6 +263,10 @@ public:
 	void cmdLeft(const Common::Array<LBValue> &params);
 	void cmdBottom(const Common::Array<LBValue> &params);
 	void cmdRight(const Common::Array<LBValue> &params);
+	void cmdXPos(const Common::Array<LBValue> &params);
+	void cmdYPos(const Common::Array<LBValue> &params);
+	void cmdWidth(const Common::Array<LBValue> &params);
+	void cmdHeight(const Common::Array<LBValue> &params);
 	void cmdMove(const Common::Array<LBValue> &params);
 	void cmdSetDragParams(const Common::Array<LBValue> &params);
 	void cmdNewList(const Common::Array<LBValue> &params);
@@ -273,6 +277,7 @@ public:
 	void cmdDeleteAt(const Common::Array<LBValue> &params);
 	void cmdSetProperty(const Common::Array<LBValue> &params);
 	void cmdGetProperty(const Common::Array<LBValue> &params);
+	void cmdDeleteVar(const Common::Array<LBValue> &params);
 	void cmdExec(const Common::Array<LBValue> &params);
 	void cmdReturn(const Common::Array<LBValue> &params);
 	void cmdSetPlayParams(const Common::Array<LBValue> &params);

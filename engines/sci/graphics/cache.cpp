@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -95,15 +95,21 @@ int16 GfxCache::kernelViewGetCelHeight(GuiResourceId viewId, int16 loopNo, int16
 }
 
 int16 GfxCache::kernelViewGetLoopCount(GuiResourceId viewId) {
+#ifdef ENABLE_SCI32
+	if (getSciVersion() >= SCI_VERSION_2) {
+		return CelObjView::getNumLoops(viewId);
+	}
+#endif
 	return getView(viewId)->getLoopCount();
 }
 
 int16 GfxCache::kernelViewGetCelCount(GuiResourceId viewId, int16 loopNo) {
+#ifdef ENABLE_SCI32
+	if (getSciVersion() >= SCI_VERSION_2) {
+		return CelObjView::getNumCels(viewId, loopNo);
+	}
+#endif
 	return getView(viewId)->getCelCount(loopNo);
-}
-
-byte GfxCache::kernelViewGetColorAtCoordinate(GuiResourceId viewId, int16 loopNo, int16 celNo, int16 x, int16 y) {
-	return getView(viewId)->getColorAtCoordinate(loopNo, celNo, x, y);
 }
 
 } // End of namespace Sci

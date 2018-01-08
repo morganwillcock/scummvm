@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_SAVELOAD_DIALOG_H
@@ -28,6 +29,25 @@
 #include "engines/metaengine.h"
 
 namespace GUI {
+
+#if defined(USE_CLOUD) && defined(USE_LIBCURL)
+enum SaveLoadCloudSyncProgress {
+	kSavesSyncProgressCmd = 'SSPR',
+	kSavesSyncEndedCmd = 'SSEN'
+};
+
+class SaveLoadCloudSyncProgressDialog : public Dialog { //protected?
+	StaticTextWidget *_label, *_percentLabel;
+	SliderWidget *_progressBar;
+	bool _close;
+public:
+	SaveLoadCloudSyncProgressDialog(bool canRunInBackground);
+	virtual ~SaveLoadCloudSyncProgressDialog();
+
+	virtual void handleCommand(CommandSender *sender, uint32 cmd, uint32 data);
+	virtual void handleTickle();
+};
+#endif
 
 #define kSwitchSaveLoadDialog -2
 
@@ -52,12 +72,20 @@ class SaveLoadChooserDialog : protected Dialog {
 public:
 	SaveLoadChooserDialog(const Common::String &dialogName, const bool saveMode);
 	SaveLoadChooserDialog(int x, int y, int w, int h, const bool saveMode);
+	virtual ~SaveLoadChooserDialog();
 
 	virtual void open();
+	virtual void close();
 
 	virtual void reflowLayout();
 
 	virtual void handleCommand(CommandSender *sender, uint32 cmd, uint32 data);
+
+#if defined(USE_CLOUD) && defined(USE_LIBCURL)
+	virtual void runSaveSync(bool hasSavepathOverride);
+#endif
+
+	virtual void handleTickle();
 
 #ifndef DISABLE_SAVELOADCHOOSER_GRID
 	virtual SaveLoadChooserType getType() const = 0;
@@ -69,6 +97,19 @@ public:
 protected:
 	virtual int runIntern() = 0;
 
+	/** Common function to refresh the list on the screen. */
+	virtual void updateSaveList();
+
+	/**
+	* Common function to get saves list from MetaEngine.
+	*
+	* It also checks whether there are some locked saves
+	* because of saves sync and adds such saves as locked
+	* slots. User sees these slots, but is unable to save
+	* or load from these.
+	*/
+	virtual void listSaves();
+
 	const bool				_saveMode;
 	const MetaEngine		*_metaEngine;
 	bool					_delSupport;
@@ -77,6 +118,8 @@ protected:
 	bool					_saveDateSupport;
 	bool					_playTimeSupport;
 	Common::String			_target;
+	bool _dialogWasShown;
+	SaveStateList			_saveList;
 
 #ifndef DISABLE_SAVELOADCHOOSER_GRID
 	ButtonWidget *_listButton;
@@ -105,6 +148,8 @@ public:
 
 	virtual void open();
 	virtual void close();
+protected:
+	virtual void updateSaveList();
 private:
 	virtual int runIntern();
 
@@ -117,10 +162,8 @@ private:
 	StaticTextWidget	*_time;
 	StaticTextWidget	*_playtime;
 
-	SaveStateList			_saveList;
 	String					_resultString;
 
-	void updateSaveList();
 	void updateSelection(bool redraw);
 };
 
@@ -163,13 +206,13 @@ public:
 protected:
 	virtual void handleCommand(CommandSender *sender, uint32 cmd, uint32 data);
 	virtual void handleMouseWheel(int x, int y, int direction);
+	virtual void updateSaveList();
 private:
 	virtual int runIntern();
 
 	uint _columns, _lines;
 	uint _entriesPerPage;
 	uint _curPage;
-	SaveStateList _saveList;
 
 	ButtonWidget *_nextButton;
 	ButtonWidget *_prevButton;

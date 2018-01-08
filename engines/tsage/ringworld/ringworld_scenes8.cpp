@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1669,7 +1669,7 @@ void Scene7700::Action3::signal() {
 		scene->_sceneHotspot9.remove();
 		scene->_object19.remove();
 		setDelay(60);
-		// No break on purpose!
+		// fall through
 	case 2:
 		scene->_soundHandler.play(260);
 		scene->_object8.setVisage(7703);
@@ -1690,7 +1690,7 @@ void Scene7700::Action4::signal() {
 	switch (_actionIndex++) {
 	case 2:
 		scene->_object13.remove();
-		// No break on purpose!
+		// fall through
 	case 0:
 		setDelay(3);
 		break;

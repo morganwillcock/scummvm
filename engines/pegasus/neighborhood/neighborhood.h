@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -91,6 +91,7 @@ struct QueueRequest {
 bool operator==(const QueueRequest &arg1, const QueueRequest &arg2);
 bool operator!=(const QueueRequest &arg1, const QueueRequest &arg2);
 
+class CaldoriaBomb;
 class GameInteraction;
 class Item;
 class Neighborhood;
@@ -109,6 +110,7 @@ protected:
 typedef Common::Queue<QueueRequest> NeighborhoodActionQueue;
 
 class Neighborhood : public IDObject, public NotificationReceiver, public InputHandler, public Idler {
+friend class CaldoriaBomb;
 friend class StriderCallBack;
 
 public:

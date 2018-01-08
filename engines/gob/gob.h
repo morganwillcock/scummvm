@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,17 +25,12 @@
 
 #include "common/random.h"
 #include "common/system.h"
-#include "common/savefile.h"
 
 #include "graphics/pixelformat.h"
 
 #include "engines/engine.h"
 
 #include "gob/console.h"
-
-namespace GUI {
-class StaticTextWidget;
-}
 
 /**
  * This is the namespace of the Gob engine.
@@ -75,7 +70,6 @@ class PalAnim;
 class Scenery;
 class Util;
 class SaveLoad;
-class GobConsole;
 class PreGob;
 
 #define WRITE_VAR_UINT32(var, val)  _vm->_inter->_variables->writeVar32(var, val)

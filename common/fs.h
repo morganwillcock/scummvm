@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef COMMON_FS_H
@@ -56,7 +57,14 @@ class FSList : public Array<FSNode> {};
  */
 class FSNode : public ArchiveMember {
 private:
+	friend class ::AbstractFSNode;
 	SharedPtr<AbstractFSNode>	_realNode;
+	/**
+	 * Construct a FSNode from a backend's AbstractFSNode implementation.
+	 *
+	 * @param realNode Pointer to a heap allocated instance. FSNode will take
+	 *                 ownership of the pointer.
+	 */
 	FSNode(AbstractFSNode *realNode);
 
 public:

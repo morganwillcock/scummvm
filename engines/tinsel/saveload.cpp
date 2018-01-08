@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -529,7 +529,7 @@ static bool DoRestore() {
 	delete f;
 
 	if (failed) {
-		GUI::MessageDialog dialog(_("Failed to load game state from file."));
+		GUI::MessageDialog dialog(_("Failed to load saved game from file."));
 		dialog.runModal();
 	}
 
@@ -542,7 +542,7 @@ static void SaveFailure(Common::OutSaveFile *f) {
 		_vm->getSaveFileMan()->removeSavefile(g_SaveSceneName);
 	}
 	g_SaveSceneName = NULL;	// Invalidate save name
-	GUI::MessageDialog dialog(_("Failed to save game state to file."));
+	GUI::MessageDialog dialog(_("Failed to save game to file."));
 	dialog.runModal();
 }
 
@@ -563,7 +563,7 @@ static void DoSave() {
 
 		while (1) {
 			Common::String fname = _vm->getSavegameFilename(ano);
-			strcpy(tmpName, fname.c_str());
+			Common::strlcpy(tmpName, fname.c_str(), FNAMELEN);
 
 			for (i = 0; i < g_numSfiles; i++)
 				if (!strcmp(g_savedFiles[i].name, tmpName))
@@ -594,8 +594,8 @@ static void DoSave() {
 	hdr.id = SAVEGAME_ID;
 	hdr.size = SAVEGAME_HEADER_SIZE;
 	hdr.ver = CURRENT_VER;
-	memcpy(hdr.desc, g_SaveSceneDesc, SG_DESC_LEN);
-	hdr.desc[SG_DESC_LEN - 1] = 0;
+	memset(hdr.desc, 0, SG_DESC_LEN);
+	Common::strlcpy(hdr.desc, g_SaveSceneDesc, SG_DESC_LEN);
 	g_system->getTimeAndDate(hdr.dateTime);
 	hdr.scnFlag = _vm->getFeatures() & GF_SCNFILES;
 	hdr.language = _vm->_config->_language;

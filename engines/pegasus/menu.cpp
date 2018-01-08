@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -227,6 +227,7 @@ MainMenu::MainMenu() : GameMenu(kMainMenuID), _menuBackground(0), _overviewButto
 
 	_menuLoop.attachFader(&_menuFader);
 	_menuLoop.initFromAIFFFile("Sounds/Main Menu.aiff");
+	_menuFader.setMasterVolume(((PegasusEngine *)g_engine)->getAmbienceLevel());
 
 	updateDisplay();
 }
@@ -257,12 +258,12 @@ void MainMenu::handleInput(const Input &input, const Hotspot *cursorSpot) {
 	bool isDemo = vm->isDemo();
 
 	if (input.upButtonDown()) {
-		if (_menuSelection > (isDemo ? kFirstSelectionDemo : kFirstSelection)) {
+		if (_menuSelection > (uint32)(isDemo ? kFirstSelectionDemo : kFirstSelection)) {
 			_menuSelection--;
 			updateDisplay();
 		}
 	} else if (input.downButtonDown()) {
-		if (_menuSelection < (isDemo ? kLastSelectionDemo : kLastSelection)) {
+		if (_menuSelection < (uint32)(isDemo ? kLastSelectionDemo : kLastSelection)) {
 			_menuSelection++;
 			updateDisplay();
 		}
@@ -736,6 +737,7 @@ DeathMenu::DeathMenu(const DeathReason deathReason) : GameMenu(kDeathMenuID), _d
 		_largeSelect.startDisplaying();
 	} else {
 		_triumphSound.initFromQuickTime("Sounds/Caldoria/Galactic Triumph");
+		_triumphSound.setVolume(((PegasusEngine *)g_engine)->getAmbienceLevel());
 		_triumphSound.playSound();
 	}
 

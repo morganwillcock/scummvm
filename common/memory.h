@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef COMMON_MEMORY_H
@@ -54,11 +55,11 @@ void uninitialized_fill(Type *first, Type *last, const Value &x) {
  * It requires the range [dst, dst + n) to be valid and
  * uninitialized.
  */
-/*template<class Type, class Value>
+template<class Type, class Value>
 void uninitialized_fill_n(Type *dst, size_t n, const Value &x) {
 	while (n--)
 		new ((void *)dst++) Type(x);
-}*/
+}
 
 } // End of namespace Common
 

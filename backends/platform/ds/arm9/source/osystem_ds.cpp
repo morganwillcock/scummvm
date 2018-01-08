@@ -16,7 +16,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 
@@ -267,7 +268,7 @@ void OSystem_DS::setCursorPalette(const byte *colors, uint start, uint num) {
 	refreshCursor();
 }
 
-void OSystem_DS::grabPalette(unsigned char *colors, uint start, uint num) {
+void OSystem_DS::grabPalette(unsigned char *colors, uint start, uint num) const {
 //	consolePrintf("Grabpalette");
 
 	for (unsigned int r = start; r < start + num; r++) {
@@ -714,7 +715,7 @@ void OSystem_DS::deleteMutex(MutexRef mutex) {
 // and should be replaced by an AudioCDManager subclass,
 // see backends/audiocd/ and common/system.h
 
-bool OSystem_DS::openCD(int drive) {
+bool OSystem_DS::openCD() {
 	return DS::CD::checkCD();
 }
 

@@ -26,7 +26,8 @@ echo.
 xcopy /F /Y "%~4/lib/%~3/SDL.dll"                          "%~2" 1>NUL 2>&1
 xcopy /F /Y "%~4/lib/%~3/freetype6.dll"                    "%~2" 1>NUL 2>&1
 xcopy /F /Y "%~1/backends/vkeybd/packs/vkeybd_default.zip" "%~2" 1>NUL 2>&1
-xcopy /F /Y "%~1/gui/themes/translations.dat"               "%~2" 1>NUL 2>&1
+xcopy /F /Y "%~1/backends/vkeybd/packs/vkeybd_small.zip"   "%~2" 1>NUL 2>&1
+xcopy /F /Y "%~1/gui/themes/translations.dat"              "%~2" 1>NUL 2>&1
 
 
 if "%~5"=="0" goto done
@@ -58,7 +59,7 @@ echo Invalid installer parameter. Should be "0" or "1" (was %~5)!
 goto done
 
 :error_script:
-echo An error occured while running the installer script!
+echo An error occurred while running the installer script!
 goto done
 
 :done

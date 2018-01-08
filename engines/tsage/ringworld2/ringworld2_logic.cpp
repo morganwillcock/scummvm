@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -32,6 +32,9 @@
 #include "tsage/ringworld2/ringworld2_scenes1.h"
 #include "tsage/ringworld2/ringworld2_scenes2.h"
 #include "tsage/ringworld2/ringworld2_scenes3.h"
+#include "tsage/ringworld2/ringworld2_airduct.h"
+#include "tsage/ringworld2/ringworld2_outpost.h"
+#include "tsage/ringworld2/ringworld2_vampire.h"
 
 namespace TsAGE {
 
@@ -294,7 +297,7 @@ Scene *Ringworld2Game::createScene(int sceneNumber) {
 		// Confrontation
 		return new Scene3400();
 	case 3500:
-		// Flub tube maze 
+		// Flub tube maze
 		return new Scene3500();
 	case 3600:
 		// Cutscene - walking at gunpoint
@@ -348,13 +351,18 @@ SceneExt::SceneExt(): Scene() {
 	_preventSaving = false;
 
 	// Reset screen clipping area
-	R2_GLOBALS._screenSurface._clipRect = Rect();
+	R2_GLOBALS._screen._clipRect = Rect();
 
 	// WORKAROUND: In the original, playing animations don't reset the global _animationCtr
 	// counter as scene changes unless the playing animation explicitly finishes. For now,
 	// to make inter-scene debugging easier, I'm explicitly resetting the _animationCtr
 	// on scene start, since scene objects aren't drawn while it's non-zero
 	R2_GLOBALS._animationCtr = 0;
+
+	// WORKAROUND: We had a case where at some point the number of modal dialogs
+	// open became incorrect. So reset it on scene changes to fix the problem if
+	// it ever happens
+	R2_GLOBALS._insetUp = 0;
 }
 
 void SceneExt::synchronize(Serializer &s) {
@@ -379,9 +387,13 @@ void SceneExt::postInit(SceneObjectList *OwnerList) {
 	int prevScene = R2_GLOBALS._sceneManager._previousScene;
 	int sceneNumber = R2_GLOBALS._sceneManager._sceneNumber;
 	if (g_vm->getFeatures() & GF_DEMO) {
-		if (((prevScene == -1) && (sceneNumber != 180) && (sceneNumber != 205) && (sceneNumber != 50))
+		if (prevScene == 0 && sceneNumber == 180) {
+			// Very start of the demo, title & intro about to be shown
+			R2_GLOBALS._uiElements._active = false;
+			R2_GLOBALS._uiElements.hide();
+		} else if (((prevScene == -1) && (sceneNumber != 180) && (sceneNumber != 205) && (sceneNumber != 50))
 			|| (prevScene == 0) || (sceneNumber == 600)
-			|| ((prevScene == 205 || prevScene == 180) && (sceneNumber == 100))) {
+			|| ((prevScene == 205 || prevScene == 180 || prevScene == 50) && (sceneNumber == 100))) {
 				R2_GLOBALS._uiElements._active = true;
 				R2_GLOBALS._uiElements.show();
 		} else {
@@ -505,7 +517,7 @@ void SceneExt::endStrip() {
 }
 
 void SceneExt::clearScreen() {
-	R2_GLOBALS._screenSurface.fillRect(R2_GLOBALS._screenSurface.getBounds(), 0);
+	R2_GLOBALS._screen.fillRect(R2_GLOBALS._screen.getBounds(), 0);
 }
 
 void SceneExt::refreshBackground(int xAmount, int yAmount) {
@@ -535,15 +547,12 @@ void SceneExt::refreshBackground(int xAmount, int yAmount) {
 	int screenSize = g_vm->_memoryManager.getSize(dataP);
 
 	// Lock the background for update
-	Graphics::Surface s = _backSurface.lockSurface();
-	assert(screenSize == (s.w * s.h));
+	assert(screenSize == (_backSurface.w * _backSurface.h));
+	Graphics::Surface s = _backSurface.getSubArea(Common::Rect(0, 0, _backSurface.w, _backSurface.h));
 
-	// Copy the data
+	// Copy the data into the surface
 	byte *destP = (byte *)s.getPixels();
 	Common::copy(dataP, dataP + (s.w * s.h), destP);
-	_backSurface.unlockSurface();
-
-	R2_GLOBALS._screenSurface.addDirtyRect(_backSurface.getBounds());
 
 	// Free the resource data
 	DEALLOCATE(dataP);
@@ -561,14 +570,14 @@ void SceneExt::saveCharacter(int characterIndex) {
 void SceneExt::scalePalette(int RFactor, int GFactor, int BFactor) {
 	byte *tmpPal = R2_GLOBALS._scenePalette._palette;
 	byte newR, newG, newB;
-	int tmp, varC, varD = 0;
+	int tmp, varD = 0;
 
 	for (int i = 0; i < 256; i++) {
 		newR = (RFactor * tmpPal[(3 * i)]) / 100;
 		newG = (GFactor * tmpPal[(3 * i) + 1]) / 100;
 		newB = (BFactor * tmpPal[(3 * i) + 2]) / 100;
 
-		varC = 769;
+		int varC = 769;
 		for (int j = 255; j >= 0; j--) {
 			tmp = abs(tmpPal[(3 * j)] - newR);
 			if (tmp >= varC)
@@ -593,7 +602,7 @@ void SceneExt::loadBlankScene() {
 	_backSurface.create(SCREEN_WIDTH, SCREEN_HEIGHT * 3 / 2);
 	_backSurface.fillRect(_backSurface.getBounds(), 0);
 
-	R2_GLOBALS._screenSurface.fillRect(R2_GLOBALS._screenSurface.getBounds(), 0);
+	R2_GLOBALS._screen.fillRect(R2_GLOBALS._screen.getBounds(), 0);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -814,7 +823,7 @@ Ringworld2InvObjectList::Ringworld2InvObjectList():
 		_chargedPowerCapsule(1, 12),
 		_aerosol(1, 13),
 		_remoteControl(1, 14),
-		_opticalFibre(1, 15),
+		_opticalFiber(1, 15),
 		_clamp(1, 16),
 		_attractorHarness(1, 17),
 		_fuelCell(2, 2),
@@ -869,7 +878,7 @@ Ringworld2InvObjectList::Ringworld2InvObjectList():
 	_itemList.push_back(&_chargedPowerCapsule);
 	_itemList.push_back(&_aerosol);
 	_itemList.push_back(&_remoteControl);
-	_itemList.push_back(&_opticalFibre);
+	_itemList.push_back(&_opticalFiber);
 	_itemList.push_back(&_clamp);
 	_itemList.push_back(&_attractorHarness);
 	_itemList.push_back(&_fuelCell);
@@ -933,7 +942,7 @@ void Ringworld2InvObjectList::reset() {
 	setObjectScene(R2_CHARGED_POWER_CAPSULE, 400);
 	setObjectScene(R2_AEROSOL, 500);
 	setObjectScene(R2_REMOTE_CONTROL, 1550);
-	setObjectScene(R2_OPTICAL_FIBRE, 850);
+	setObjectScene(R2_OPTICAL_FIBER, 850);
 	setObjectScene(R2_CLAMP, 850);
 	setObjectScene(R2_ATTRACTOR_CABLE_HARNESS, 0);
 	setObjectScene(R2_FUEL_CELL, 1550);
@@ -1215,6 +1224,13 @@ void Ringworld2Game::processEvent(Event &event) {
 			R2_GLOBALS._events.setCursorFromFlag();
 			break;
 
+		case Common::KEYCODE_F5:
+			// F5 - Save
+			saveGame();
+			R2_GLOBALS._events.setCursorFromFlag();
+			event.handled = true;
+			break;
+
 		case Common::KEYCODE_F7:
 			// F7 - Restore
 			restoreGame();
@@ -1223,7 +1239,8 @@ void Ringworld2Game::processEvent(Event &event) {
 
 		case Common::KEYCODE_F8:
 			// F8 - Credits
-			R2_GLOBALS._sceneManager.changeScene(205);
+			if (R2_GLOBALS._sceneManager._sceneNumber != 205)
+				R2_GLOBALS._sceneManager.changeScene(205);
 			break;
 
 		case Common::KEYCODE_F10:
@@ -1426,7 +1443,7 @@ void SceneExit::process(Event &event) {
 	if (!R2_GLOBALS._insetUp) {
 		SceneArea::process(event);
 
-		if (_enabled) {
+		if (_enabled && R2_GLOBALS._player._enabled) {
 			if (event.eventType == EVENT_BUTTON_DOWN) {
 				if (!_bounds.contains(mousePos))
 					_moving = false;
@@ -1958,21 +1975,20 @@ void AnimationPlayer::drawFrame(int sliceIndex) {
 	byte *sliceData1 = sliceDataStart;
 
 	Rect playerBounds = _screenBounds;
-	int y = _screenBounds.top;
-	R2_GLOBALS._screenSurface.addDirtyRect(playerBounds);
 
-	Graphics::Surface surface = R2_GLOBALS._screenSurface.lockSurface();
+	Graphics::Surface dest = R2_GLOBALS._screen.getSubArea(playerBounds);
+	int y = 0;
 
 	// Handle different drawing modes
 	switch (slice._drawMode) {
 	case 0:
 		// Draw from uncompressed source
 		for (int sliceNum = 0; sliceNum < _subData._ySlices; ++sliceNum) {
-			for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex) {
+			for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, ++y) {
 				// TODO: Check of _subData._drawType was done for two different kinds of
 				// line slice drawing in original
 				const byte *pSrc = (const byte *)sliceDataStart + READ_LE_UINT16(sliceData1 + sliceNum * 2);
-				byte *pDest = (byte *)surface.getBasePtr(playerBounds.left, y++);
+				byte *pDest = (byte *)dest.getBasePtr(0, y);
 
 				Common::copy(pSrc, pSrc + _subData._sliceSize, pDest);
 			}
@@ -1984,12 +2000,12 @@ void AnimationPlayer::drawFrame(int sliceIndex) {
 		case 0xfe:
 			// Draw from uncompressed source with optional skipped rows
 			for (int sliceNum = 0; sliceNum < _subData._ySlices; ++sliceNum) {
-				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, playerBounds.top++) {
+				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, ++y) {
 					int offset = READ_LE_UINT16(sliceData1 + sliceNum * 2);
 
 					if (offset) {
 						const byte *pSrc = (const byte *)sliceDataStart + offset;
-						byte *pDest = (byte *)surface.getBasePtr(playerBounds.left, playerBounds.top);
+						byte *pDest = (byte *)dest.getBasePtr(0, y);
 
 						//Common::copy(pSrc, pSrc + playerBounds.width(), pDest);
 						rleDecode(pSrc, pDest, playerBounds.width());
@@ -2000,11 +2016,11 @@ void AnimationPlayer::drawFrame(int sliceIndex) {
 		case 0xff:
 			// Draw from RLE compressed source
 			for (int sliceNum = 0; sliceNum < _subData._ySlices; ++sliceNum) {
-				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, playerBounds.top++) {
+				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, ++y) {
 					// TODO: Check of _subData._drawType was done for two different kinds of
 					// line slice drawing in original
 					const byte *pSrc = (const byte *)sliceDataStart + READ_LE_UINT16(sliceData1 + sliceNum * 2);
-					byte *pDest = (byte *)surface.getBasePtr(playerBounds.left, playerBounds.top);
+					byte *pDest = (byte *)dest.getBasePtr(0, y);
 
 					rleDecode(pSrc, pDest, _subData._sliceSize);
 				}
@@ -2016,10 +2032,10 @@ void AnimationPlayer::drawFrame(int sliceIndex) {
 			byte *sliceData2 = &slices._pixelData[slice2._sliceOffset - 96];
 
 			for (int sliceNum = 0; sliceNum < _subData._ySlices; ++sliceNum) {
-				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex) {
+				for (int yIndex = 0; yIndex < _sliceHeight; ++yIndex, ++y) {
 					const byte *pSrc1 = (const byte *)sliceDataStart + READ_LE_UINT16(sliceData2 + sliceNum * 2);
 					const byte *pSrc2 = (const byte *)sliceDataStart + READ_LE_UINT16(sliceData1 + sliceNum * 2);
-					byte *pDest = (byte *)surface.getBasePtr(playerBounds.left, y++);
+					byte *pDest = (byte *)dest.getBasePtr(0, y);
 
 					if (slice2._drawMode == 0) {
 						// Uncompressed background, foreground compressed
@@ -2039,17 +2055,14 @@ void AnimationPlayer::drawFrame(int sliceIndex) {
 		break;
 	}
 
-	// Unlock the screen surface
-	R2_GLOBALS._screenSurface.unlockSurface();
-
 	if (_objectMode == ANIMOBJMODE_42) {
 		_screenBounds.expandPanes();
 
 		// Copy the drawn frame to the back surface
-		Rect srcRect = R2_GLOBALS._screenSurface.getBounds();
+		Rect srcRect = R2_GLOBALS._screen.getBounds();
 		Rect destRect = srcRect;
 		destRect.translate(-g_globals->_sceneOffset.x, -g_globals->_sceneOffset.y);
-		R2_GLOBALS._sceneManager._scene->_backSurface.copyFrom(R2_GLOBALS._screenSurface,
+		R2_GLOBALS._sceneManager._scene->_backSurface.copyFrom(R2_GLOBALS._screen,
 			srcRect, destRect);
 
 		// Draw any objects into the scene
@@ -2334,7 +2347,7 @@ void ScannerDialog::Button::reset() {
 		case 1800:
 			if (R2_GLOBALS._rimLocation < 1201)
 				scanner._obj4.setup(4, 3, 3);
-			else if (R2_GLOBALS._rimLocation < 1201)
+			else if (R2_GLOBALS._rimLocation > 1201)
 				scanner._obj4.setup(4, 3, 4);
 			else
 				scanner._obj4.setup(4, 3, 5);

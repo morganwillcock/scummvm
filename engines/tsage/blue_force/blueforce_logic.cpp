@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -859,7 +859,7 @@ void SceneExt::endStrip() {
 }
 
 void SceneExt::clearScreen() {
-	BF_GLOBALS._screenSurface.fillRect(BF_GLOBALS._screenSurface.getBounds(), 0);
+	BF_GLOBALS._screen.clear();
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1411,7 +1411,7 @@ void SceneMessage::process(Event &event) {
 
 
 void SceneMessage::draw() {
-	GfxSurface &surface = BF_GLOBALS._screenSurface;
+	GfxSurface &surface = BF_GLOBALS._screen;
 
 	// Clear the game area
 	surface.fillRect(Rect(0, 0, SCREEN_WIDTH, UI_INTERFACE_Y), 0);

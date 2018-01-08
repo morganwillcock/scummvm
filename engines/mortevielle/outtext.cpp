@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -227,7 +227,31 @@ void TextHandler::taffich() {
 	Common::String filename, altFilename;
 
 	if ((a != 50) && (a != 51)) {
+		int m = a + 2000;
+
+		if ((m > 2001) && (m < 2010))
+			m = 2001;
+		else if (m == 2011)
+			m = 2010;
+		if (a == 32)
+			m = 2034;
+		else if ((a == 17) && (_vm->_maff == 14))
+			m = 2018;
+		else if (a > 99) {
+			if ((_vm->_is == 1) || (_vm->_is == 0))
+				m = 2031;
+			else
+				m = 2032;
+		}
+
+		if ( ((a > 69) && (a < 80)) || (a == 30) || (a == 31) || (a == 144) || (a == 147) || (a == 149) )
+			m = 2030;
+		else if ( ((a < 27) && ( ((_vm->_maff > 69) && (!_vm->_coreVar._alreadyEnteredManor)) || (_vm->_maff > 99) )) || ((_vm->_maff > 29) && (_vm->_maff < 33)) )
+			m = 2033;
+
+		_vm->displayInterScreenMessage(m);
 		_vm->_maff = a;
+
 		if (a == 159)
 			a = 86;
 		else if (a > 140)
@@ -287,8 +311,8 @@ void TextHandler::taffich() {
 			filename = "AXX.mor";
 		} else { // b == 50
 			// CHECKME: the size of AZZ.mor is 1280 for the DOS version
-			//          and 1260 for the Amiga version. Maybe the 20 bytes 
-			//          are a filler (to get 10 blocks of 128 bytes), 
+			//          and 1260 for the Amiga version. Maybe the 20 bytes
+			//          are a filler (to get 10 blocks of 128 bytes),
 			//          or the size should be variable.
 			drawingSize = 1260;
 			filename = "AZZ.mor";

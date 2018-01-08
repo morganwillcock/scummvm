@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -138,11 +138,10 @@ public:
 	uint32 _flags;
 	uint32 _nextTime;
 	uint32 _delayTime;
-	uint16 _dirty; // byte in old
-	byte _needsReset;
-	byte _justReset; // old
-	byte _notifyDone; // old
-	byte _done; // new
+	bool _dirty; // byte in old
+	bool _needsReset;
+	bool _justReset; // old
+	bool _done; // new
 
 	FeatureData _data;
 
@@ -192,13 +191,6 @@ protected:
 	void finishResetFeatureScript();
 };
 
-#define NUM_SYNC_CHANNELS 17
-struct SyncChannel {
-	uint16 masterId;
-	byte state;
-	bool alternate;
-};
-
 class View {
 public:
 	View(MohawkEngine *vm);
@@ -234,7 +226,6 @@ public:
 	void sortView();
 
 	uint32 _lastIdleTime;
-	SyncChannel _syncChannels[NUM_SYNC_CHANNELS];
 
 	virtual uint32 getTime() = 0;
 

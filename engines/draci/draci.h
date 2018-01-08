@@ -8,20 +8,20 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef DRACI_H
-#define DRACI_H
+#ifndef DRACI_DRACI_H
+#define DRACI_DRACI_H
 
 #include "engines/engine.h"
 #include "common/random.h"
@@ -126,4 +126,4 @@ static inline long scummvm_lround(double val) { return (long)floor(val + 0.5); }
 
 } // End of namespace Draci
 
-#endif // DRACI_H
+#endif // DRACI_DRACI_H

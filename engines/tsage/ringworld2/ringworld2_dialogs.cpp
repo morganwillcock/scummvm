@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,9 +21,6 @@
  */
 
 #include "common/translation.h"
-
-#include "gui/dialog.h"
-#include "gui/widget.h"
 
 #include "tsage/tsage.h"
 #include "tsage/core.h"
@@ -154,7 +151,7 @@ int RightClickDialog::execute() {
 		}
 
 		g_system->delayMillis(10);
-		GLOBALS._screenSurface.updateScreen();
+		GLOBALS._screen.update();
 	}
 
 	// Execute the specified action
@@ -197,6 +194,11 @@ int RightClickDialog::execute() {
 
 void CharacterDialog::show() {
 	CharacterDialog *dlg = new CharacterDialog();
+	CursorType cursorNum = R2_GLOBALS._events.getCursor();
+
+	// Reset the current cursor
+	R2_GLOBALS._events.setCursor(CURSOR_ARROW);
+
 	dlg->draw();
 
 	// Make the default button the currently active character
@@ -315,12 +317,15 @@ void CharacterDialog::show() {
 			}
 		}
 
-		// Reset the current cursor
-		R2_GLOBALS._events.setCursor(CURSOR_USE);
-
 		// Change to whichever scene the newly selected character is in
 		R2_GLOBALS._sceneManager.changeScene(R2_GLOBALS._player._characterScene[R2_GLOBALS._player._characterIndex]);
-	}
+
+		// Force the reset the current cursor
+		R2_GLOBALS._events.setCursor(CURSOR_USE);
+
+	} else
+		// Restore previous cursor
+		R2_GLOBALS._events.setCursor(cursorNum);
 }
 
 CharacterDialog::CharacterDialog() {
@@ -357,7 +362,7 @@ void HelpDialog::show() {
 	HelpDialog *dlg = new HelpDialog();
 	dlg->draw();
 
-	// Show the character selection dialog
+	// Show the help dialog
 	GfxButton *btn = dlg->execute(&dlg->_btnResume);
 
 	// If a function button was selected, take care of it
@@ -448,6 +453,36 @@ HelpDialog::HelpDialog() {
 	frame();
 	_bounds.collapse(-6, -6);
 	setCenter(160, 100);
+}
+
+bool HelpDialog::handleKeypress(Event &event, GfxButton *&btn) {
+	switch (event.kbd.keycode) {
+	case Common::KEYCODE_F2:
+		btn = &_btnList[0];
+		break;
+	case Common::KEYCODE_F3:
+		btn = &_btnList[1];
+		break;
+	case Common::KEYCODE_F4:
+		btn = &_btnList[2];
+		break;
+	case Common::KEYCODE_F5:
+		btn = &_btnList[3];
+		break;
+	case Common::KEYCODE_F7:
+		btn = &_btnList[4];
+		break;
+	case Common::KEYCODE_F8:
+		btn = &_btnList[5];
+		break;
+	case Common::KEYCODE_F10:
+		btn = &_btnList[6];
+		break;
+	default:
+		return false;
+	}
+
+	return true;
 }
 
 } // End of namespace Ringworld2

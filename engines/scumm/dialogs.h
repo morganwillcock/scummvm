@@ -17,21 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef SCUMM_DIALOGS_H
 #define SCUMM_DIALOGS_H
 
 #include "common/str.h"
+#include "common/keyboard.h"
 #include "gui/dialog.h"
-#include "gui/widget.h"
 #include "engines/dialogs.h"
 
-#include "scumm/detection.h"
-
 namespace GUI {
-class ListWidget;
 class CommandSender;
+class StaticTextWidget;
 }
 
 

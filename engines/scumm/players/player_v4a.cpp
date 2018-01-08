@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -174,7 +174,7 @@ int Player_V4A::getMusicTimer() {
 		return 2000;
 	if (_musicId) {
 		// The titlesong (and a few others) is running with ~70 ticks per second and the scale seems to be based on that.
-		// The Game itself doesnt get the timing from the Tfmx Player however, so we just use the elapsed time
+		// The Game itself doesn't get the timing from the Tfmx Player however, so we just use the elapsed time
 		// 357 ~ 1000 * 25 * (1 / 70)
 		return _mixer->getSoundElapsedTime(_musicHandle) / 357;
 	}
@@ -183,7 +183,7 @@ int Player_V4A::getMusicTimer() {
 
 int Player_V4A::getSoundStatus(int nr) const {
 	// For music the game queues a variable the Tfmx Player sets through a special command.
-	// For sfx there seems to be no way to queue them, and the game doesnt try to.
+	// For sfx there seems to be no way to queue them, and the game doesn't try to.
 	return (nr == _musicId) ? _signal : 0;
 }
 

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -90,22 +90,29 @@ enum EventType {
 };
 
 typedef uint32 CustomEventType;
+
 /**
  * Data structure for an event. A pointer to an instance of Event
  * can be passed to pollEvent.
  */
 struct Event {
+
 	/** The type of the event. */
 	EventType type;
-	/** Flag to indicate if the event is real or synthetic. E.g. keyboard
-	  * repeat events are synthetic.
-	  */
-	bool synthetic;
+
+	/**
+	 * True if this is a key down repeat event.
+	 *
+	 * Only valid for EVENT_KEYDOWN events.
+	 */
+	bool kbdRepeat;
+
 	/**
 	  * Keyboard data; only valid for keyboard events (EVENT_KEYDOWN and
 	  * EVENT_KEYUP). For all other event types, content is undefined.
 	  */
 	KeyState kbd;
+
 	/**
 	 * The mouse coordinates, in virtual screen coordinates. Only valid
 	 * for mouse events.
@@ -120,7 +127,7 @@ struct Event {
 	CustomEventType customType;
 #endif
 
-	Event() : type(EVENT_INVALID), synthetic(false) {
+	Event() : type(EVENT_INVALID), kbdRepeat(false) {
 #ifdef ENABLE_KEYMAPPER
 		customType = 0;
 #endif
@@ -282,6 +289,12 @@ public:
 	void dispatch();
 
 	/**
+	 * Clear all events currently in the event queue.
+	 * The cleared events are not dispatched and are simply discarded.
+	 */
+	void clearEvents();
+
+	/**
 	 * Registers an event mapper with the dispatcher.
 	 *
 	 * The ownership of the "mapper" variable will pass
@@ -317,7 +330,7 @@ public:
 	/**
 	 * Registers a new EventObserver with the Dispatcher.
 	 *
-	 * @param listenPools if set, then all pollEvent() calls are passed to observer
+	 * @param listenPolls if set, then all pollEvent() calls are passed to observer
 	 *                    currently it is used by keyMapper
 	 */
 	void registerObserver(EventObserver *obs, uint priority, bool autoFree, bool listenPolls = false);
@@ -377,6 +390,7 @@ public:
 	 * @note	called after graphics system has been set up
 	 */
 	virtual void init() {}
+
 	/**
 	 * Get the next event in the event queue.
 	 * @param event	point to an Event struct, which will be filled with the event data.
@@ -388,6 +402,11 @@ public:
 	 * Pushes a "fake" event into the event queue
 	 */
 	virtual void pushEvent(const Event &event) = 0;
+
+	/**
+	 * Purges all unprocessed mouse events already in the event queue.
+	 */
+	virtual void purgeMouseEvents() = 0;
 
 	/** Return the current mouse position */
 	virtual Point getMousePos() const = 0;

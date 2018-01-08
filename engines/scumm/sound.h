@@ -17,28 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef SCUMM_SOUND_H
 #define SCUMM_SOUND_H
 
 #include "common/scummsys.h"
-#include "audio/audiostream.h"
+#include "common/str.h"
 #include "audio/mididrv.h"
-#include "audio/mixer.h"
+#include "backends/audiocd/audiocd.h"
 #include "scumm/saveload.h"
 
 namespace Audio {
 class Mixer;
+class SoundHandle;
 }
 
 namespace Scumm {
 
 class ScummEngine;
-class BaseScummFile;
 
 struct MP3OffsetTable;
-struct SaveLoadEntry;
 
 enum {
 	kTalkSoundID = 10000
@@ -67,6 +67,9 @@ protected:
 		int32 offset;
 		int16 channel;
 		int16 flags;
+		int16 freq;
+		int16 pan;
+		int16 vol;
 	} _soundQue2[10];
 
 	Common::String _sfxFilename;
@@ -85,8 +88,12 @@ protected:
 	int16 _currentCDSound;
 	int16 _currentMusic;
 
+	Audio::SoundHandle *_loomSteamCDAudioHandle;
+	bool _isLoomSteam;
+	AudioCDManager::Status _loomSteamCD;
+
 public:
-	Audio::SoundHandle _talkChannelHandle;	// Handle of mixer channel actor is talking on
+	Audio::SoundHandle *_talkChannelHandle;	// Handle of mixer channel actor is talking on
 
 	bool _soundsPaused;
 	byte _sfxMode;
@@ -97,8 +104,8 @@ public:
 public:
 	Sound(ScummEngine *parent, Audio::Mixer *mixer);
 	virtual ~Sound();
-	virtual void addSoundToQueue(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0);
-	virtual void addSoundToQueue2(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0);
+	virtual void addSoundToQueue(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0, int heFreq = 0, int hePan = 0, int heVol = 0);
+	virtual void addSoundToQueue2(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0, int heFreq = 0, int hePan = 0, int heVol = 0);
 	void processSound();
 
 	void playSound(int soundID);
@@ -118,9 +125,11 @@ public:
 	void stopCDTimer();
 
 	void playCDTrack(int track, int numLoops, int startFrame, int duration);
+	void playCDTrackInternal(int track, int numLoops, int startFrame, int duration);
 	void stopCD();
 	int pollCD() const;
 	void updateCD();
+	AudioCDManager::Status getCDStatus();
 	int getCurrentCDSound() const { return _currentCDSound; }
 
 	// Used by the save/load system:

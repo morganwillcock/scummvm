@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #if !defined(SCUMM_IMUSE_DIGI_H) && defined(ENABLE_SCUMM_7_8)
@@ -33,8 +34,10 @@
 #include "scumm/music.h"
 #include "scumm/sound.h"
 
-#include "audio/mixer.h"
-#include "audio/audiostream.h"
+namespace Audio {
+class AudioStream;
+class Mixer;
+}
 
 namespace Scumm {
 

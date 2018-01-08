@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,7 +33,7 @@ class GobMetaEngine : public AdvancedMetaEngine {
 public:
 	GobMetaEngine();
 
-	virtual GameDescriptor findGame(const char *gameid) const;
+	virtual GameDescriptor findGame(const char *gameId) const;
 
 	virtual const ADGameDescription *fallbackDetect(const FileMap &allFiles, const Common::FSList &fslist) const;
 
@@ -55,12 +55,12 @@ private:
 GobMetaEngine::GobMetaEngine() :
 	AdvancedMetaEngine(Gob::gameDescriptions, sizeof(Gob::GOBGameDescription), gobGames) {
 
-	_singleid   = "gob";
-	_guioptions = GUIO1(GUIO_NOLAUNCHLOAD);
+	_singleId   = "gob";
+	_guiOptions = GUIO1(GUIO_NOLAUNCHLOAD);
 }
 
-GameDescriptor GobMetaEngine::findGame(const char *gameid) const {
-	return Engines::findGameID(gameid, _gameids, obsoleteGameIDsTable);
+GameDescriptor GobMetaEngine::findGame(const char *gameId) const {
+	return Engines::findGameID(gameId, _gameIds, obsoleteGameIDsTable);
 }
 
 const ADGameDescription *GobMetaEngine::fallbackDetect(const FileMap &allFiles, const Common::FSList &fslist) const {
@@ -77,7 +77,10 @@ const ADGameDescription *GobMetaEngine::fallbackDetect(const FileMap &allFiles, 
 			return 0;
 	}
 
-	reportUnknown(fslist.begin()->getParent(), filesProps);
+	ADGameIdList gameIds;
+	gameIds.push_back(game->desc.gameId);
+
+	reportUnknown(fslist.begin()->getParent(), filesProps, gameIds);
 	return (const ADGameDescription *)game;
 }
 

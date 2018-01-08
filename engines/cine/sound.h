@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -48,6 +48,7 @@ public:
 
 	virtual void playSound(int channel, int frequency, const uint8 *data, int size, int volumeStep, int stepCount, int volume, int repeat) = 0;
 	virtual void stopSound(int channel) = 0;
+	virtual void setBgMusic(int num) = 0;
 
 protected:
 
@@ -71,11 +72,14 @@ public:
 
 	virtual void playSound(int channel, int frequency, const uint8 *data, int size, int volumeStep, int stepCount, int volume, int repeat);
 	virtual void stopSound(int channel);
+	virtual void setBgMusic(int num);
 
 protected:
 
 	PCSoundDriver *_soundDriver;
 	PCSoundFxPlayer *_player;
+
+	uint8 _currentMusic, _currentMusicStatus, _currentBgSlot;
 };
 
 class PaulaSound : public Sound {
@@ -91,6 +95,7 @@ public:
 
 	virtual void playSound(int channel, int frequency, const uint8 *data, int size, int volumeStep, int stepCount, int volume, int repeat);
 	virtual void stopSound(int channel);
+	virtual void setBgMusic(int num);
 
 	enum {
 		PAULA_FREQ = 3579545,

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,9 +31,6 @@
 #include "sci/graphics/screen.h"
 
 namespace Sci {
-
-GfxCoordAdjuster::GfxCoordAdjuster() {
-}
 
 GfxCoordAdjuster16::GfxCoordAdjuster16(GfxPorts *ports)
 	: _ports(ports) {
@@ -82,54 +79,5 @@ Common::Rect GfxCoordAdjuster16::pictureGetDisplayArea() {
 	displayArea.moveTo(_ports->getPort()->left, _ports->getPort()->top);
 	return displayArea;
 }
-
-#ifdef ENABLE_SCI32
-GfxCoordAdjuster32::GfxCoordAdjuster32(SegManager *segMan)
-	: _segMan(segMan) {
-	_scriptsRunningWidth = 0;
-	_scriptsRunningHeight = 0;
-}
-
-GfxCoordAdjuster32::~GfxCoordAdjuster32() {
-}
-
-void GfxCoordAdjuster32::kernelGlobalToLocal(int16 &x, int16 &y, reg_t planeObject) {
-	uint16 planeTop = readSelectorValue(_segMan, planeObject, SELECTOR(top));
-	uint16 planeLeft = readSelectorValue(_segMan, planeObject, SELECTOR(left));
-
-	y -= planeTop;
-	x -= planeLeft;
-}
-void GfxCoordAdjuster32::kernelLocalToGlobal(int16 &x, int16 &y, reg_t planeObject) {
-	uint16 planeTop = readSelectorValue(_segMan, planeObject, SELECTOR(top));
-	uint16 planeLeft = readSelectorValue(_segMan, planeObject, SELECTOR(left));
-
-	x += planeLeft;
-	y += planeTop;
-}
-
-void GfxCoordAdjuster32::setScriptsResolution(uint16 width, uint16 height) {
-	_scriptsRunningWidth = width;
-	_scriptsRunningHeight = height;
-}
-
-void GfxCoordAdjuster32::fromDisplayToScript(int16 &y, int16 &x) {
-	y = ((y * _scriptsRunningHeight) / g_sci->_gfxScreen->getHeight());
-	x = ((x * _scriptsRunningWidth) / g_sci->_gfxScreen->getWidth());
-}
-
-void GfxCoordAdjuster32::fromScriptToDisplay(int16 &y, int16 &x) {
-	y = ((y * g_sci->_gfxScreen->getHeight()) / _scriptsRunningHeight);
-	x = ((x * g_sci->_gfxScreen->getWidth()) / _scriptsRunningWidth);
-}
-
-void GfxCoordAdjuster32::pictureSetDisplayArea(Common::Rect displayArea) {
-	_pictureDisplayArea = displayArea;
-}
-
-Common::Rect GfxCoordAdjuster32::pictureGetDisplayArea() {
-	return _pictureDisplayArea;
-}
-#endif
 
 } // End of namespace Sci

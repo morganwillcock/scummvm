@@ -8,35 +8,32 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef HUGO_H
-#define HUGO_H
+#ifndef HUGO_HUGO_H
+#define HUGO_HUGO_H
 
 #include "engines/engine.h"
-#include "common/file.h"
-#include "hugo/console.h"
-#include "hugo/dialogs.h"
 
 // This include is here temporarily while the engine is being refactored.
 #include "hugo/game.h"
-#include "hugo/file.h"
 
 #define HUGO_DAT_VER_MAJ 0                          // 1 byte
 #define HUGO_DAT_VER_MIN 42                         // 1 byte
 #define DATAALIGNMENT    4
 
 namespace Common {
+class SeekableReadStream;
 class RandomSource;
 }
 
@@ -209,6 +206,8 @@ class SoundHandler;
 class IntroHandler;
 class ObjectHandler;
 class TextHandler;
+class TopMenu;
+class HugoConsole;
 
 class HugoEngine : public Engine {
 public:
@@ -342,4 +341,4 @@ private:
 
 } // End of namespace Hugo
 
-#endif // Hugo_H
+#endif // HUGO_HUGO_H

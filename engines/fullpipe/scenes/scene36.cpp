@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -64,7 +64,7 @@ int sceneHandler36(ExCommand *cmd) {
 				if (g_vars->scene36_scissors->_flags & 4)
 					if (g_fp->_aniMan->isIdle())
 						if (!(g_fp->_aniMan->_flags & 0x100) && g_fp->_msgObjectId2 != g_vars->scene36_scissors->_id ) {
-							handleObjectInteraction(g_fp->_aniMan, g_vars->scene36_scissors, cmd->_keyCode);
+							handleObjectInteraction(g_fp->_aniMan, g_vars->scene36_scissors, cmd->_param);
 
 							cmd->_messageKind = 0;
 						}

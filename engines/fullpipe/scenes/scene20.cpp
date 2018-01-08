@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -73,7 +73,7 @@ void scene20_initScene(Scene *sc) {
 	} else if (g_fp->getObjectState(sO_Grandma) == g_fp->getObjectEnumState(sO_Grandma, sO_OnTheFloor)) {
 		g_vars->scene20_grandma->changeStatics2(ST_GMA20_FLOOR);
 	} else if (g_fp->getObjectState(sO_Grandma) == g_fp->getObjectEnumState(sO_Grandma, sO_NearPipe)
-			   || g_fp->getObjectState(sO_Grandma) == g_fp->getObjectEnumState(sO_Grandma, sO_NearPipeWithStool)) {
+				|| g_fp->getObjectState(sO_Grandma) == g_fp->getObjectEnumState(sO_Grandma, sO_NearPipeWithStool)) {
 		g_vars->scene20_grandma->changeStatics2(ST_GMA20_STAND);
 	} else {
 		g_vars->scene20_grandma->hide();
@@ -84,13 +84,13 @@ void scene20_initScene(Scene *sc) {
 	g_fp->_floaters->init(g_fp->getGameLoaderGameVar()->getSubVarByName("SC_20"));
 
 	for (int i = 0; i < 3; i++) {
-		g_fp->_floaters->genFlies(sc, g_fp->_rnd->getRandomNumber(101) + 70, g_fp->_rnd->getRandomNumber(51) + 175, 100, 0);
-		g_fp->_floaters->_array2[g_fp->_floaters->_array2.size() - 1]->val13 = g_fp->_rnd->getRandomNumber(9);
+		g_fp->_floaters->genFlies(sc, g_fp->_rnd.getRandomNumber(101) + 70, g_fp->_rnd.getRandomNumber(51) + 175, 100, 0);
+		g_fp->_floaters->_array2[g_fp->_floaters->_array2.size() - 1].val13 = g_fp->_rnd.getRandomNumber(9);
 	}
 
 	g_fp->_currentScene = oldsc;
 
-	g_vars->scene20_fliesCountdown = g_fp->_rnd->getRandomNumber(200) + 400;
+	g_vars->scene20_fliesCountdown = g_fp->_rnd.getRandomNumber(200) + 400;
 }
 
 void sceneHandler20_updateFlies() {
@@ -98,21 +98,21 @@ void sceneHandler20_updateFlies() {
 
 	if (sz < 3) {
 		g_fp->_floaters->genFlies(g_fp->_currentScene, 253, 650, 200, 0);
-		g_fp->_floaters->_array2[sz - 1]->val2 = 250;
-		g_fp->_floaters->_array2[sz - 1]->val3 = 200;
+		g_fp->_floaters->_array2[sz - 1].val2 = 250;
+		g_fp->_floaters->_array2[sz - 1].val3 = 200;
 	} else {
-		int idx = g_fp->_rnd->getRandomNumber(sz);
+		int idx = g_fp->_rnd.getRandomNumber(sz);
 
-		g_fp->_floaters->_array2[idx]->countdown = 0;
-		g_fp->_floaters->_array2[idx]->fflags |= 4u;
-		g_fp->_floaters->_array2[idx]->val2 = 250;
-		g_fp->_floaters->_array2[idx]->val3 = 200;
-		g_fp->_floaters->_array2[idx]->val6 = 253;
-		g_fp->_floaters->_array2[idx]->val7 = 650;
-		g_fp->_floaters->_array2[idx]->ani->_priority = 200;
+		g_fp->_floaters->_array2[idx].countdown = 0;
+		g_fp->_floaters->_array2[idx].fflags |= 4u;
+		g_fp->_floaters->_array2[idx].val2 = 250;
+		g_fp->_floaters->_array2[idx].val3 = 200;
+		g_fp->_floaters->_array2[idx].val6 = 253;
+		g_fp->_floaters->_array2[idx].val7 = 650;
+		g_fp->_floaters->_array2[idx].ani->_priority = 200;
 	}
 
-	g_vars->scene20_fliesCountdown = g_fp->_rnd->getRandomNumber(200) + 400;
+	g_vars->scene20_fliesCountdown = g_fp->_rnd.getRandomNumber(200) + 400;
 }
 
 int sceneHandler20(ExCommand *cmd) {

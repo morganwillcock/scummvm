@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_THEMEBROWSER_H
@@ -41,9 +42,11 @@ public:
 	void handleCommand(CommandSender *sender, uint32 cmd, uint32 data);
 
 	const Common::String &getSelected() const { return _select; }
+	const Common::String &getSelectedName() const { return _selectName; }
 private:
 	ListWidget *_fileList;
 	Common::String _select;
+	Common::String _selectName;
 
 	typedef Common::List<ThemeEngine::ThemeDescriptor> ThemeDescList;
 	ThemeDescList _themes;

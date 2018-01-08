@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -30,7 +30,6 @@
 #include "engines/util.h"
 
 #include "gui/message.h"
-#include "gui/gui-manager.h"
 
 #include "graphics/cursorman.h"
 
@@ -67,6 +66,7 @@
 #include "scumm/players/player_v5m.h"
 #include "scumm/resource.h"
 #include "scumm/he/resource_he.h"
+#include "scumm/he/moonbase/moonbase.h"
 #include "scumm/scumm_v0.h"
 #include "scumm/scumm_v8.h"
 #include "scumm/sound.h"
@@ -106,7 +106,8 @@ static const dbgChannelDesc debugChannels[] = {
 	{"ACTORS", "Actor-related debug", DEBUG_ACTORS},
 	{"SOUND", "Sound related debug", DEBUG_SOUND},
 	{"INSANE", "Track INSANE", DEBUG_INSANE},
-	{"SMUSH", "Track SMUSH", DEBUG_SMUSH}
+	{"SMUSH", "Track SMUSH", DEBUG_SMUSH},
+	{"MOONBASEAI", "Track Moonbase AI", DEBUG_MOONBASE_AI}
 };
 
 ScummEngine::ScummEngine(OSystem *syst, const DetectorResult &dr)
@@ -205,7 +206,7 @@ ScummEngine::ScummEngine(OSystem *syst, const DetectorResult &dr)
 	_lastInputScriptTime = 0;
 	_bootParam = 0;
 	_dumpScripts = false;
-	_debugMode = 0;
+	_debugMode = false;
 	_objectOwnerTable = NULL;
 	_objectRoomTable = NULL;
 	_objectStateTable = NULL;
@@ -316,6 +317,7 @@ ScummEngine::ScummEngine(OSystem *syst, const DetectorResult &dr)
 	_NES_lastTalkingActor = 0;
 	_NES_talkColor = 0;
 	_keepText = false;
+	_msgCount = 0;
 	_costumeLoader = NULL;
 	_costumeRenderer = NULL;
 	_2byteFontPtr = 0;
@@ -466,6 +468,8 @@ ScummEngine::ScummEngine(OSystem *syst, const DetectorResult &dr)
 
 	VAR_NUM_SCRIPT_CYCLES = 0xFF;
 	VAR_SCRIPT_CYCLE = 0xFF;
+
+	VAR_QUIT_SCRIPT = 0xFF;
 
 	VAR_NUM_GLOBAL_OBJS = 0xFF;
 
@@ -714,7 +718,7 @@ ScummEngine_v2::ScummEngine_v2(OSystem *syst, const DetectorResult &dr)
 
 ScummEngine_v0::ScummEngine_v0(OSystem *syst, const DetectorResult &dr)
 	: ScummEngine_v2(syst, dr) {
-
+	_drawDemo = false;
 	_currentMode = 0;
 	_currentLights = 0;
 
@@ -729,6 +733,38 @@ ScummEngine_v0::ScummEngine_v0(OSystem *syst, const DetectorResult &dr)
 	VAR_ACTIVE_OBJECT2 = 0xFF;
 	VAR_IS_SOUND_RUNNING = 0xFF;
 	VAR_ACTIVE_VERB = 0xFF;
+
+	DelayReset();
+
+	if (strcmp(dr.fp.pattern, "maniacdemo.d64") == 0 )
+		_game.features |= GF_DEMO;
+}
+
+void ScummEngine_v0::DelayReset() {
+	_V0Delay._screenScroll = false;
+	_V0Delay._objectRedrawCount = 0;
+	_V0Delay._objectStripRedrawCount = 0;
+	_V0Delay._actorRedrawCount = 0;
+	_V0Delay._actorLimbRedrawDrawCount = 0;
+}
+
+int ScummEngine_v0::DelayCalculateDelta() {
+	float Time = 0;
+
+	// These values are made up, based on trial/error with visual inspection against WinVice
+	// If anyone feels inclined, the routines in the original engine could be profiled
+	// and these values changed accordindly.
+	Time += _V0Delay._objectRedrawCount * 7;
+	Time += _V0Delay._objectStripRedrawCount * 0.6;
+	Time += _V0Delay._actorRedrawCount * 2.0;
+	Time += _V0Delay._actorLimbRedrawDrawCount * 0.3;
+
+	if (_V0Delay._screenScroll)
+		Time += 3.6f;
+
+	DelayReset();
+
+	return floor(Time + 0.5);
 }
 
 ScummEngine_v6::ScummEngine_v6(OSystem *syst, const DetectorResult &dr)
@@ -799,6 +835,8 @@ ScummEngine_v70he::ScummEngine_v70he(OSystem *syst, const DetectorResult &dr)
 	_heSndChannel = 0;
 	_heSndFlags = 0;
 	_heSndSoundFreq = 0;
+	_heSndPan = 0;
+	_heSndVol = 0;
 
 	_numStoredFlObjects = 0;
 	_storedFlObjects = (ObjectData *)calloc(100, sizeof(ObjectData));
@@ -869,7 +907,7 @@ ScummEngine_v90he::ScummEngine_v90he(OSystem *syst, const DetectorResult &dr)
 	memset(_videoParams.filename, 0, sizeof(_videoParams.filename));
 	_videoParams.status = 0;
 	_videoParams.flags = 0;
-	_videoParams.unk2 = 0;
+	_videoParams.number = 0;
 	_videoParams.wizResNum = 0;
 
 	VAR_NUM_SPRITE_GROUPS = 0xFF;
@@ -892,10 +930,29 @@ ScummEngine_v90he::~ScummEngine_v90he() {
 	}
 }
 
+ScummEngine_v100he::ScummEngine_v100he(OSystem *syst, const DetectorResult &dr) : ScummEngine_v99he(syst, dr) {
+	/* Moonbase stuff */
+	_moonbase = 0;
+
+	if (_game.id == GID_MOONBASE)
+		_moonbase = new Moonbase(this);
+
+	VAR_U32_USER_VAR_A = 0xFF;
+	VAR_U32_USER_VAR_B = 0xFF;
+	VAR_U32_USER_VAR_C = 0xFF;
+	VAR_U32_USER_VAR_D = 0xFF;
+	VAR_U32_USER_VAR_E = 0xFF;
+	VAR_U32_USER_VAR_F = 0xFF;
+}
+
+ScummEngine_v100he::~ScummEngine_v100he() {
+	delete _moonbase;
+}
+
 ScummEngine_vCUPhe::ScummEngine_vCUPhe(OSystem *syst, const DetectorResult &dr) : Engine(syst){
 	_syst = syst;
 	_game = dr.game;
-	_filenamePattern = dr.fp,
+	_filenamePattern = dr.fp;
 
 	_cupPlayer = new CUP_Player(syst, this, _mixer);
 }
@@ -905,7 +962,7 @@ ScummEngine_vCUPhe::~ScummEngine_vCUPhe() {
 }
 
 Common::Error ScummEngine_vCUPhe::run() {
-	initGraphics(CUP_Player::kDefaultVideoWidth, CUP_Player::kDefaultVideoHeight, true);
+	initGraphics(CUP_Player::kDefaultVideoWidth, CUP_Player::kDefaultVideoHeight);
 
 	if (_cupPlayer->open(_filenamePattern.pattern)) {
 		_cupPlayer->play();
@@ -1026,6 +1083,35 @@ Common::Error ScummEngine::init() {
 	}
 #endif
 
+	// Extra directories needed for the Steam versions
+	if (_filenamePattern.genMethod == kGenDiskNumSteam || _filenamePattern.genMethod == kGenRoomNumSteam) {
+		if (_game.platform == Common::kPlatformWindows) {
+			switch (_game.id) {
+			case GID_INDY3 :
+				SearchMan.addSubDirectoryMatching(gameDataDir, "indy3");
+				break;
+			case GID_INDY4 :
+				SearchMan.addSubDirectoryMatching(gameDataDir, "atlantis");
+				break;
+			case GID_LOOM :
+				SearchMan.addSubDirectoryMatching(gameDataDir, "loom");
+				break;
+#ifdef ENABLE_SCUMM_7_8
+			case GID_DIG :
+				SearchMan.addSubDirectoryMatching(gameDataDir, "dig");
+				SearchMan.addSubDirectoryMatching(gameDataDir, "dig/video");
+				break;
+#endif
+			default:
+				break;
+			}
+		} else {
+			SearchMan.addSubDirectoryMatching(gameDataDir, "Contents");
+			SearchMan.addSubDirectoryMatching(gameDataDir, "Contents/MacOS");
+			SearchMan.addSubDirectoryMatching(gameDataDir, "Contents/Resources");
+			SearchMan.addSubDirectoryMatching(gameDataDir, "Contents/Resources/video");
+		}
+	}
 
 	// The	kGenUnchanged method is only used for 'container files', i.e. files
 	// that contain the real game files bundled together in an archive format.
@@ -1060,8 +1146,13 @@ Common::Error ScummEngine::init() {
 			const char *tmpBuf1, *tmpBuf2;
 			assert(_game.id == GID_MANIAC || _game.id == GID_ZAK);
 			if (_game.id == GID_MANIAC) {
-				tmpBuf1 = "maniac1.d64";
-				tmpBuf2 = "maniac2.d64";
+				if (_game.features & GF_DEMO) {
+					tmpBuf1 = "maniacdemo.d64";
+					tmpBuf2 = "maniacdemo.d64";
+				} else {
+					tmpBuf1 = "maniac1.d64";
+					tmpBuf2 = "maniac2.d64";
+				}
 			} else {
 				tmpBuf1 = "zak1.d64";
 				tmpBuf2 = "zak2.d64";
@@ -1126,14 +1217,29 @@ Common::Error ScummEngine::init() {
 				error("Couldn't find known subfile inside container file '%s'", _containerFile.c_str());
 
 			_fileHandle->close();
-
 		} else {
 			error("kGenUnchanged used with unsupported platform");
 		}
 	} else {
-		// Regular access, no container file involved
-		_fileHandle = new ScummFile();
+		if (_filenamePattern.genMethod == kGenDiskNumSteam || _filenamePattern.genMethod == kGenRoomNumSteam) {
+			// Steam game versions have the index file embedded in the main executable
+			const SteamIndexFile *indexFile = lookUpSteamIndexFile(_filenamePattern.pattern, _game.platform);
+			if (!indexFile || indexFile->id != _game.id) {
+				error("Couldn't find index file description for Steam version");
+			} else {
+				_fileHandle = new ScummSteamFile(*indexFile);
+			}
+		} else {
+			// Regular access, no container file involved
+			_fileHandle = new ScummFile();
+		}
 	}
+
+	// Steam Win and Mac versions share the same DOS data files. We show Windows or Mac
+	// for the platform the detector, but internally we force the platform to DOS, so that
+	// the code for handling the original DOS data files is used.
+	if (_filenamePattern.genMethod == kGenDiskNumSteam || _filenamePattern.genMethod == kGenRoomNumSteam)
+		_game.platform = Common::kPlatformDOS;
 
 	// Load CJK font, if present
 	// Load it earlier so _useCJKMode variable could be set
@@ -1141,7 +1247,7 @@ Common::Error ScummEngine::init() {
 
 	// Initialize backend
 	if (_renderMode == Common::kRenderHercA || _renderMode == Common::kRenderHercG) {
-		initGraphics(kHercWidth, kHercHeight, true);
+		initGraphics(kHercWidth, kHercHeight);
 	} else {
 		int screenWidth = _screenWidth;
 		int screenHeight = _screenHeight;
@@ -1160,7 +1266,7 @@ Common::Error ScummEngine::init() {
 			_outputPixelFormat = Graphics::PixelFormat(2, 5, 5, 5, 0, 10, 5, 0, 0);
 
 			if (_game.platform != Common::kPlatformFMTowns && _game.platform != Common::kPlatformPCEngine) {
-				initGraphics(screenWidth, screenHeight, screenWidth > 320, &_outputPixelFormat);
+				initGraphics(screenWidth, screenHeight, &_outputPixelFormat);
 				if (_outputPixelFormat != _system->getScreenFormat())
 					return Common::kUnsupportedColorMode;
 			} else {
@@ -1175,14 +1281,14 @@ Common::Error ScummEngine::init() {
 					}
 				}
 
-				initGraphics(screenWidth, screenHeight, screenWidth > 320, tryModes);
+				initGraphics(screenWidth, screenHeight, tryModes);
 				if (_system->getScreenFormat().bytesPerPixel != 2)
 					return Common::kUnsupportedColorMode;
 			}
 #else
 			if (_game.platform == Common::kPlatformFMTowns && _game.version == 3) {
 				warning("Starting game without the required 16bit color support.\nYou may experience color glitches");
-				initGraphics(screenWidth, screenHeight, (screenWidth > 320));
+				initGraphics(screenWidth, screenHeight);
 			} else {
 				return Common::Error(Common::kUnsupportedColorMode, "16bit color support is required for this game");
 			}
@@ -1192,7 +1298,7 @@ Common::Error ScummEngine::init() {
 		if (_game.platform == Common::kPlatformFMTowns && _game.version == 5)
 			return Common::Error(Common::kUnsupportedColorMode, "This game requires dual graphics layer support which is disabled in this build");
 #endif
-			initGraphics(screenWidth, screenHeight, (screenWidth > 320));
+			initGraphics(screenWidth, screenHeight);
 		}
 	}
 
@@ -1218,12 +1324,9 @@ Common::Error ScummEngine::init() {
 
 void ScummEngine::setupScumm() {
 	// On some systems it's not safe to run CD audio games from the CD.
-	if (_game.features & GF_AUDIOTRACKS) {
+	if (_game.features & GF_AUDIOTRACKS && !Common::File::exists("CDDA.SOU")) {
 		checkCD();
-
-		int cd_num = ConfMan.getInt("cdrom");
-		if (cd_num >= 0)
-			_system->getAudioCDManager()->openCD(cd_num);
+		_system->getAudioCDManager()->open();
 	}
 
 	// Create the sound manager
@@ -1850,7 +1953,7 @@ void ScummEngine::setupMusic(int midi) {
 		// EGA/VGA. However, we support multi MIDI for that game and we cannot
 		// support this with the Player_AD code at the moment. The reason here
 		// is that multi MIDI is supported internally by our iMuse output.
-		_musicEngine = new Player_AD(this, _mixer);
+		_musicEngine = new Player_AD(this);
 	} else if (_game.version >= 3 && _game.heversion <= 62) {
 		MidiDriver *nativeMidiDriver = 0;
 		MidiDriver *adlibMidiDriver = 0;
@@ -2006,13 +2109,24 @@ Common::Error ScummEngine::go() {
 		if (delta < 1)	// Ensure we don't get into an endless loop
 			delta = 1;  // by not decreasing sleepers.
 
-		// WORKAROUND: walking speed in the original v0/v1 interpreter
+		// WORKAROUND: Unfortunately the MOS 6502 wasn't always fast enough for MM
+		//  a number of situations can lead to the engine running at less than 60 ticks per second, without this drop
+		//	- A single kid is able to escape via the Dungeon Door (after pushing the brick)
+		//	- During the intro, calls to 'SetState08' are made for the lights on the mansion, with a 'breakHere'
+		//	  in between each, the reduction in ticks then occurs while affected stripes are being redrawn.
+		//	  The music buildup is then out of sync with the text "A Lucasfilm Games Production".
+		//	  Each call to 'breakHere' has been replaced with calls to 'Delay' in the V1/V2 versions of the game
+		if (_game.version == 0) {
+			delta += ((ScummEngine_v0 *)this)->DelayCalculateDelta();
+		}
+
+		// WORKAROUND: walking speed in the original v1 interpreter
 		// is sometimes slower (e.g. during scrolling) than in ScummVM.
 		// This is important for the door-closing action in the dungeon,
 		// otherwise (delta < 6) a single kid is able to escape.
-		if ((_game.version == 0 && isScriptRunning(132)) ||
-			(_game.version == 1 && isScriptRunning(137)))
-			delta = 6;
+		if (_game.version == 1 && isScriptRunning(137)) {
+				delta = 6;
+		}
 
 		// Wait...
 		waitForTimer(delta * 1000 / 60 - diff);
@@ -2029,6 +2143,7 @@ Common::Error ScummEngine::go() {
 
 		if (shouldQuit()) {
 			// TODO: Maybe perform an autosave on exit?
+			runQuitScript();
 		}
 	}
 
@@ -2281,7 +2396,7 @@ void ScummEngine::scummLoop_updateScummVars() {
 		VAR(VAR_MOUSE_Y) = _mouse.y;
 		if (VAR_DEBUGMODE != 0xFF) {
 			// This is NOT for the Mac version of Indy3/Loom
-			VAR(VAR_DEBUGMODE) = _debugMode;
+			VAR(VAR_DEBUGMODE) = (_debugMode ? 1 : 0);
 		}
 	} else if (_game.version >= 1) {
 		// We use shifts below instead of dividing by V12_X_MULTIPLIER resp.
@@ -2311,14 +2426,14 @@ void ScummEngine::scummLoop_handleSaveLoad() {
 		if (_saveLoadFlag == 1) {
 			success = saveState(_saveLoadSlot, _saveTemporaryState, filename);
 			if (!success)
-				errMsg = _("Failed to save game state to file:\n\n%s");
+				errMsg = _("Failed to save game to file:\n\n%s");
 
 			if (success && _saveTemporaryState && VAR_GAME_LOADED != 0xFF && _game.version <= 7)
 				VAR(VAR_GAME_LOADED) = 201;
 		} else {
 			success = loadState(_saveLoadSlot, _saveTemporaryState, filename);
 			if (!success)
-				errMsg = _("Failed to load game state from file:\n\n%s");
+				errMsg = _("Failed to load saved game from file:\n\n%s");
 
 			if (success && _saveTemporaryState && VAR_GAME_LOADED != 0xFF)
 				VAR(VAR_GAME_LOADED) = (_game.version == 8) ? 1 : 203;
@@ -2329,7 +2444,7 @@ void ScummEngine::scummLoop_handleSaveLoad() {
 		} else if (_saveLoadFlag == 1 && _saveLoadSlot != 0 && !_saveTemporaryState) {
 			// Display "Save successful" message, except for auto saves
 			char buf[256];
-			snprintf(buf, sizeof(buf), _("Successfully saved game state in file:\n\n%s"), filename.c_str());
+			snprintf(buf, sizeof(buf), _("Successfully saved game in file:\n\n%s"), filename.c_str());
 
 			GUI::TimedMessageDialog dialog(buf, 1500);
 			runDialog(dialog);
@@ -2378,6 +2493,8 @@ void ScummEngine_v8::scummLoop_handleSaveLoad() {
 
 void ScummEngine::scummLoop_handleDrawing() {
 	if (camera._cur != camera._last || _bgNeedsRedraw || _fullRedraw) {
+		_V0Delay._screenScroll = true;
+
 		redrawBGAreas();
 	}
 
@@ -2473,6 +2590,30 @@ void ScummEngine_v60he::setHETimer(int timer) {
 	_heTimers[timer] = _system->getMillis();
 }
 
+void ScummEngine_v60he::pauseHETimers(bool pause) {
+	// The HE timers rely on system time which of course doesn't pause when
+	// the engine does. By adding the elapsed time we compensate for this.
+	// Fixes bug #6352
+	if (pause) {
+		// Pauses can be layered, we only need the start of the first
+		if (!_pauseStartTime)
+			_pauseStartTime = _system->getMillis();
+	} else {
+		int elapsedTime = _system->getMillis() - _pauseStartTime;
+		for (int i = 0; i < ARRAYSIZE(_heTimers); i++) {
+			if (_heTimers[i] != 0)
+				_heTimers[i] += elapsedTime;
+		}
+		_pauseStartTime = 0;
+	}
+}
+
+void ScummEngine_v60he::pauseEngineIntern(bool pause) {
+	pauseHETimers(pause);
+
+	ScummEngine::pauseEngineIntern(pause);
+}
+
 void ScummEngine::pauseGame() {
 	pauseDialog();
 }
@@ -2525,7 +2666,7 @@ void ScummEngine::runBootscript() {
 	int args[NUM_SCRIPT_LOCAL];
 	memset(args, 0, sizeof(args));
 	args[0] = _bootParam;
-	if (_game.id == GID_MANIAC && (_game.features & GF_DEMO))
+	if (_game.id == GID_MANIAC && (_game.features & GF_DEMO) && (_game.platform != Common::kPlatformC64))
 		runScript(9, 0, 0, args);
 	else
 		runScript(1, 0, 0, args);
@@ -2542,9 +2683,56 @@ void ScummEngine_v90he::runBootscript() {
 }
 #endif
 
-void ScummEngine::startManiac() {
-	debug(0, "stub startManiac()");
-	displayMessage(0, "%s", _("Usually, Maniac Mansion would start now. But ScummVM doesn't do that yet. To play it, go to 'Add Game' in the ScummVM start menu and select the 'Maniac' directory inside the Tentacle game directory."));
+bool ScummEngine::startManiac() {
+	Common::String currentPath = ConfMan.get("path");
+	Common::String maniacTarget;
+
+	if (!ConfMan.hasKey("easter_egg")) {
+		// Look for a game with a game path pointing to a 'Maniac' directory
+		// as a subdirectory to the current game.
+		Common::ConfigManager::DomainMap::iterator iter = ConfMan.beginGameDomains();
+		for (; iter != ConfMan.endGameDomains(); ++iter) {
+			Common::ConfigManager::Domain &dom = iter->_value;
+			Common::String path = dom.getVal("path");
+
+			if (path.hasPrefix(currentPath)) {
+				path.erase(0, currentPath.size());
+				// Do a case-insensitive non-path-mode match of the remainder.
+				// While strictly speaking it's too broad, this matchString
+				// ignores the presence or absence of trailing path separators
+				// in either currentPath or path.
+				if (path.matchString("*maniac*", true, false)) {
+					maniacTarget = iter->_key;
+					break;
+				}
+			}
+		}
+	} else {
+		maniacTarget = ConfMan.get("easter_egg");
+	}
+
+	if (!maniacTarget.empty()) {
+		// Request a temporary save game to be made.
+		_saveLoadFlag = 1;
+		_saveLoadSlot = 100;
+		_saveTemporaryState = true;
+
+		// Set up the chanined games to Maniac Mansion, and then back
+		// to the current game again with that save slot.
+		ChainedGamesMan.push(maniacTarget);
+		ChainedGamesMan.push(ConfMan.getActiveDomainName(), 100);
+
+		// Force a return to the launcher. This will start the first
+		// chained game.
+		Common::EventManager *eventMan = g_system->getEventManager();
+		Common::Event event;
+		event.type = Common::EVENT_RTL;
+		eventMan->pushEvent(event);
+		return true;
+	} else {
+		displayMessage(0, "%s", _("Usually, Maniac Mansion would start now. But for that to work, the game files for Maniac Mansion have to be in the 'Maniac' directory inside the Tentacle game directory, and the game has to be added to ScummVM."));
+		return false;
+	}
 }
 
 #pragma mark -

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -73,6 +73,8 @@ Puzzle::Puzzle(SagaEngine *vm) : _vm(vm), _solved(false), _active(false) {
 		_lang = 1;
 	else if (_vm->getLanguage() == Common::IT_ITA)
 		_lang = 2;
+	else if (_vm->getLanguage() == Common::FR_FRA)
+		_lang = 3;
 
 	_hintRqState = kRQNoHint;
 	_hintOffer = 0;
@@ -85,6 +87,11 @@ Puzzle::Puzzle(SagaEngine *vm) : _vm(vm), _solved(false), _active(false) {
 	_hintBox.top = 105;
 	_hintBox.setWidth(240);
 	_hintBox.setHeight(30);
+
+	_hintNextRqState = kRQNoHint;
+	_hintGiver = 0;
+	_hintSpeaker = 0;
+	_slidePointX = _slidePointY = 0;
 
 	initPieceInfo( 0, 268,  18,  0, 0,  0 + PUZZLE_X_OFFSET,   0 + PUZZLE_Y_OFFSET, 0, 3,
 		  Point(0, 1),  Point(0, 62), Point(15, 31), Point(0, 0), Point(0, 0), Point(0,0));
@@ -399,6 +406,9 @@ void Puzzle::hintTimerCallback(void *refCon) {
 }
 
 void Puzzle::solicitHint() {
+	// CHECKME: This is potentially called from a different thread because it is
+	// called from a timer callback. However, it does not seem to take any
+	// precautions to avoid race conditions.
 	int i;
 
 	_vm->_actor->setSpeechColor(1, kITEColorBlack);

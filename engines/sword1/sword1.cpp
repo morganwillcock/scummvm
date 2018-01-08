@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -39,7 +39,6 @@
 #include "engines/util.h"
 
 #include "gui/message.h"
-#include "gui/gui-manager.h"
 
 namespace Sword1 {
 
@@ -95,7 +94,7 @@ SwordEngine::~SwordEngine() {
 
 Common::Error SwordEngine::init() {
 
-	initGraphics(640, 480, true);
+	initGraphics(640, 480);
 
 	if (0 == scumm_stricmp(ConfMan.get("gameid").c_str(), "sword1mac") ||
 	        0 == scumm_stricmp(ConfMan.get("gameid").c_str(), "sword1macdemo"))
@@ -155,7 +154,7 @@ Common::Error SwordEngine::init() {
 
 	_systemVars.showText = ConfMan.getBool("subtitles");
 
-	_systemVars.playSpeech = 1;
+	_systemVars.playSpeech = true;
 	_mouseState = 0;
 
 	// Some Mac versions use big endian for the speech files but not all of them.
@@ -774,6 +773,8 @@ void SwordEngine::reinitRes() {
 	_logic->newScreen(Logic::_scriptVars[NEW_SCREEN]);
 	_sound->newScreen(Logic::_scriptVars[NEW_SCREEN]);
 	Logic::_scriptVars[SCREEN] = Logic::_scriptVars[NEW_SCREEN];
+	_logic->engine();
+	_logic->updateScreenParams();
 	_screen->fullRefresh();
 	_screen->draw();
 }

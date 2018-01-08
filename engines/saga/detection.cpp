@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -102,11 +102,11 @@ static const Engines::ObsoleteGameID obsoleteGameIDsTable[] = {
 class SagaMetaEngine : public AdvancedMetaEngine {
 public:
 	SagaMetaEngine() : AdvancedMetaEngine(Saga::gameDescriptions, sizeof(Saga::SAGAGameDescription), sagaGames) {
-		_singleid = "saga";
+		_singleId = "saga";
 	}
 
-	virtual GameDescriptor findGame(const char *gameid) const {
-		return Engines::findGameID(gameid, _gameids, obsoleteGameIDsTable);
+	virtual GameDescriptor findGame(const char *gameId) const {
+		return Engines::findGameID(gameId, _gameIds, obsoleteGameIDsTable);
 	}
 
 	virtual const char *getName() const {
@@ -157,7 +157,8 @@ bool SagaMetaEngine::hasFeature(MetaEngineFeature f) const {
 		(f == kSavesSupportMetaInfo) ||
 		(f == kSavesSupportThumbnail) ||
 		(f == kSavesSupportCreationDate) ||
-		(f == kSavesSupportPlayTime);
+		(f == kSavesSupportPlayTime) ||
+		(f == kSimpleSavesNames);
 }
 
 bool Saga::SagaEngine::hasFeature(EngineFeature f) const {
@@ -180,10 +181,9 @@ SaveStateList SagaMetaEngine::listSaves(const char *target) const {
 	Common::StringArray filenames;
 	char saveDesc[SAVE_TITLE_SIZE];
 	Common::String pattern = target;
-	pattern += ".s??";
+	pattern += ".s##";
 
 	filenames = saveFileMan->listSavefiles(pattern);
-	sort(filenames.begin(), filenames.end());	// Sort (hopefully ensuring we are sorted numerically..)
 
 	SaveStateList saveList;
 	int slotNum = 0;
@@ -203,6 +203,8 @@ SaveStateList SagaMetaEngine::listSaves(const char *target) const {
 		}
 	}
 
+	// Sort saves based on slot number.
+	Common::sort(saveList.begin(), saveList.end(), SaveStateDescriptorSlotComparator());
 	return saveList;
 }
 

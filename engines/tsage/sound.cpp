@@ -8,21 +8,22 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
+#include "audio/fmopl.h"
 #include "audio/decoders/raw.h"
 #include "common/config-manager.h"
-#include "audio/decoders/raw.h"
+#include "common/timer.h"
 #include "audio/audiostream.h"
 #include "tsage/core.h"
 #include "tsage/globals.h"
@@ -70,7 +71,7 @@ SoundManager::~SoundManager() {
 		}
 		sfTerminate();
 
-//		g_system->getTimerManager()->removeTimerProc(_sfUpdateCallback);
+		g_system->getTimerManager()->removeTimerProc(&sfSoundServer);
 	}
 
 	// Free any allocated voice type structures
@@ -90,12 +91,7 @@ void SoundManager::postInit() {
 		g_saver->addLoadNotifier(&SoundManager::loadNotifier);
 		g_saver->addListener(this);
 
-
-//	I originally separated the sound manager update method into a separate thread, since
-//  it handles updates for both music and Fx. However, since Adlib updates also get done in a
-//	thread, and doesn't get too far ahead, I've left it to the AdlibSoundDriver class to
-//	call the update method, rather than having it be called separately
-//		g_system->getTimerManager()->installTimerProc(_sfUpdateCallback, 1000000 / SOUND_FREQUENCY, NULL, "tsageSoundUpdate");
+		g_system->getTimerManager()->installTimerProc(&sfSoundServer, 1000000 / CALLBACKS_PER_SECOND, NULL, "tsageSoundUpdate");
 		_sndmgrReady = true;
 	}
 }
@@ -147,10 +143,6 @@ void SoundManager::syncSounds() {
 	}
 }
 
-void SoundManager::update() {
-	sfSoundServer();
-}
-
 Common::List<SoundDriverEntry> &SoundManager::buildDriverList(bool detectFlag) {
 	assert(_sndmgrReady);
 	_availableDrivers.clear();
@@ -164,7 +156,7 @@ Common::List<SoundDriverEntry> &SoundManager::buildDriverList(bool detectFlag) {
 	sd._status = detectFlag ? SNDSTATUS_DETECTED : SNDSTATUS_SKIPPED;
 	sd._field2 = 0;
 	sd._field6 = 15000;
-	sd._shortDescription = "Adlib or SoundBlaster";
+	sd._shortDescription = "AdLib or SoundBlaster";
 	sd._longDescription = "3812fm";
 	_availableDrivers.push_back(sd);
 
@@ -379,11 +371,13 @@ void SoundManager::updateSoundLoop(Sound *sound) {
 }
 
 void SoundManager::rethinkVoiceTypes() {
-	Common::StackLock slock(sfManager()._serverSuspendedMutex);
 	sfRethinkVoiceTypes();
 }
 
-void SoundManager::sfSoundServer() {
+void SoundManager::sfSoundServer(void *) {
+	Common::StackLock slock1(SoundManager::sfManager()._serverDisabledMutex);
+	Common::StackLock slock2(SoundManager::sfManager()._serverSuspendedMutex);
+
 	if (sfManager()._needToRethink) {
 		sfRethinkVoiceTypes();
 		sfManager()._needToRethink = false;
@@ -468,8 +462,9 @@ void SoundManager::sfProcessFading() {
 
 		if (vtStruct->_voiceType == VOICETYPE_1) {
 			for (uint idx = 0; idx < vtStruct->_entries.size(); ++idx) {
-				if (vtStruct->_entries[idx]._type1._field6 >= -1)
-					++vtStruct->_entries[idx]._type1._field6;
+				VoiceStructEntryType1 &vte = vtStruct->_entries[idx]._type1;
+				if (vte._field6 >= -1)
+					++vte._field6;
 			}
 		}
 	}
@@ -499,22 +494,22 @@ void SoundManager::sfUpdateVoiceStructs() {
 
 		if (vs->_voiceType == VOICETYPE_0) {
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
-				VoiceStructEntry &vse = vs->_entries[idx];
+				VoiceStructEntryType0 &vte = vs->_entries[idx]._type0;
 
-				vse._type0._sound = vse._type0._sound2;
-				vse._type0._channelNum = vse._type0._channelNum2;
-				vse._type0._priority = vse._type0._priority2;
-				vse._type0._fieldA = vse._type0._field12;
+				vte._sound = vte._sound2;
+				vte._channelNum = vte._channelNum2;
+				vte._priority = vte._priority2;
+				vte._fieldA = vte._field12;
 			}
 		} else {
 			vs->_field3 = vs->_numVoices;
 
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
-				VoiceStructEntry &vse = vs->_entries[idx];
+				VoiceStructEntryType1 &vte = vs->_entries[idx]._type1;
 
-				vse._type1._sound = vse._type1._sound2;
-				vse._type1._channelNum = vse._type1._channelNum2;
-				vse._type1._priority = vse._type1._priority2;
+				vte._sound = vte._sound2;
+				vte._channelNum = vte._channelNum2;
+				vte._priority = vte._priority2;
 			}
 		}
 	}
@@ -529,23 +524,19 @@ void SoundManager::sfUpdateVoiceStructs2() {
 		for (uint idx = 0; idx < vtStruct->_entries.size(); ++idx) {
 
 			if (vtStruct->_voiceType == VOICETYPE_0) {
-				VoiceStructEntryType0 &vse = vtStruct->_entries[idx]._type0;
-				vse._sound2 = vse._sound;
-				vse._channelNum2 = vse._channelNum;
-				vse._priority2 = vse._priority;
-				vse._field12 = vse._fieldA;
+				VoiceStructEntryType0 &vte = vtStruct->_entries[idx]._type0;
+				vte._sound2 = vte._sound;
+				vte._channelNum2 = vte._channelNum;
+				vte._priority2 = vte._priority;
+				vte._field12 = vte._fieldA;
 			} else {
-				VoiceStructEntryType1 &vse = vtStruct->_entries[idx]._type1;
-				vse._sound2 = vse._sound;
-				vse._channelNum2 = vse._channelNum;
-				vse._priority2 = vse._priority;
+				VoiceStructEntryType1 &vte = vtStruct->_entries[idx]._type1;
+				vte._sound2 = vte._sound;
+				vte._channelNum2 = vte._channelNum;
+				vte._priority2 = vte._priority;
 			}
 		}
 	}
-}
-
-void SoundManager::sfUpdateCallback(void *ref) {
-	((SoundManager *)ref)->update();
 }
 
 /*--------------------------------------------------------------------------*/
@@ -724,7 +715,7 @@ void SoundManager::sfRethinkSoundDrivers() {
 								ve._type0._sound = NULL;
 								ve._type0._channelNum = 0;
 								ve._type0._priority = 0;
-								ve._type0._fieldA = 0;
+								ve._type0._fieldA = false;
 
 								vs->_entries.push_back(ve);
 							}
@@ -773,32 +764,31 @@ void SoundManager::sfRethinkVoiceTypes() {
 
 		if (vs->_voiceType == VOICETYPE_0) {
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
-				VoiceStructEntry &vse = vs->_entries[idx];
-				vse._type0._sound3 = vse._type0._sound;
-				vse._type0._channelNum3 = vse._type0._channelNum;
-				vse._type0._priority3 = vse._type0._priority;
-				vse._type0._field1A = vse._type0._fieldA;
-				vse._type0._sound = NULL;
-				vse._type0._channelNum = 0;
-				vse._type0._priority = 0;
-				vse._type0._fieldA = 0;
-				vse._type0._sound2 = NULL;
-				vse._type0._channelNum2 = 0;
-				vse._type0._priority2 = 0;
-				vse._type0._field12 = 0;
+				VoiceStructEntryType0 &vte = vs->_entries[idx]._type0;
+				vte._sound3 = vte._sound;
+				vte._channelNum3 = vte._channelNum;
+				vte._priority3 = vte._priority;
+				vte._sound = NULL;
+				vte._channelNum = 0;
+				vte._priority = 0;
+				vte._fieldA = false;
+				vte._sound2 = NULL;
+				vte._channelNum2 = 0;
+				vte._priority2 = 0;
+				vte._field12 = false;
 			}
 		} else {
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
-				VoiceStructEntry &vse = vs->_entries[idx];
-				vse._type1._sound3 = vse._type1._sound;
-				vse._type1._channelNum3 = vse._type1._channelNum;
-				vse._type1._priority3 = vse._type1._priority;
-				vse._type1._sound = NULL;
-				vse._type1._channelNum = 0;
-				vse._type1._priority = 0;
-				vse._type1._sound2 = NULL;
-				vse._type1._channelNum2 = 0;
-				vse._type1._priority2 = 0;
+				VoiceStructEntryType1 &vte = vs->_entries[idx]._type1;
+				vte._sound3 = vte._sound;
+				vte._channelNum3 = vte._channelNum;
+				vte._priority3 = vte._priority;
+				vte._sound = NULL;
+				vte._channelNum = 0;
+				vte._priority = 0;
+				vte._sound2 = NULL;
+				vte._channelNum2 = 0;
+				vte._priority2 = 0;
 			}
 
 			// Reset the number of voices available
@@ -858,10 +848,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 				if (numVoices >= chNumVoices) {
 					int channelCount = chNumVoices, idx = 0;
 					while (channelCount > 0) {
-						if (!vtStruct->_entries[idx]._type1._sound2) {
-							vtStruct->_entries[idx]._type1._sound2 = sound;
-							vtStruct->_entries[idx]._type1._channelNum2 = foundIndex;
-							vtStruct->_entries[idx]._type1._priority2 = foundPriority;
+						VoiceStructEntryType1 &vte = vtStruct->_entries[idx]._type1;
+						if (!vte._sound2) {
+							vte._sound2 = sound;
+							vte._channelNum2 = foundIndex;
+							vte._priority2 = foundPriority;
 							--channelCount;
 						}
 						++idx;
@@ -881,10 +872,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 						}
 
 						for (uint idx = 0; idx < vtStruct->_entries.size(); ++idx) {
-							if (vtStruct->_entries[idx]._type1._priority2 == maxPriority) {
-								vtStruct->_entries[idx]._type1._sound2 = NULL;
-								vtStruct->_entries[idx]._type1._channelNum2 = 0;
-								vtStruct->_entries[idx]._type1._priority2 = 0;
+							VoiceStructEntryType1 &vte = vtStruct->_entries[idx]._type1;
+							if (vte._priority2 == maxPriority) {
+								vte._sound2 = NULL;
+								vte._channelNum2 = 0;
+								vte._priority2 = 0;
 								++numVoices;
 							}
 						}
@@ -892,10 +884,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 
 					int voicesCtr = chNumVoices;
 					for (uint idx = 0; (idx < vtStruct->_entries.size()) && (voicesCtr > 0); ++idx) {
-						if (!vtStruct->_entries[idx]._type1._sound2) {
-							vtStruct->_entries[idx]._type1._sound2 = sound;
-							vtStruct->_entries[idx]._type1._channelNum2 = foundIndex;
-							vtStruct->_entries[idx]._type1._priority2 = foundPriority;
+						VoiceStructEntryType1 &vte = vtStruct->_entries[idx]._type1;
+						if (!vte._sound2) {
+							vte._sound2 = sound;
+							vte._channelNum2 = foundIndex;
+							vte._priority2 = foundPriority;
 							--voicesCtr;
 						}
 					}
@@ -932,10 +925,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 					}
 
 					if (entryIndex != -1) {
-						vtStruct->_entries[entryIndex]._type0._sound2 = sound;
-						vtStruct->_entries[entryIndex]._type0._channelNum2 = foundIndex;
-						vtStruct->_entries[entryIndex]._type0._priority2 = foundPriority;
-						vtStruct->_entries[entryIndex]._type0._field12 = 0;
+						VoiceStructEntryType0 &vte = vtStruct->_entries[entryIndex]._type0;
+						vte._sound2 = sound;
+						vte._channelNum2 = foundIndex;
+						vte._priority2 = foundPriority;
+						vte._field12 = false;
 						continue;
 					}
 
@@ -953,10 +947,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 					}
 
 					if (entryIndex != -1) {
-						vtStruct->_entries[entryIndex]._type0._sound2 = sound;
-						vtStruct->_entries[entryIndex]._type0._channelNum2 = foundIndex;
-						vtStruct->_entries[entryIndex]._type0._priority2 = foundPriority;
-						vtStruct->_entries[entryIndex]._type0._field12 = 0;
+						VoiceStructEntryType0 &vte = vtStruct->_entries[entryIndex]._type0;
+						vte._sound2 = sound;
+						vte._channelNum2 = foundIndex;
+						vte._priority2 = foundPriority;
+						vte._field12 = false;
 						continue;
 					}
 
@@ -978,10 +973,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 					}
 
 					if (entryIndex != -1) {
-						vtStruct->_entries[entryIndex]._type0._sound2 = sound;
-						vtStruct->_entries[entryIndex]._type0._channelNum2 = foundIndex;
-						vtStruct->_entries[entryIndex]._type0._priority2 = foundPriority;
-						vtStruct->_entries[entryIndex]._type0._field12 = 0;
+						VoiceStructEntryType0 &vte = vtStruct->_entries[entryIndex]._type0;
+						vte._sound2 = sound;
+						vte._channelNum2 = foundIndex;
+						vte._priority2 = foundPriority;
+						vte._field12 = false;
 						continue;
 					}
 
@@ -1017,10 +1013,11 @@ void SoundManager::sfRethinkVoiceTypes() {
 							continue;
 
 						if (entryIndex != -1) {
-							vtStruct->_entries[entryIndex]._type0._sound2 = sound;
-							vtStruct->_entries[entryIndex]._type0._channelNum2 = foundIndex;
-							vtStruct->_entries[entryIndex]._type0._priority2 = foundPriority;
-							vtStruct->_entries[entryIndex]._type0._field12 = 1;
+							VoiceStructEntryType0 &vte = vtStruct->_entries[entryIndex]._type0;
+							vte._sound2 = sound;
+							vte._channelNum2 = foundIndex;
+							vte._priority2 = foundPriority;
+							vte._field12 = true;
 							continue;
 						}
 
@@ -1035,14 +1032,15 @@ void SoundManager::sfRethinkVoiceTypes() {
 
 					for (uint idx = 0; idx < vtStruct->_entries.size(); ++idx) {
 						if (vtStruct->_entries[idx]._field1) {
-							if (!vtStruct->_entries[idx]._type0._sound2) {
+							VoiceStructEntryType0 &vte = vtStruct->_entries[idx]._type0;
+							if (!vte._sound2) {
 								if (vtStruct->_entries[idx]._voiceNum > maxVoiceNum) {
 									maxVoiceNum = vtStruct->_entries[idx]._voiceNum;
 									voiceIndex = idx;
 								}
 							} else {
-								if (vtStruct->_entries[idx]._type0._priority2 > maxPriority) {
-									maxPriority = vtStruct->_entries[idx]._type0._priority2;
+								if (vte._priority2 > maxPriority) {
+									maxPriority = vte._priority2;
 									priorityIndex = idx;
 								}
 							}
@@ -1060,7 +1058,7 @@ void SoundManager::sfRethinkVoiceTypes() {
 						vteSrc._sound2 = sound;
 						vteSrc._channelNum2 = foundIndex;
 						vteSrc._priority2 = foundPriority;
-						vteSrc._field12 = 1;
+						vteSrc._field12 = true;
 						continue;
 					}
 
@@ -1084,7 +1082,7 @@ void SoundManager::sfRethinkVoiceTypes() {
 					vteSrc._sound2 = sound;
 					vteSrc._channelNum2 = foundIndex;
 					vteSrc._priority2 = foundPriority;
-					vteSrc._field12 = 1;
+					vteSrc._field12 = true;
 					continue;
 				}
 			}
@@ -1115,10 +1113,10 @@ void SoundManager::sfRethinkVoiceTypes() {
 						++total;
 
 					vse._priority = vse._priority2;
-					vse._fieldA = 1;
+					vse._fieldA = true;
 					vse._sound2 = NULL;
 
-					if (total) {
+					if ((total) && vse._sound) {
 						driver->proc24(vse._channelNum, idx, vse._sound, 123, 0);
 						driver->proc24(vse._channelNum, idx, vse._sound, 1, vse._sound->_chModulation[vse._channelNum]);
 						driver->proc24(vse._channelNum, idx, vse._sound, 7,
@@ -1135,7 +1133,7 @@ void SoundManager::sfRethinkVoiceTypes() {
 					vse._sound = NULL;
 					vse._channelNum = 0;
 					vse._priority = 0;
-					vse._fieldA = 0;
+					vse._fieldA = false;
 				}
 			}
 
@@ -1148,13 +1146,13 @@ void SoundManager::sfRethinkVoiceTypes() {
 					continue;
 
 				for (uint entryIndex = 0; entryIndex < vs->_entries.size(); ++entryIndex) {
-					if ((vs->_entries[entryIndex]._type0._sound3 != sound) ||
-						(vs->_entries[entryIndex]._type0._channelNum3 != channelNum)) {
+					VoiceStructEntryType0 &vteCur = vs->_entries[entryIndex]._type0;
+					if ((vteCur._sound3 != sound) || (vteCur._channelNum3 != channelNum)) {
 						// Found match
-						vs->_entries[entryIndex]._type0._sound = sound;
-						vs->_entries[entryIndex]._type0._channelNum = channelNum;
-						vs->_entries[entryIndex]._type0._priority = vse._priority2;
-						vs->_entries[entryIndex]._type0._fieldA = 0;
+						vteCur._sound = sound;
+						vteCur._channelNum = channelNum;
+						vteCur._priority = vse._priority2;
+						vteCur._fieldA = false;
 						vse._sound2 = NULL;
 						break;
 					}
@@ -1185,7 +1183,7 @@ void SoundManager::sfRethinkVoiceTypes() {
 				vseFound._sound = vse._sound2;
 				vseFound._channelNum = vse._channelNum2;
 				vseFound._priority = vse._priority2;
-				vseFound._fieldA = 0;
+				vseFound._fieldA = false;
 
 				SoundDriver *driver = vs->_entries[foundIndex]._driver;
 				assert(driver);
@@ -1215,10 +1213,10 @@ void SoundManager::sfRethinkVoiceTypes() {
 		} else {
 			// Type 1
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
-				VoiceStructEntry &vse = vs->_entries[idx];
-				vse._type1._sound = NULL;
-				vse._type1._channelNum = 0;
-				vse._type1._priority = 0;
+				VoiceStructEntryType1 &vte = vs->_entries[idx]._type1;
+				vte._sound = NULL;
+				vte._channelNum = 0;
+				vte._priority = 0;
 			}
 
 			for (uint idx = 0; idx < vs->_entries.size(); ++idx) {
@@ -1434,8 +1432,6 @@ bool SoundManager::sfDoRemoveFromPlayList(Sound *sound) {
 }
 
 void SoundManager::sfDoUpdateVolume(Sound *sound) {
-	Common::StackLock slock(sfManager()._serverSuspendedMutex);
-
 	for (int voiceIndex = 0; voiceIndex < SOUND_ARR_SIZE; ++voiceIndex) {
 		VoiceTypeStruct *vs = sfManager()._voiceTypeStructPtrs[voiceIndex];
 		if (!vs)
@@ -1557,7 +1553,9 @@ void Sound::play(int soundNum) {
 }
 
 void Sound::stop() {
-	g_globals->_soundManager.removeFromPlayList(this);
+	if (g_globals) {
+		g_globals->_soundManager.removeFromPlayList(this);
+	}
 	_unPrime();
 }
 
@@ -1699,8 +1697,6 @@ void Sound::pause(bool flag) {
 }
 
 void Sound::mute(bool flag) {
-	Common::StackLock slock(g_globals->_soundManager._serverSuspendedMutex);
-
 	if (flag)
 		++_mutedCount;
 	else if (_mutedCount > 0)
@@ -2188,9 +2184,10 @@ void Sound::soPlaySound(VoiceTypeStruct *vtStruct, const byte *channelData, int 
 		SoundDriver *driver = vtStruct->_entries[entryIndex]._driver;
 		assert(driver);
 
-		vtStruct->_entries[entryIndex]._type1._field6 = 0;
-		vtStruct->_entries[entryIndex]._type1._field4 = v0;
-		vtStruct->_entries[entryIndex]._type1._field5 = 0;
+		VoiceStructEntryType1 &vte = vtStruct->_entries[entryIndex]._type1;
+		vte._field6 = 0;
+		vte._field4 = v0;
+		vte._field5 = 0;
 
 		driver->playSound(channelData, 0, _chProgram[channelNum], vtStruct->_entries[entryIndex]._voiceNum, v0, v1);
 	}
@@ -2207,9 +2204,10 @@ void Sound::soPlaySound2(VoiceTypeStruct *vtStruct, const byte *channelData, int
 				assert(driver);
 				byte *trackData = _channelData[trackCtr];
 
-				vtStruct->_entries[entryIndex]._type1._field6 = 0;
-				vtStruct->_entries[entryIndex]._type1._field4 = v0;
-				vtStruct->_entries[entryIndex]._type1._field5 = 0;
+				VoiceStructEntryType1 &vte = vtStruct->_entries[entryIndex]._type1;
+				vte._field6 = 0;
+				vte._field4 = v0;
+				vte._field5 = 0;
 
 				int v1, v2;
 				driver->playSound(trackData, 14, -1, vtStruct->_entries[entryIndex]._voiceNum, v0, 0x7F);
@@ -2336,9 +2334,10 @@ void Sound::soServiceTrackType1(int trackIndex, const byte *channelData) {
 						SoundDriver *driver = vtStruct->_entries[entryIndex]._driver;
 						assert(driver);
 
-						vtStruct->_entries[entryIndex]._type1._field6 = 0;
-						vtStruct->_entries[entryIndex]._type1._field4 = *(channelData + 1);
-						vtStruct->_entries[entryIndex]._type1._field5 = 0;
+						VoiceStructEntryType1 &vte = vtStruct->_entries[entryIndex]._type1;
+						vte._field6 = 0;
+						vte._field4 = *(channelData + 1);
+						vte._field5 = 0;
 
 						int v1, v2;
 						driver->playSound(channelData, 14, -1, vtStruct->_entries[entryIndex]._voiceNum, *(channelData + 1), 0x7f);
@@ -2737,17 +2736,9 @@ AdlibSoundDriver::AdlibSoundDriver(): SoundDriver() {
 	_groupData._pData = &adlib_group_data[0];
 
 	_mixer = g_vm->_mixer;
-	_sampleRate = _mixer->getOutputRate();
 	_opl = OPL::Config::create();
 	assert(_opl);
-	_opl->init(_sampleRate);
-
-	_samplesTillCallback = 0;
-	_samplesTillCallbackRemainder = 0;
-	_samplesPerCallback = getRate() / CALLBACKS_PER_SECOND;
-	_samplesPerCallbackRemainder = getRate() % CALLBACKS_PER_SECOND;
-
-	_mixer->playStream(Audio::Mixer::kPlainSoundType, &_soundHandle, this, -1, Audio::Mixer::kMaxChannelVolume, 0, DisposeAfterUse::NO, true);
+	_opl->init();
 
 	Common::fill(_channelVoiced, _channelVoiced + ADLIB_CHANNEL_COUNT, false);
 	memset(_channelVolume, 0, ADLIB_CHANNEL_COUNT * sizeof(int));
@@ -2766,11 +2757,12 @@ AdlibSoundDriver::AdlibSoundDriver(): SoundDriver() {
 		_channelVoiced[i] = false;
 		_pitchBlend[i] = 0;
 	}
+
+	_opl->start(new Common::Functor0Mem<void, AdlibSoundDriver>(this, &AdlibSoundDriver::onTimer), CALLBACKS_PER_SECOND);
 }
 
 AdlibSoundDriver::~AdlibSoundDriver() {
 	DEALLOCATE(_patchData);
-	_mixer->stopHandle(_soundHandle);
 	delete _opl;
 }
 
@@ -2880,13 +2872,13 @@ void AdlibSoundDriver::setPitch(int channel, int pitchBlend) {
 }
 
 void AdlibSoundDriver::write(byte reg, byte value) {
+	Common::StackLock lock(_queueMutex);
 	_portContents[reg] = value;
 	_queue.push(RegisterValue(reg, value));
 }
 
 void AdlibSoundDriver::flush() {
-	Common::StackLock slock(SoundManager::sfManager()._serverDisabledMutex);
-
+	Common::StackLock lock(_queueMutex);
 	while (!_queue.empty()) {
 		RegisterValue v = _queue.pop();
 		_opl->writeReg(v._regNum, v._value);
@@ -3013,33 +3005,8 @@ void AdlibSoundDriver::setFrequency(int channel) {
 		((dataWord >> 8) & 3) | (var2 << 2));
 }
 
-int AdlibSoundDriver::readBuffer(int16 *buffer, const int numSamples) {
-	Common::StackLock slock1(SoundManager::sfManager()._serverDisabledMutex);
-	Common::StackLock slock2(SoundManager::sfManager()._serverSuspendedMutex);
-
-	int32 samplesLeft = numSamples;
-	memset(buffer, 0, sizeof(int16) * numSamples);
-	while (samplesLeft) {
-		if (!_samplesTillCallback) {
-			SoundManager::sfUpdateCallback(NULL);
-			flush();
-
-			_samplesTillCallback = _samplesPerCallback;
-			_samplesTillCallbackRemainder += _samplesPerCallbackRemainder;
-			if (_samplesTillCallbackRemainder >= CALLBACKS_PER_SECOND) {
-				_samplesTillCallback++;
-				_samplesTillCallbackRemainder -= CALLBACKS_PER_SECOND;
-			}
-		}
-
-		int32 render = MIN<int>(samplesLeft, _samplesTillCallback);
-		samplesLeft -= render;
-		_samplesTillCallback -= render;
-
-		_opl->readBuffer(buffer, render);
-		buffer += render;
-	}
-	return numSamples;
+void AdlibSoundDriver::onTimer() {
+	flush();
 }
 
 /*--------------------------------------------------------------------------*/

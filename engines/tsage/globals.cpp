@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,7 @@
 #include "tsage/ringworld/ringworld_logic.h"
 #include "tsage/ringworld2/ringworld2_logic.h"
 #include "tsage/ringworld2/ringworld2_scenes0.h"
+#include "tsage/sherlock/sherlock_logo.h"
 #include "tsage/staticres.h"
 
 namespace TsAGE {
@@ -58,7 +59,7 @@ static SavedObject *classFactoryProc(const Common::String &className) {
 
 /*--------------------------------------------------------------------------*/
 
-Globals::Globals() : _dialogCenter(160, 140), _gfxManagerInstance(_screenSurface),
+Globals::Globals() : _dialogCenter(160, 140), _gfxManagerInstance(_screen),
 		_randomSource("tsage"), _color1(0), _color2(255), _color3(255) {
 	reset();
 	_stripNum = 0;
@@ -118,7 +119,7 @@ Globals::Globals() : _dialogCenter(160, 140), _gfxManagerInstance(_screenSurface
 		_color3 = 4;
 		_dialogCenter.y = 100;
 	}
-	_screenSurface.setScreenSurface();
+
 	_gfxManagers.push_back(&_gfxManagerInstance);
 
 	_sceneObjects = &_sceneObjectsInstance;
@@ -155,6 +156,15 @@ Globals::Globals() : _dialogCenter(160, 140), _gfxManagerInstance(_screenSurface
 		_inventory = new Ringworld2::Ringworld2InvObjectList();
 		_game = new Ringworld2::Ringworld2Game();
 		_sceneHandler = new Ringworld2::SceneHandlerExt();
+		break;
+#ifdef TSAGE_SHERLOCK_ENABLED
+	case GType_Sherlock1:
+		_inventory = nullptr;
+		_sceneHandler = new Sherlock::SherlockSceneHandler();
+		_game = new Sherlock::SherlockLogo();
+		break;
+#endif
+	default:
 		break;
 	}
 

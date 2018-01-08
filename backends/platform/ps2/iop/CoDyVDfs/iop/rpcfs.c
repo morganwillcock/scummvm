@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -69,11 +69,11 @@ void *rpcReadClock(void *data) {
 void *driveStop(void *data) {
 	if (CdStop() == 1) {
 		if (CdSync(0) == 0) {
-			*(int*)data = CdGetError();
+			*(int *)data = CdGetError();
 		} else
-			*(int*)data = -0x100;
+			*(int *)data = -0x100;
 	} else
-		*(int*)data = -0x101;
+		*(int *)data = -0x101;
 	return data;
 }
 
@@ -81,11 +81,11 @@ void *driveStandby(void *data) {
 	int type;
 	if (CdStandby() == 1) {
 		if (CdSync(0) == 0) {
-			*(int*)data = CdGetError();
+			*(int *)data = CdGetError();
 		} else
-			*(int*)data = -0x100;
+			*(int *)data = -0x100;
 	} else
-		*(int*)data = -0x101;
+		*(int *)data = -0x101;
 
 	do {	// wait until drive detected disc type
 		type = CdGetDiskType();

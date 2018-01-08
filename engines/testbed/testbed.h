@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
-#ifndef TESTBED_H
-#define TESTBED_H
+#ifndef TESTBED_TESTBED_H
+#define TESTBED_TESTBED_H
 
 #include "common/array.h"
 
@@ -71,4 +72,4 @@ private:
 
 } // End of namespace Testbed
 
-#endif // TESTBED_H
+#endif // TESTBED_TESTBED_H

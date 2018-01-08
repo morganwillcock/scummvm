@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -66,21 +66,6 @@ Huffman::~Huffman() {
 void Huffman::setSymbols(const uint32 *symbols) {
 	for (uint32 i = 0; i < _symbols.size(); i++)
 		_symbols[i]->symbol = symbols ? *symbols++ : i;
-}
-
-uint32 Huffman::getSymbol(BitStream &bits) const {
-	uint32 code = 0;
-
-	for (uint32 i = 0; i < _codes.size(); i++) {
-		bits.addBit(code, i);
-
-		for (CodeList::const_iterator cCode = _codes[i].begin(); cCode != _codes[i].end(); ++cCode)
-			if (code == cCode->code)
-				return cCode->symbol;
-	}
-
-	error("Unknown Huffman code");
-	return 0;
 }
 
 } // End of namespace Common

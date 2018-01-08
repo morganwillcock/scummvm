@@ -8,20 +8,20 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef SCUMM_H
-#define SCUMM_H
+#ifndef SCUMM_SCUMM_H
+#define SCUMM_SCUMM_H
 
 #include "engines/engine.h"
 
@@ -172,7 +172,8 @@ enum {
 	DEBUG_SOUND	=	1 << 7,		// General Sound Debug
 	DEBUG_ACTORS	=	1 << 8,		// General Actor Debug
 	DEBUG_INSANE	=	1 << 9,		// Track INSANE
-	DEBUG_SMUSH	=	1 << 10		// Track SMUSH
+	DEBUG_SMUSH	=	1 << 10,		// Track SMUSH
+	DEBUG_MOONBASE_AI = 1 << 11		// Moonbase AI
 };
 
 struct VerbSlot;
@@ -256,6 +257,7 @@ enum ScummGameId {
 	GID_BASEBALL2003,
 	GID_BASKETBALL,
 	GID_MOONBASE,
+	GID_PJGAMES,
 	GID_HECUP		// CUP demos
 };
 
@@ -297,7 +299,14 @@ struct StringTab : StringSlot {
 	}
 };
 
+struct ScummEngine_v0_Delays {
+	bool _screenScroll;
+	uint _objectRedrawCount;
+	uint _objectStripRedrawCount;
+	uint _actorRedrawCount;
+	uint _actorLimbRedrawDrawCount;
 
+};
 
 enum WhereIsObject {
 	WIO_NOT_FOUND = -1,
@@ -586,7 +595,7 @@ protected:
 	bool _dumpScripts;
 	bool _hexdumpScripts;
 	bool _showStack;
-	uint16 _debugMode;
+	bool _debugMode;
 
 	// Save/Load class - some of this may be GUI
 	byte _saveLoadFlag, _saveLoadSlot;
@@ -641,7 +650,7 @@ protected:
 	byte _opcode;
 	byte _currentScript;
 	int _scummStackPos;
-	int _vmStack[150];
+	int _vmStack[256];
 
 	OpcodeEntry _opcodes[256];
 
@@ -653,7 +662,7 @@ protected:
 	int	getScriptSlot();
 
 	void startScene(int room, Actor *a, int b);
-	void startManiac();
+	bool startManiac();
 
 public:
 	void runScript(int script, bool freezeResistant, bool recursive, int *lvarptr, int cycle = 0);
@@ -670,6 +679,7 @@ protected:
 	virtual void checkAndRunSentenceScript();
 	void runExitScript();
 	void runEntryScript();
+	void runQuitScript();
 	void runAllScripts();
 	void freezeScripts(int scr);
 	void unfreezeScripts();
@@ -702,6 +712,7 @@ protected:
 	virtual int readVar(uint var);
 	virtual void writeVar(uint var, int value);
 
+protected:
 	void beginCutscene(int *args);
 	void endCutscene();
 	void abortCutscene();
@@ -1094,6 +1105,8 @@ public:
 	// Indy4 Amiga specific
 	byte *_verbPalette;
 
+	ScummEngine_v0_Delays _V0Delay;
+
 protected:
 	int _shadowPaletteSize;
 	byte _currentPalette[3 * 256];
@@ -1128,6 +1141,8 @@ public:
 
 	byte getNumBoxes();
 	byte *getBoxMatrixBaseAddr();
+	byte *getBoxConnectionBase(int box);
+
 	int getNextBox(byte from, byte to);
 
 	void setBoxFlags(int box, int val);
@@ -1180,6 +1195,7 @@ protected:
 	byte _charsetBuffer[512];
 
 	bool _keepText;
+	byte _msgCount;
 
 	int _nextLeft, _nextTop;
 
@@ -1360,6 +1376,8 @@ public:
 
 	byte VAR_SCRIPT_CYCLE;			// Used in runScript()/runObjectScript()
 	byte VAR_NUM_SCRIPT_CYCLES;		// Used in runAllScripts()
+
+	byte VAR_QUIT_SCRIPT;			// Used in confirmExitDialog()
 
 	// Exists both in V7 and in V72HE:
 	byte VAR_NUM_GLOBAL_OBJS;

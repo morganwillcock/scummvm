@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -35,10 +35,7 @@
 
 namespace Sword25 {
 
-SWImage::SWImage(const Common::String &filename, bool &result) :
-	_imageDataPtr(0),
-	_width(0),
-	_height(0) {
+SWImage::SWImage(const Common::String &filename, bool &result) : _image() {
 	result = false;
 
 	PackageManager *pPackage = Kernel::getInstance()->getPackage();
@@ -54,9 +51,7 @@ SWImage::SWImage(const Common::String &filename, bool &result) :
 	}
 
 	// Uncompress the image
-	int pitch;
-	byte *pUncompressedData;
-	if (!ImgLoader::decodePNGImage(pFileData, fileSize, pUncompressedData, _width, _height, pitch)) {
+	if (!ImgLoader::decodePNGImage(pFileData, fileSize, &_image)) {
 		error("Could not decode image.");
 		return;
 	}
@@ -64,14 +59,12 @@ SWImage::SWImage(const Common::String &filename, bool &result) :
 	// Cleanup FileData
 	delete[] pFileData;
 
-	_imageDataPtr = (uint *)pUncompressedData;
-
 	result = true;
 	return;
 }
 
 SWImage::~SWImage() {
-	delete[] _imageDataPtr;
+	_image.free();
 }
 
 
@@ -96,10 +89,10 @@ bool SWImage::setContent(const byte *pixeldata, uint size, uint offset, uint str
 }
 
 uint SWImage::getPixel(int x, int y) {
-	assert(x >= 0 && x < _width);
-	assert(y >= 0 && y < _height);
+	assert(x >= 0 && x < _image.w);
+	assert(y >= 0 && y < _image.h);
 
-	return _imageDataPtr[_width * y + x];
+	return *((const uint32 *)_image.getBasePtr(0, 0));
 }
 
 } // End of namespace Sword25

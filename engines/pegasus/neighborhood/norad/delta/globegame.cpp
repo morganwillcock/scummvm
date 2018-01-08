@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -42,6 +42,9 @@ GlobeTracker::GlobeTracker(Movie *globeMovie, Picture *leftHighlight, Picture *r
 	_rightHighlight = rightHighlight;
 	_upHighlight = upHighlight;
 	_downHighlight = downHighlight;
+	_trackSpot = nullptr;
+	_trackTime = -1;
+	_trackDirection = kTrackDown;
 }
 
 void GlobeTracker::setTrackParameters(const Hotspot *trackSpot, GlobeTrackDirection direction) {
@@ -394,20 +397,22 @@ static const NotificationFlags kGlobeNotificationFlags = kGlobeSplash1Finished |
 													kGlobeTimerExpired |
 													kMaxDeactivatedFinished;
 
-static const int16 kSplash1End = 4;
-static const int16 kSplash2End = 5;
-static const int16 kSplash3Start = 8;
-static const int16 kSplash3Stop = 9;
-static const int16 kSplash4Start = 9;
-static const int16 kSplash4Stop = 10;
-static const int16 kNewLaunchSiloTime = 10;
-static const int16 kSiloDeactivatedTime = 11;
-static const int16 kMissileLaunchedTime = 12;
-static const int16 kMaxDeactivatedStart = 13;
-static const int16 kMaxDeactivatedStop = 23;
+enum {
+	kSplash1End = 4,
+	kSplash2End = 5,
+	kSplash3Start = 8,
+	kSplash3Stop = 9,
+	kSplash4Start = 9,
+	kSplash4Stop = 10,
+	kNewLaunchSiloTime = 10,
+	kSiloDeactivatedTime = 11,
+	kMissileLaunchedTime = 12,
+	kMaxDeactivatedStart = 13,
+	kMaxDeactivatedStop = 23,
 
-static const int16 kGamePlaying = 1;
-static const int16 kGameOver = 2;
+	kGamePlaying = 1,
+	kGameOver = 2
+};
 
 enum {
 	kGameIntro,
@@ -453,8 +458,13 @@ GlobeGame::GlobeGame(Neighborhood *handler) : GameInteraction(kNoradGlobeGameInt
 	_neighborhoodNotification = handler->getNeighborhoodNotification();
 }
 
+void GlobeGame::setSoundFXLevel(const uint16 fxLevel) {
+	_monitorMovie.setVolume(fxLevel);
+}
+
 void GlobeGame::openInteraction() {
 	_monitorMovie.initFromMovieFile("Images/Norad Delta/N79 Left Monitor");
+	_monitorMovie.setVolume(((PegasusEngine *)g_engine)->getSoundFXLevel());
 	_monitorMovie.moveElementTo(kGlobeMonitorLeft, kGlobeMonitorTop);
 	_monitorMovie.setDisplayOrder(kGlobeMonitorLayer);
 	_monitorMovie.startDisplaying();

@@ -8,25 +8,22 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef TSAGE_H
-#define TSAGE_H
+#ifndef TSAGE_TSAGE_H
+#define TSAGE_TSAGE_H
 
 #include "engines/engine.h"
-#include "common/rect.h"
-#include "audio/mixer.h"
-#include "common/file.h"
 #include "gui/debugger.h"
 
 #include "tsage/core.h"
@@ -42,7 +39,8 @@ namespace TsAGE {
 enum {
 	GType_Ringworld = 0,
 	GType_BlueForce = 1,
-	GType_Ringworld2 = 2
+	GType_Ringworld2 = 2,
+	GType_Sherlock1 = 5
 };
 
 enum {
@@ -60,12 +58,6 @@ enum {
 };
 
 struct tSageGameDescription;
-
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 200
-#define SCREEN_CENTER_X 160
-#define SCREEN_CENTER_Y 100
-#define UI_INTERFACE_Y 168
 
 class TSageEngine : public Engine {
 private:

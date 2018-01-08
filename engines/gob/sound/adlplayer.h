@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -36,7 +36,7 @@ namespace Gob {
 /** A player for Coktel Vision's ADL music format. */
 class ADLPlayer : public AdLib {
 public:
-	ADLPlayer(Audio::Mixer &mixer);
+	ADLPlayer();
 	~ADLPlayer();
 
 	bool load(Common::SeekableReadStream &adl);
@@ -76,8 +76,6 @@ private:
 	bool readHeader  (Common::SeekableReadStream &adl, int &timbreCount);
 	bool readTimbres (Common::SeekableReadStream &adl, int  timbreCount);
 	bool readSongData(Common::SeekableReadStream &adl);
-
-	uint32 getSampleDelay(uint16 delay) const;
 };
 
 } // End of namespace Gob

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -43,6 +43,7 @@
 
 namespace Common {
 struct Rect;
+class MemoryReadWriteStream;
 class SeekableReadStream;
 }
 namespace Audio {
@@ -53,9 +54,11 @@ namespace Graphics {
 struct PixelFormat;
 }
 
-namespace Video {
-
+namespace Image {
 class Codec;
+}
+
+namespace Video {
 
 /**
  * Decoder for Coktel videos.
@@ -501,6 +504,17 @@ private:
 	AudioFormat _audioFormat;
 	bool   _autoStartSound;
 
+	/**
+	 * Old stereo format packs a DPCM stream into audio packets without ensuring
+	 * that each packet contains an even amount of samples. In order for the
+	 * stream to play back correctly, all audio data needs to be pushed into a
+	 * single data buffer and read from there.
+	 *
+	 * This buffer is owned by _audioStream and will be disposed when
+	 * _audioStream is disposed.
+	 */
+	Common::MemoryReadWriteStream *_oldStereoBuffer;
+
 	// Video properties
 	bool   _hasVideo;
 	uint32 _videoCodec;
@@ -516,7 +530,7 @@ private:
 	Graphics::Surface _8bppSurface[3]; ///< Fake 8bpp surfaces over the video buffers.
 
 	bool _externalCodec;
-	Codec *_codec;
+	Image::Codec *_codec;
 
 	int32 _subtitle;
 
@@ -543,6 +557,7 @@ private:
 	void emptySoundSlice  (uint32 size);
 	void filledSoundSlice (uint32 size);
 	void filledSoundSlices(uint32 size, uint32 mask);
+	void createAudioStream();
 
 	uint8 evaluateMask(uint32 mask, bool *fillInfo, uint8 &max);
 
@@ -565,6 +580,8 @@ public:
 
 	bool loadStream(Common::SeekableReadStream *stream);
 	void close();
+
+	void setSurfaceMemory(void *mem, uint16 width, uint16 height, uint8 bpp);
 
 private:
 	class VMDVideoTrack : public FixedRateVideoTrack {
@@ -590,8 +607,6 @@ private:
 	class VMDAudioTrack : public AudioTrack {
 	public:
 		VMDAudioTrack(VMDDecoder *decoder);
-
-		Audio::Mixer::SoundType getSoundType() const;
 
 	protected:
 		virtual Audio::AudioStream *getAudioStream() const;

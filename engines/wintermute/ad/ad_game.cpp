@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -2261,7 +2261,7 @@ bool AdGame::onMouseRightUp() {
 bool AdGame::displayDebugInfo() {
 	char str[100];
 	if (_gameRef->_debugDebugMode) {
-		sprintf(str, "Mouse: %d, %d (scene: %d, %d)", _mousePos.x, _mousePos.y, _mousePos.x + _scene->getOffsetLeft(), _mousePos.y + _scene->getOffsetTop());
+		sprintf(str, "Mouse: %d, %d (scene: %d, %d)", _mousePos.x, _mousePos.y, _mousePos.x + (_scene ? _scene->getOffsetLeft() : 0), _mousePos.y + (_scene ? _scene->getOffsetTop() : 0));
 		_systemFont->drawText((byte *)str, 0, 90, _renderer->getWidth(), TAL_RIGHT);
 
 		sprintf(str, "Scene: %s (prev: %s)", (_scene && _scene->getName()) ? _scene->getName() : "???", _prevSceneName ? _prevSceneName : "???");
@@ -2280,4 +2280,7 @@ bool AdGame::onScriptShutdown(ScScript *script) {
 	return STATUS_OK;
 }
 
+Common::String AdGame::debuggerToString() const {
+	return Common::String::format("%p: Game \"%s\"", (const void *)this, getName());
+}
 } // End of namespace Wintermute

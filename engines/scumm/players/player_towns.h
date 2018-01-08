@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -104,8 +104,6 @@ public:
 	void saveLoadWithSerializer(Serializer *ser);
 	void restoreAfterLoad();
 
-	TownsEuphonyDriver *driver() { return _driver; }
-
 private:
 	void restartLoopingSounds();
 	void startSoundEx(int sound, int velo, int pan, int note);
@@ -137,7 +135,7 @@ private:
 	uint8 _cdaCurrentSoundTemp;
 	uint8 _cdaNumLoopsTemp;
 
-	TownsEuphonyDriver *_driver;
+	EuphonyPlayer *_player;
 };
 
 class Player_Towns_v2 : public Player_Towns {

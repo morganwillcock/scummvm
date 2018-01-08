@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,7 +21,6 @@
  */
 
 #include "tsage/blue_force/blueforce_scenes5.h"
-#include "tsage/blue_force/blueforce_dialogs.h"
 #include "tsage/scenes.h"
 #include "tsage/tsage.h"
 #include "tsage/staticres.h"
@@ -1623,7 +1622,7 @@ void Scene570::PasswordEntry::process(Event &event) {
 
 			checkPassword();
 			remove();
-		} else if ((key >= 32) || (key <= 126)) {
+		} else if ((key >= 32) && (key <= 126)) {
 			// Valid character pressed
 			if (_entryBuffer.size() < 10)
 				_entryBuffer += (char)key;
@@ -2123,7 +2122,7 @@ void Scene570::signal() {
 		_object3.setVisage(572);
 		_object3.setStrip(4);
 		_object3.setFrame(1);
-		// Deliberate fall-through
+		// fall through
 	case 5702:
 	case 5703:
 		_object3.fixPriority(1);

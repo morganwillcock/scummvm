@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef GUI_WIDGETS_LIST_H
@@ -88,6 +89,7 @@ public:
 	ListWidget(Dialog *boss, int x, int y, int w, int h, const char *tooltip = 0, uint32 cmd = 0);
 	virtual ~ListWidget();
 
+	virtual bool containsWidget(Widget *) const;
 	virtual Widget *findWidget(int x, int y);
 
 	void setList(const StringArray &list, const ColorList *colors = 0);

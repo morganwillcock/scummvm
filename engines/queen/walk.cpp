@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -130,7 +130,7 @@ void Walk::animateJoe() {
 			_vm->logic()->joeScale(pbs->scale);
 			pbs->scaleWalkSpeed(6);
 			_vm->update(true);
-			if (_vm->input()->cutawayQuit() || _vm->logic()->joeWalk() == JWM_EXECUTE) {
+			if (_vm->input()->cutawayQuit() || _vm->logic()->joeWalk() == JWM_EXECUTE || _vm->shouldQuit()) {
 				stopJoe();
 				break;
 			}
@@ -249,7 +249,7 @@ void Walk::animatePerson(const MovePersonData *mpd, uint16 image, uint16 bobNum,
 			_vm->update();
 			pbs->scale = pwd->area->calcScale(pbs->y);
 			pbs->scaleWalkSpeed(mpd->moveSpeed);
-			if (_vm->input()->cutawayQuit()) {
+			if (_vm->input()->cutawayQuit() || _vm->shouldQuit()) {
 				stopPerson(bobNum);
 				break;
 			}

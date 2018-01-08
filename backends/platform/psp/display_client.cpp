@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -204,7 +204,7 @@ void Palette::deallocate() {
 
 // Copy some of the palette to an array of colors
 //
-void Palette::getPartial(byte *colors, uint start, uint num) {
+void Palette::getPartial(byte *colors, uint start, uint num) const {
 	DEBUG_ENTER_FUNC();
 
 	assert(_values);
@@ -286,13 +286,13 @@ void Palette::print(uint32 numToPrint /* = 0 */) {
 	}
 }
 
-uint32 Palette::getRawColorAt(uint32 position) {
+uint32 Palette::getRawColorAt(uint32 position) const {
 	byte *pcolor = &_values[_pixelFormat.pixelsToBytes(position)];
 	uint32 color = _pixelFormat.getColorValueAt(pcolor);
 	return color;
 }
 
-uint32 Palette::getRGBAColorAt(uint32 position) {
+uint32 Palette::getRGBAColorAt(uint32 position) const {
 	uint32 color = getRawColorAt(position);
 	uint32 r, g, b, a;
 	_pixelFormat.colorToRgba(color, r, g, b, a);

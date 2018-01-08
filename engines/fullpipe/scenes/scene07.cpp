@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -66,7 +66,7 @@ void sceneHandler07_openLuke() {
 	} else {
 		StaticANIObject *ani = g_fp->_currentScene->getStaticANIObject1ById(ANI_CORNERSITTER, -1);
 
-		g_vars->scene07_lukeAnim = g_fp->_behaviorManager->getBehaviorEntryInfoByMessageQueueDataId(ani, ST_CST_HANDLELESS, QU_CST_CLOSELUKE);
+		g_vars->scene07_lukeAnim = g_fp->_behaviorManager->getBehaviorMoveByMessageQueueDataId(ani, ST_CST_HANDLELESS, QU_CST_CLOSELUKE);
 
 		g_vars->scene07_lukeAnim->_percent = g_vars->scene07_lukePercent;
 	}
@@ -78,7 +78,7 @@ void sceneHandler07_closeLuke() {
 	if (!g_vars->scene07_lukeAnim) {
 		StaticANIObject *ani = g_fp->_currentScene->getStaticANIObject1ById(ANI_CORNERSITTER, -1);
 
-		g_vars->scene07_lukeAnim = g_fp->_behaviorManager->getBehaviorEntryInfoByMessageQueueDataId(ani, ST_CST_HANDLELESS, QU_CST_CLOSELUKE);
+		g_vars->scene07_lukeAnim = g_fp->_behaviorManager->getBehaviorMoveByMessageQueueDataId(ani, ST_CST_HANDLELESS, QU_CST_CLOSELUKE);
 	}
 
 	g_vars->scene07_lukePercent = g_vars->scene07_lukeAnim->_percent;
@@ -133,7 +133,7 @@ int sceneHandler07(ExCommand *ex) {
 
 		break;
 
-    case MSG_SC7_CLOSELUKE:
+	case MSG_SC7_CLOSELUKE:
 		sceneHandler07_closeLuke();
 		break;
 

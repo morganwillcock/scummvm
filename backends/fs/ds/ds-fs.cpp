@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -211,6 +211,11 @@ Common::WriteStream *DSFileSystemNode::createWriteStream() {
 	return Common::wrapBufferedWriteStream(stream, WRITE_BUFFER_SIZE);
 }
 
+bool DSFileSystemNode::create(bool isDirectoryFlag) {
+	error("Not supported");
+	return false;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // GBAMPFileSystemNode - File system using GBA Movie Player and CF card //
 //////////////////////////////////////////////////////////////////////////
@@ -266,7 +271,7 @@ GBAMPFileSystemNode::GBAMPFileSystemNode(const Common::String& path) {
 	_path = path;
 }
 
-GBAMPFileSystemNode::GBAMPFileSystemNode(const Common::String& path, bool isDir) {
+GBAMPFileSystemNode::GBAMPFileSystemNode(const Common::String& path, bool isDirectoryFlag) {
 	//consolePrintf("'%s'",path.c_str());
 
 	int lastSlash = 3;
@@ -279,7 +284,7 @@ GBAMPFileSystemNode::GBAMPFileSystemNode(const Common::String& path, bool isDir)
 	_displayName = Common::String(path.c_str() + lastSlash + 1);
 	_path = path;
 	_isValid = true;
-	_isDirectory = isDir;
+	_isDirectory = isDirectoryFlag;
 }
 
 
@@ -391,6 +396,11 @@ Common::SeekableReadStream *GBAMPFileSystemNode::createReadStream() {
 Common::WriteStream *GBAMPFileSystemNode::createWriteStream() {
 	Common::WriteStream *stream = DSFileStream::makeFromPath(getPath(), true);
 	return Common::wrapBufferedWriteStream(stream, WRITE_BUFFER_SIZE);
+}
+
+bool GBAMPFileSystemNode::create(bool isDirectoryFlag) {
+	error("Not supported");
+	return false;
 }
 
 

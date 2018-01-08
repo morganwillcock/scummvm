@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -171,7 +171,8 @@ static bool grabScreen565(Graphics::Surface *surf) {
 	if (!screen)
 		return false;
 
-	assert(screen->format.bytesPerPixel == 1 || screen->format.bytesPerPixel == 2);
+	assert(screen->format.bytesPerPixel == 1 || screen->format.bytesPerPixel == 2
+	       || screen->format.bytesPerPixel == 4);
 	assert(screen->getPixels() != 0);
 
 	Graphics::PixelFormat screenFormat = g_system->getScreenFormat();
@@ -196,6 +197,9 @@ static bool grabScreen565(Graphics::Surface *surf) {
 				b = palette[pixel * 3 + 2];
 			} else if (screenFormat.bytesPerPixel == 2) {
 				uint16 col = READ_UINT16(screen->getBasePtr(x, y));
+				screenFormat.colorToRGB(col, r, g, b);
+			} else if (screenFormat.bytesPerPixel == 4) {
+				uint32 col = READ_UINT32(screen->getBasePtr(x, y));
 				screenFormat.colorToRGB(col, r, g, b);
 			}
 

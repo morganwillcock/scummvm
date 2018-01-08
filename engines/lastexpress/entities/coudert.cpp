@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1739,7 +1739,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function14(kEntityVerges);
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 2:
 			if (ENTITY_PARAM(0, 5)) {
@@ -1747,7 +1747,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function14(kEntityMertens);
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 3:
 			if (ENTITY_PARAM(0, 4)) {
@@ -1755,7 +1755,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function14(kEntityMmeBoutarel);
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 4:
 			ENTITY_PARAM(2, 6) = 0;
@@ -1776,7 +1776,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function37();
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 7:
 			if (ENTITY_PARAM(2, 2)) {
@@ -1784,7 +1784,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function39();
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 8:
 			if (ENTITY_PARAM(1, 2)) {
@@ -1792,7 +1792,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function55();
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 9:
 			if (ENTITY_PARAM(1, 7)) {
@@ -1800,7 +1800,7 @@ IMPLEMENT_FUNCTION(33, Coudert, function33)
 				setup_function34(false);
 				break;
 			}
-			// Fallback to next case
+			// fall through
 
 		case 10:
 			ENTITY_PARAM(2, 6) = 0;
@@ -3022,7 +3022,7 @@ IMPLEMENT_FUNCTION(46, Coudert, function46)
 		case 6:
 			getEntities()->drawSequenceLeft(kEntityCoudert, "629Cf");
 			getEntities()->enterCompartment(kEntityCoudert, kObjectCompartmentF, true);
-			// Fallback to next case
+			// fall through
 
 		case 7:
 			if (getSoundQueue()->isBuffered(kEntityCoudert)) {
@@ -3091,7 +3091,7 @@ IMPLEMENT_FUNCTION_I(47, Coudert, function47, bool)
 		case 3:
 			getEntities()->drawSequenceLeft(kEntityCoudert, "627Wf");
 			getEntities()->enterCompartment(kEntityCoudert, kObjectCompartmentF);
-			// Fallback to next case
+			// fall through
 
 		case 4:
 			if (getSoundQueue()->isBuffered(kEntityCoudert)) {

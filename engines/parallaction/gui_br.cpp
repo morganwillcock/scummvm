@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -43,7 +43,8 @@ protected:
 	int _fadeSteps;
 
 public:
-	SplashInputState_BR(Parallaction *vm, const Common::String &name, MenuInputHelper *helper) : MenuInputState(name, helper), _vm(vm)  {
+	SplashInputState_BR(Parallaction *vm, const Common::String &name, MenuInputHelper *helper) : MenuInputState(name, helper), _vm(vm),
+			_timeOut(0), _startTime(0), _fadeSteps(0) {
 	}
 
 	virtual MenuInputState* run() {
@@ -382,6 +383,9 @@ public:
 		_menuObj->getRect(0, _menuRect);
 		_cellW = _menuRect.width() / 3;
 		_cellH = _menuRect.height() / 2;
+
+		_menuObjId = _mscMenuObjId = _sfxMenuObjId = 0;
+		_sfxStatus = _mscStatus = 0;
 	}
 
 	~IngameMenuInputState_BR() {

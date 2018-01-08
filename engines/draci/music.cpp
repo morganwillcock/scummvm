@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -22,10 +22,8 @@
 
 // MIDI and digital music class
 
-#include "audio/audiostream.h"
 #include "audio/mididrv.h"
 #include "audio/midiparser.h"
-#include "common/config-manager.h"
 #include "common/debug.h"
 #include "common/file.h"
 
@@ -55,7 +53,7 @@ MusicPlayer::MusicPlayer(const char *pathMask) : _pathMask(pathMask), _isGM(fals
 
 void MusicPlayer::sendToChannel(byte channel, uint32 b) {
 	if (!_channelsTable[channel]) {
-		_channelsTable[channel] = (channel == 9) ? _driver->getPercussionChannel() : _driver->allocateChannel();
+		_channelsTable[channel] = (channel == 15) ? _driver->getPercussionChannel() : _driver->allocateChannel();
 		// If a new channel is allocated during the playback, make sure
 		// its volume is correctly initialized.
 		if (_channelsTable[channel])

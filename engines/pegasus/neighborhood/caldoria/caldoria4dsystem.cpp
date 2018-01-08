@@ -11,12 +11,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -30,34 +30,36 @@
 
 namespace Pegasus {
 
-static const TimeValue kSwitchableSlop = 3 * kCaldoriaFrameDuration;
-// Two seconds - some slop
-static const TimeValue kSwitchableDuration = kCaldoriaMovieScale * 2 - kSwitchableSlop;
-// Twelve frames + some slop
-static const TimeValue kNonswitchableDuration = kCaldoriaFrameDuration * 12 + kSwitchableSlop;
+enum {
+	kSwitchableSlop = 3 * kCaldoriaFrameDuration,
+	// Two seconds - some slop
+	kSwitchableDuration = kCaldoriaMovieScale * 2 - kSwitchableSlop,
+	// Twelve frames + some slop
+	kNonswitchableDuration = kCaldoriaFrameDuration * 12 + kSwitchableSlop,
 
-static const TimeValue kSwitchable1Start = 0;
-static const TimeValue kSwitchable1Stop = kSwitchable1Start + kSwitchableDuration;
+	kSwitchable1Start = 0,
+	kSwitchable1Stop = kSwitchable1Start + kSwitchableDuration,
 
-static const TimeValue kSwitchable2Start = kSwitchable1Stop + kNonswitchableDuration;
-static const TimeValue kSwitchable2Stop = kSwitchable2Start + kSwitchableDuration;
+	kSwitchable2Start = kSwitchable1Stop + kNonswitchableDuration,
+	kSwitchable2Stop = kSwitchable2Start + kSwitchableDuration,
 
-static const TimeValue kSwitchable3Start = kSwitchable2Stop + kNonswitchableDuration;
-static const TimeValue kSwitchable3Stop = kSwitchable3Start + kSwitchableDuration;
+	kSwitchable3Start = kSwitchable2Stop + kNonswitchableDuration,
+	kSwitchable3Stop = kSwitchable3Start + kSwitchableDuration,
 
-static const NotificationFlags kVidPhoneDoneFlag = 1;
+	kVidPhoneDoneFlag = 1,
 
-static const TimeValue kRockMusicLoopIn = 0;
-static const TimeValue kRockMusicLoopOut = 2088;
+	kRockMusicLoopIn = 0,
+	kRockMusicLoopOut = 2088,
 
-static const TimeValue kOrchestralMusicLoopIn = 2088;
-static const TimeValue kOrchestralMusicLoopOut = 4985;
+	kOrchestralMusicLoopIn = 2088,
+	kOrchestralMusicLoopOut = 4985,
 
-static const TimeValue kRhythmsMusicLoopIn = 4985;
-static const TimeValue kRhythmsMusicLoopOut = 6824;
+	kRhythmsMusicLoopIn = 4985,
+	kRhythmsMusicLoopOut = 6824,
 
-static const TimeValue kAcousticMusicLoopIn = 6824;
-static const TimeValue kAcousticMusicLoopOut = 9387;
+	kAcousticMusicLoopIn = 6824,
+	kAcousticMusicLoopOut = 9387
+};
 
 enum {
 	k4DVideoMenu,
@@ -102,6 +104,14 @@ static const ExtraID s_shutDownExtras[3][3] = {
 
 Caldoria4DSystem::Caldoria4DSystem(Neighborhood *owner) : GameInteraction(kCaldoria4DInteractionID, owner),
 		_4DSpritesMovie(kCaldoria4DSpritesID) {
+	_4DSpritesScale = 0;
+	_whichMenu = k4DVideoMenu;
+	_videoChoice = k4DIslandChoice;
+	_audioChoice = k4DRockChoice;
+	_neighborhoodNotification = nullptr;
+	_loopStart = 0;
+	_clickedHotspotID = kNoHotSpotID;
+
 	g_AIArea->lockAIOut();
 }
 

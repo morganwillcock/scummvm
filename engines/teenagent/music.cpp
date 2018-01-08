@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -36,7 +36,7 @@ static const uint32 noteToPeriod[3][12] = {
 	{214, 201, 189, 179, 170, 160, 151, 143, 135, 127, 120, 113}
 };
 
-MusicPlayer::MusicPlayer(TeenAgentEngine *vm) : Paula(false, 44100, 5000), _vm(vm), _id(0) {
+MusicPlayer::MusicPlayer(TeenAgentEngine *vm) : Paula(false, 44100, 5000), _vm(vm), _id(0), _currRow(0) {
 }
 
 MusicPlayer::~MusicPlayer() {
@@ -55,7 +55,7 @@ bool MusicPlayer::load(int id) {
 
 	Common::StackLock lock(_mutex);
 	// Load the samples
-	sampleCount = stream->readByte();
+	byte sampleCount = stream->readByte();
 
 	debugC(0, kDebugMusic, "sampleCount = %d", sampleCount);
 

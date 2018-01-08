@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,7 @@
 #include "common/noncopyable.h"
 #include "common/keyboard.h"
 
+#include "graphics/mode.h"
 #include "graphics/palette.h"
 
 /**
@@ -37,29 +38,37 @@ class GraphicsManager : public PaletteManager {
 public:
 	virtual ~GraphicsManager() {}
 
-	virtual bool hasFeature(OSystem::Feature f) = 0;
+	virtual bool hasFeature(OSystem::Feature f) const = 0;
 	virtual void setFeatureState(OSystem::Feature f, bool enable) = 0;
-	virtual bool getFeatureState(OSystem::Feature f) = 0;
+	virtual bool getFeatureState(OSystem::Feature f) const = 0;
 
 	virtual const OSystem::GraphicsMode *getSupportedGraphicsModes() const = 0;
 	virtual int getDefaultGraphicsMode() const = 0;
 	virtual bool setGraphicsMode(int mode) = 0;
 	virtual void resetGraphicsScale() = 0;
 	virtual int getGraphicsMode() const = 0;
+	virtual const OSystem::GraphicsMode *getSupportedShaders() const {
+		static const OSystem::GraphicsMode no_shader[2] = {{"NONE", "Normal (no shader)", 0}, {0, 0, 0}};
+		return no_shader;
+	};
+	virtual bool setShader(int id) { return false; }
+	virtual int getShader() const { return 0; }
+
 #ifdef USE_RGB_COLOR
 	virtual Graphics::PixelFormat getScreenFormat() const = 0;
 	virtual Common::List<Graphics::PixelFormat> getSupportedFormats() const = 0;
 #endif
 	virtual void initSize(uint width, uint height, const Graphics::PixelFormat *format = NULL) = 0;
+	virtual void initSizeHint(const Graphics::ModeList &modes) {}
 	virtual int getScreenChangeID() const = 0;
 
 	virtual void beginGFXTransaction() = 0;
 	virtual OSystem::TransactionError endGFXTransaction() = 0;
 
-	virtual int16 getHeight() = 0;
-	virtual int16 getWidth() = 0;
+	virtual int16 getHeight() const = 0;
+	virtual int16 getWidth() const = 0;
 	virtual void setPalette(const byte *colors, uint start, uint num) = 0;
-	virtual void grabPalette(byte *colors, uint start, uint num) = 0;
+	virtual void grabPalette(byte *colors, uint start, uint num) const = 0;
 	virtual void copyRectToScreen(const void *buf, int pitch, int x, int y, int w, int h) = 0;
 	virtual Graphics::Surface *lockScreen() = 0;
 	virtual void unlockScreen() = 0;
@@ -73,10 +82,10 @@ public:
 	virtual void hideOverlay() = 0;
 	virtual Graphics::PixelFormat getOverlayFormat() const = 0;
 	virtual void clearOverlay() = 0;
-	virtual void grabOverlay(void *buf, int pitch) = 0;
-	virtual void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h)= 0;
-	virtual int16 getOverlayHeight() = 0;
-	virtual int16 getOverlayWidth() = 0;
+	virtual void grabOverlay(void *buf, int pitch) const = 0;
+	virtual void copyRectToOverlay(const void *buf, int pitch, int x, int y, int w, int h) = 0;
+	virtual int16 getOverlayHeight() const = 0;
+	virtual int16 getOverlayWidth() const = 0;
 
 	virtual bool showMouse(bool visible) = 0;
 	virtual void warpMouse(int x, int y) = 0;
@@ -84,10 +93,12 @@ public:
 	virtual void setCursorPalette(const byte *colors, uint start, uint num) = 0;
 
 	virtual void displayMessageOnOSD(const char *msg) {}
+	virtual void displayActivityIconOnOSD(const Graphics::Surface *icon) {}
+
 
 	// Graphics::PaletteManager interface
 	//virtual void setPalette(const byte *colors, uint start, uint num) = 0;
-	//virtual void grabPalette(byte *colors, uint start, uint num) = 0;
+	//virtual void grabPalette(byte *colors, uint start, uint num) const = 0;
 };
 
 #endif

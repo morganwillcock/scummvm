@@ -8,15 +8,16 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #define FORBIDDEN_SYMBOL_EXCEPTION_printf
@@ -351,7 +352,7 @@ void OSystem_Wii::setPalette(const byte *colors, uint start, uint num) {
 	}
 }
 
-void OSystem_Wii::grabPalette(byte *colors, uint start, uint num) {
+void OSystem_Wii::grabPalette(byte *colors, uint start, uint num) const {
 #ifdef USE_RGB_COLOR
 	assert(_pfGame.bytesPerPixel == 1);
 #endif
@@ -712,12 +713,12 @@ void OSystem_Wii::setMouseCursor(const void *buf, uint w, uint h, int hotspotX,
 			}
 
 			// nasty, shouldn't the frontend set the alpha channel?
-			u16 *s = (u16 *) buf;
+			const u16 *s = (const u16 *) buf;
 			u16 *d = (u16 *) tmp;
 			for (u16 y = 0; y < h; ++y) {
 				for (u16 x = 0; x < w; ++x) {
-					if (*s++ != _mouseKeyColor)
-						*d++ |= 7 << 12;
+					if (*s++ == _mouseKeyColor)
+						*d++ &= ~(7 << 12);
 					else
 						d++;
 				}

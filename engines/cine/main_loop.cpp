@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -30,6 +30,8 @@
 #include "cine/various.h"
 #include "cine/bg_list.h"
 #include "cine/sound.h"
+
+#include "backends/audiocd/audiocd.h"
 
 namespace Cine {
 
@@ -169,7 +171,7 @@ static void processEvent(Common::Event &event) {
 				g_cine->getDebugger()->attach();
 				g_cine->getDebugger()->onFrame();
 			}
-			// No Break to allow fallthrough to process 'd' without CTRL
+			// fall through
 		default:
 			lastKeyStroke = event.kbd.keycode;
 			break;
@@ -219,6 +221,8 @@ void manageEvents() {
 
 	mouseData.left = mouseLeft;
 	mouseData.right = mouseRight;
+
+	g_system->getAudioCDManager()->update();
 }
 
 void getMouseData(uint16 param, uint16 *pButton, uint16 *pX, uint16 *pY) {
@@ -254,7 +258,7 @@ void purgeSeqList() {
 			it = g_cine->_seqList.erase(it);
 		} else {
 			// Let the element be and jump to the next element
-			it++;
+			++it;
 		}
 	}
 }

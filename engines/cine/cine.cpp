@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -22,10 +22,14 @@
 
 #include "common/config-manager.h"
 #include "common/debug-channels.h"
+#include "common/events.h"
 
 #include "engines/util.h"
 
 #include "graphics/cursorman.h"
+#include "graphics/palette.h"
+
+#include "image/iff.h"
 
 #include "cine/cine.h"
 #include "cine/bg_list.h"
@@ -45,16 +49,25 @@ CineEngine::CineEngine(OSystem *syst, const CINEGameDescription *gameDesc)
 	: Engine(syst),
 	_gameDescription(gameDesc),
 	_rnd("cine") {
-	// Setup mixer
-	syncSoundSettings();
-
 	DebugMan.addDebugChannel(kCineDebugScript,    "Script",    "Script debug level");
 	DebugMan.addDebugChannel(kCineDebugPart,      "Part",      "Part debug level");
 	DebugMan.addDebugChannel(kCineDebugSound,     "Sound",     "Sound debug level");
 	DebugMan.addDebugChannel(kCineDebugCollision, "Collision", "Collision debug level");
+
+	// Setup mixer
+	syncSoundSettings();
+
 	_console = new CineConsole(this);
 
 	g_cine = this;
+
+	for (int i = 0; i < NUM_FONT_CHARS; i++) {
+		_textHandler.fontParamTable[i].characterIdx = 0;
+		_textHandler.fontParamTable[i].characterWidth = 0;
+	}
+	_restartRequested = false;
+	_preLoad = false;
+	_timerDelayMultiplier = 12;
 }
 
 CineEngine::~CineEngine() {
@@ -81,8 +94,21 @@ void CineEngine::syncSoundSettings() {
 }
 
 Common::Error CineEngine::run() {
+	Graphics::ModeList modes;
+	modes.push_back(Graphics::Mode(320, 200));
+	if (g_cine->getGameType() == GType_FW && (g_cine->getFeatures() & GF_CD)) {
+		modes.push_back(Graphics::Mode(640, 480));
+		initGraphicsModes(modes);
+		showSplashScreen();
+	} else {
+		initGraphicsModes(modes);
+	}
+
 	// Initialize backend
-	initGraphics(320, 200, false);
+	initGraphics(320, 200);
+
+	if (g_cine->getGameType() == GType_FW && (g_cine->getFeatures() & GF_CD))
+		checkCD();
 
 	if (getPlatform() == Common::kPlatformDOS) {
 		g_sound = new PCSound(_mixer, this);
@@ -226,6 +252,47 @@ void CineEngine::initialize() {
 		strcpy(currentPrcName, BOOT_PRC_NAME);
 		setMouseCursor(MOUSE_CURSOR_NORMAL);
 	}
+}
+
+void CineEngine::showSplashScreen() {
+	Common::File file;
+	if (!file.open("sony.lbm"))
+		return;
+
+	Image::IFFDecoder decoder;
+	if (!decoder.loadStream(file))
+		return;
+
+	const Graphics::Surface *surface = decoder.getSurface();
+	if (surface->w == 640 && surface->h == 480) {
+		initGraphics(640, 480);
+
+		const byte *palette = decoder.getPalette();
+		int paletteColorCount = decoder.getPaletteColorCount();
+		g_system->getPaletteManager()->setPalette(palette, 0, paletteColorCount);
+
+		g_system->copyRectToScreen(surface->getPixels(), 640, 0, 0, 640, 480);
+		g_system->updateScreen();
+
+		Common::EventManager *eventMan = g_system->getEventManager();
+
+		bool done = false;
+		uint32 now = g_system->getMillis();
+
+		while (!done && g_system->getMillis() - now < 2000) {
+			Common::Event event;
+			while (eventMan->pollEvent(event)) {
+				if (event.type == Common::EVENT_KEYDOWN && event.kbd.keycode == Common::KEYCODE_ESCAPE) {
+					done = true;
+					break;
+				}
+				if (shouldQuit())
+					done = true;
+			}
+		}
+	}
+
+	decoder.destroy();
 }
 
 } // End of namespace Cine

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -29,6 +29,7 @@
 
 #include "common/random.h"
 #include "common/savefile.h"
+#include "common/system.h"
 #include "graphics/thumbnail.h"
 
 namespace Avalanche {
@@ -46,17 +47,18 @@ AvalancheEngine::AvalancheEngine(OSystem *syst, const AvalancheGameDescription *
 	_clock = nullptr;
 	_graphics = nullptr;
 	_parser = nullptr;
-	_pingo = nullptr;
 	_dialogs = nullptr;
 	_background = nullptr;
 	_sequence = nullptr;
 	_timer = nullptr;
 	_animation = nullptr;
-	_menu = nullptr;
+	_dropdown = nullptr;
 	_closing = nullptr;
 	_sound = nullptr;
 	_nim = nullptr;
 	_ghostroom = nullptr;
+	_help = nullptr;
+	_highscore = nullptr;
 
 	_platform = gd->desc.platform;
 	initVariables();
@@ -70,17 +72,18 @@ AvalancheEngine::~AvalancheEngine() {
 	delete _parser;
 
 	delete _clock;
-	delete _pingo;
 	delete _dialogs;
 	delete _background;
 	delete _sequence;
 	delete _timer;
 	delete _animation;
-	delete _menu;
+	delete _dropdown;
 	delete _closing;
 	delete _sound;
 	delete _nim;
 	delete _ghostroom;
+	delete _help;
+	delete _highscore;
 
 	for (int i = 0; i < 31; i++) {
 		for (int j = 0; j < 2; j++) {
@@ -142,7 +145,7 @@ void AvalancheEngine::initVariables() {
 	_letMeOut = false;
 	_thinks = 2;
 	_thinkThing = true;
-	_seeScroll = false;
+	_animationsEnabled = true;
 	_currentMouse = 177;
 	_holdLeftMouse = false;
 
@@ -154,17 +157,18 @@ Common::ErrorCode AvalancheEngine::initialize() {
 	_parser = new Parser(this);
 
 	_clock = new Clock(this);
-	_pingo = new Pingo(this);
 	_dialogs = new Dialogs(this);
 	_background = new Background(this);
 	_sequence = new Sequence(this);
 	_timer = new Timer(this);
 	_animation = new Animation(this);
-	_menu = new Menu(this);
+	_dropdown = new DropDownMenu(this);
 	_closing = new Closing(this);
 	_sound = new SoundHandler(this);
 	_nim = new Nim(this);
 	_ghostroom = new GhostRoom(this);
+	_help = new Help(this);
+	_highscore = new HighScore(this);
 
 	_graphics->init();
 	_dialogs->init();
@@ -200,7 +204,7 @@ void AvalancheEngine::synchronize(Common::Serializer &sz) {
 	sz.syncAsByte(_carryNum);
 	for (int i = 0; i < kObjectNum; i++)
 		sz.syncAsByte(_objects[i]);
-	sz.syncAsSint16LE(_dnascore);
+	sz.syncAsSint16LE(_score);
 	sz.syncAsSint32LE(_money);
 	sz.syncAsByte(_room);
 	if (sz.isSaving())
@@ -276,9 +280,9 @@ void AvalancheEngine::synchronize(Common::Serializer &sz) {
 
 		if (!_favoriteSong.empty())
 			_favoriteSong.clear();
-		uint16 favourite_songSize = 0;
-		sz.syncAsUint16LE(favourite_songSize);
-		for (uint16 i = 0; i < favourite_songSize; i++) {
+		uint16 favoriteSongSize = 0;
+		sz.syncAsUint16LE(favoriteSongSize);
+		for (uint16 i = 0; i < favoriteSongSize; i++) {
 			sz.syncAsByte(actChr);
 			_favoriteSong += actChr;
 		}
@@ -336,8 +340,8 @@ void AvalancheEngine::synchronize(Common::Serializer &sz) {
 
 }
 
-bool AvalancheEngine::canSaveGameStateCurrently() { // TODO: Refine these!!!
-	return (!_seeScroll && _alive);
+bool AvalancheEngine::canSaveGameStateCurrently() {
+	return (_animationsEnabled && _alive);
 }
 
 Common::Error AvalancheEngine::saveGameState(int slot, const Common::String &desc) {
@@ -381,8 +385,8 @@ Common::String AvalancheEngine::getSaveFileName(const int slot) {
 	return Common::String::format("%s.%03d", _targetName.c_str(), slot);
 }
 
-bool AvalancheEngine::canLoadGameStateCurrently() { // TODO: Refine these!!!
-	return (!_seeScroll);
+bool AvalancheEngine::canLoadGameStateCurrently() {
+	return (_animationsEnabled);
 }
 
 Common::Error AvalancheEngine::loadGameState(int slot) {
@@ -432,7 +436,7 @@ bool AvalancheEngine::loadGame(const int16 slot) {
 
 	_isLoaded = true;
 
-	_seeScroll = true;  // This prevents display of the new sprites before the new picture is loaded.
+	_animationsEnabled = false;
 
 	if (_holdTheDawn) {
 		_holdTheDawn = false;
@@ -441,7 +445,7 @@ bool AvalancheEngine::loadGame(const int16 slot) {
 
 	_background->release();
 	minorRedraw();
-	_menu->setup();
+	_dropdown->setup();
 	setRoom(kPeopleAvalot, _room);
 	_alive = true;
 	refreshObjectList();

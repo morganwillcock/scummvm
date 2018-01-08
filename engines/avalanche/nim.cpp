@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,8 @@
 
 #include "avalanche/avalanche.h"
 #include "avalanche/nim.h"
+
+#include "common/system.h"
 
 namespace Avalanche {
 
@@ -77,7 +79,7 @@ void Nim::playNim() {
 
 	_vm->_dialogs->displayScrollChain('Q', 3);
 	_playedNim++;
-	
+
 	_vm->_graphics->saveScreen();
 	_vm->fadeOut();
 
@@ -87,7 +89,7 @@ void Nim::playNim() {
 	//CursorMan.showMouse(true);
 
 	do {
-		
+
 		startMove();
 		if (_dogfoodsTurn)
 			dogFood();
@@ -122,7 +124,7 @@ void Nim::playNim() {
 		_vm->refreshObjectList();
 		_vm->_wonNim = true;
 		_vm->_background->draw(-1, -1, 0); // Show the settle with no lute on it.
-		
+
 		// 7 points for winning!
 		_vm->incScore(7);
 	}
@@ -135,7 +137,7 @@ void Nim::playNim() {
 
 void Nim::chalk(int x, int y, Common::String text) {
 	const Color greys[] = { kColorBlack, kColorDarkgray, kColorLightgray, kColorWhite };
-	
+
 	for (int i = 0; i < 4; i++) {
 		_vm->_graphics->drawNormalText(text, _vm->_font, 8, x - i, y, greys[i]);
 		_vm->_graphics->refreshScreen();
@@ -152,14 +154,14 @@ void Nim::setup() {
 	_vm->fadeIn();
 	_vm->_graphics->nimLoad();
 
-	_vm->_graphics->drawFilledRectangle(Common::Rect(0, 0, 640, 200), kColorBlack);
+	_vm->_graphics->blackOutScreen();
 	// Upper left rectangle.
 	_vm->_graphics->drawRectangle(Common::Rect(10, 5, 381, 71), kColorRed);
 	_vm->_graphics->drawFilledRectangle(Common::Rect(11, 6, 380, 70), kColorBrown);
 	// Bottom right rectangle.
 	_vm->_graphics->drawRectangle(Common::Rect(394, 50, 635, 198), kColorRed);
 	_vm->_graphics->drawFilledRectangle(Common::Rect(395, 51, 634, 197), kColorBrown);
-		
+
 	_vm->_graphics->nimDrawLogo();
 	_vm->_graphics->nimDrawInitials();
 
@@ -167,7 +169,7 @@ void Nim::setup() {
 	_vm->_graphics->drawNormalText("Turn:", _vm->_font, 8, 420, 55, kColorYellow);
 	_vm->_graphics->drawNormalText("Player:", _vm->_font, 8, 490, 55, kColorYellow);
 	_vm->_graphics->drawNormalText("Move:", _vm->_font, 8, 570, 55, kColorYellow);
-	
+
 	chalk(27, 7, "Take pieces away with:");
 	chalk(77, 17, "1) the mouse (click leftmost)");
 	chalk(53, 27, "or 2) the keyboard:");
@@ -364,7 +366,7 @@ bool Nim::checkInput() {
 
 void Nim::takeSome() {
 	_number = 1;
-	
+
 	do {
 		byte sr;
 		do {
@@ -377,32 +379,32 @@ void Nim::takeSome() {
 				_number = 1;
 			}
 		} while (sr == 0);
-		
+
 		if (_number > sr)
 			_number = sr;
 
 		int x1 = 63 + (_stones[_row] - _number) * 64;
 		int y1 = 38 + 35 * (_row + 1);
-		int x2 = 54 + _stones[_row] * 64;
-		int y2 = 63 + 35 * (_row + 1);
+		int x2 = 55 + _stones[_row] * 64;
+		int y2 = 64 + 35 * (_row + 1);
 		_vm->_graphics->drawRectangle(Common::Rect(x1, y1, x2, y2), kColorBlue); // Draw the selection rectangle.
 		_vm->_graphics->refreshScreen();
 
 		bool confirm = false;
 		do {
 			confirm = checkInput();
-			
+
 			if (!confirm) {
 				_vm->_graphics->drawRectangle(Common::Rect(x1, y1, x2, y2), kColorBlack); // Erase the previous selection.
 				x1 = 63 + (_stones[_row] - _number) * 64;
 				y1 = 38 + 35 * (_row + 1);
-				x2 = 54 + _stones[_row] * 64;
-				y2 = 63 + 35 * (_row + 1);
+				x2 = 55 + _stones[_row] * 64;
+				y2 = 64 + 35 * (_row + 1);
 				_vm->_graphics->drawRectangle(Common::Rect(x1, y1, x2, y2), kColorBlue); // Draw the new one.
 				_vm->_graphics->refreshScreen();
 			}
 		} while (!confirm);
-		
+
 		return;
 
 	} while (true);
@@ -524,7 +526,7 @@ void Nim::dogFood() {
 		// 1) Look for 2 equal lines, then take the odd one out.
 		// 2) Look for A.P.s, and capitalise on them.
 		// 3) Go any old where.
-		const byte other[3][2] = { { 2, 3 }, { 1, 3 }, { 1, 2 } };
+		const byte other[3][2] = { { 1, 2 }, { 0, 2 }, { 0, 1 } };
 
 		for (int i = 0; i < 3; i++) { // Look for 2 equal lines.
 			if (_stones[other[i][0]] == _stones[other[i][1]]) {

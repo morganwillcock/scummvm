@@ -8,32 +8,27 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
 
-#ifndef DREAMWEB_H
-#define DREAMWEB_H
+#ifndef DREAMWEB_DREAMWEB_H
+#define DREAMWEB_DREAMWEB_H
 
 #include "common/error.h"
-#include "common/file.h"
 #include "common/keyboard.h"
 #include "common/random.h"
 #include "common/rect.h"
-#include "common/savefile.h"
 #include "common/scummsys.h"
 #include "common/system.h"
-
-#include "audio/audiostream.h"
-#include "audio/mixer.h"
 
 #include "engines/engine.h"
 
@@ -44,6 +39,10 @@
 #define SCUMMVM_HEADER MKTAG('S', 'C', 'V', 'M')
 #define SCUMMVM_BLOCK_MAGIC_SIZE 0x1234
 #define SAVEGAME_VERSION 1
+
+namespace Common {
+class File;
+}
 
 namespace DreamWeb {
 
@@ -415,7 +414,7 @@ public:
 	uint8 _saveLoadPage;
 	uint8 _currentSlot;
 	uint8 _cursorPos;
-	uint8 _colourPos;
+	uint8 _colorPos;
 	uint8 _fadeDirection;
 	uint8 _numToFade;
 	uint8 _fadeCount;
@@ -515,8 +514,8 @@ public:
 	int findCommand(const char *const cmdList[]);
 
 	// from newplace.cpp
-	void getUnderCentre();
-	void putUnderCentre();
+	void getUnderCenter();
+	void putUnderCenter();
 	void showArrows();
 	uint8 getLocation(uint8 index);
 	void setLocation(uint8 index);
@@ -894,7 +893,7 @@ public:
 	void cantDrop();
 	void entryAnims();
 	bool finishedWalking();
-	void emergencyPurge();
+	void emergencyPurge(uint8 from);
 	void purgeAnItem();
 	uint8 nextSymbol(uint8 symbol);
 	void enterSymbol();
@@ -996,7 +995,7 @@ public:
 	void useDryer();
 	void callEdensDLift();
 	void callEdensLift();
-	void openYourNeighbour();
+	void openYourNeighbor();
 	void openRyan();
 	void openPoolBoss();
 	void openEden();

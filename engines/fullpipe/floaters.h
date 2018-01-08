@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -22,6 +22,9 @@
 
 #ifndef FULLPIPE_FLOATERS_H
 #define FULLPIPE_FLOATERS_H
+
+#include "common/array.h"
+#include "common/ptr.h"
 
 namespace Fullpipe {
 
@@ -52,18 +55,16 @@ struct FloaterArray2 {
 	int val15;
 	int fflags;
 
-	FloaterArray2() : ani(0), val2(0), val3(0), val4(0), val5(0), val6(0), val7(0), val8(0),
+	FloaterArray2() : ani(nullptr), val2(0), val3(0), val4(0), val5(0), val6(0), val7(0), val8(0),
 		val9(0.0), val11(0.0), val13(0), countdown(0), val15(0), fflags(0) {}
 };
 
 class Floaters {
 public:
-	ReactPolygonal *_hRgn;
-	Common::Array<FloaterArray1 *> _array1;
-	Common::Array<FloaterArray2 *> _array2;
+	Common::ScopedPtr<ReactPolygonal> _hRgn;
+	Common::Array<FloaterArray1> _array1;
+	Common::Array<FloaterArray2> _array2;
 
-	Floaters() { _hRgn = 0; }
-	~Floaters();
 	void init(GameVar *var);
 	void genFlies(Scene *sc, int x, int y, int priority, int flags);
 	void update();

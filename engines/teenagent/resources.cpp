@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "teenagent/resources.h"
 #include "teenagent/teenagent.h"
+#include "common/debug.h"
 #include "common/textconsole.h"
 #include "common/translation.h"
 #include "common/zlib.h"
@@ -89,9 +91,10 @@ void Resources::precomputeDialogOffsets() {
 
 bool Resources::loadArchives(const ADGameDescription *gd) {
 	Common::File *dat_file = new Common::File();
-	if (!dat_file->open("teenagent.dat")) {
+	Common::String filename = "teenagent.dat";
+	if (!dat_file->open(filename.c_str())) {
 		delete dat_file;
-		Common::String errorMessage = _("You're missing the 'teenagent.dat' file. Get it from the ScummVM website");
+		Common::String errorMessage = Common::String::format(_("Unable to locate the '%s' engine data file."), filename.c_str());
 		warning("%s", errorMessage.c_str());
 		GUIErrorMessage(errorMessage);
 		return false;

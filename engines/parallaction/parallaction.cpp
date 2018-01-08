@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -60,6 +60,7 @@ Parallaction::Parallaction(OSystem *syst, const PARALLACTIONGameDescription *gam
 	DebugMan.addDebugChannel(kDebugMenu, "menu", "Menu debug level");
 	DebugMan.addDebugChannel(kDebugInventory, "inventory", "Inventory debug level");
 
+	_screenWidth = 0;
 	_screenHeight = 0;
 	_screenSize = 0;
 	_gameType = 0;
@@ -86,6 +87,7 @@ Parallaction::Parallaction(OSystem *syst, const PARALLACTIONGameDescription *gam
 	_inventory = 0;
 	_currentLocationIndex = 0;
 	_numLocations = 0;
+	_language = 0;
 }
 
 Parallaction::~Parallaction() {
@@ -208,7 +210,7 @@ void Parallaction::allocateLocationSlot(const char *name) {
 		error("No more location slots available. Please report this immediately to ScummVM team");
 
 	if (_currentLocationIndex  == -1) {
-		strcpy(_locationNames[_numLocations], name);
+		Common::strlcpy(_locationNames[_numLocations], name, 10);
 		_currentLocationIndex = _numLocations;
 
 		_numLocations++;

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef AUDIO_SOFTSYNTH_CMS_H
@@ -67,7 +68,9 @@ struct SAA1099 {
 class CMSEmulator {
 public:
 	CMSEmulator(uint32 sampleRate) {
-		_sampleRate = sampleRate;
+		// In PCs the chips run at 7.15909 MHz instead of 8 MHz.
+		// Adjust sampling rate upwards to bring pitch down.
+		_sampleRate = (sampleRate * 352) / 315;
 		memset(_saa1099, 0, sizeof(SAA1099)*2);
 	}
 

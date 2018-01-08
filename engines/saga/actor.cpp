@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -1172,21 +1172,6 @@ void Actor::actorSpeech(uint16 actorId, const char **strings, int stringsCount, 
 	if (_activeSpeech.speechBox.right > _vm->getDisplayInfo().width - 10) {
 		_activeSpeech.speechBox.left -= _activeSpeech.speechBox.right - _vm->getDisplayInfo().width - 10;
 		_activeSpeech.speechBox.right = _vm->getDisplayInfo().width - 10;
-	}
-
-	// HACK for the compact disk in Ellen's chapter
-	// Once Ellen starts saying that "Something is different", bring the compact disk in the
-	// scene. After speaking with AM, the compact disk is visible. She always says this line
-	// when entering room 59, after speaking with AM, if the compact disk is not picked up yet
-	// Check Script::sfDropObject for the other part of this hack
-	if (_vm->getGameId() == GID_IHNM && _vm->_scene->currentChapterNumber() == 3 &&
-		_vm->_scene->currentSceneNumber() == 59 && _activeSpeech.sampleResourceId == 286) {
-		for (ObjectDataArray::iterator obj = _objs.begin(); obj != _objs.end(); ++obj) {
-			if (obj->_id == 16385) {	// the compact disk
-				obj->_sceneNumber = 59;
-				break;
-			}
-		}
 	}
 
 }

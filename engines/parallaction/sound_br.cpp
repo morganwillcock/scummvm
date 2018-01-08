@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -86,7 +86,7 @@ protected:
 	byte *_trackEnd;
 
 public:
-	MidiParser_MSC() : byte_11C5A(false) {
+	MidiParser_MSC() : byte_11C5A(false), _beats(0), _lastEvent(0), _trackEnd(NULL) {
 	}
 };
 
@@ -467,6 +467,11 @@ SoundMan_br::SoundMan_br(Parallaction_br *vm) : _vm(vm) {
 
 	_musicEnabled = true;
 	_sfxEnabled = true;
+
+	_sfxLooping = false;
+	_sfxVolume = 0;
+	_sfxRate = 0;
+	_sfxChannel = 0;
 }
 
 SoundMan_br::~SoundMan_br() {

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -55,7 +55,7 @@ protected:
 	}
 
 public:
-	WrappedLineFormatter(Font *font) : _font(font) { }
+	WrappedLineFormatter(Font *font) : _font(font), _lines(0), _lineWidth(0) { }
 	virtual ~WrappedLineFormatter() { }
 
 	virtual void calc(const Common::String &text, uint16 maxwidth) {
@@ -136,7 +136,7 @@ protected:
 	}
 
 public:
-	StringExtent_NS(Font *font) : WrappedLineFormatter(font) { }
+	StringExtent_NS(Font *font) : WrappedLineFormatter(font), _width(0), _height(0) { }
 
 	uint width() const { return _width; }
 	uint height() const { return _height; }
@@ -189,7 +189,8 @@ protected:
 	}
 
 public:
-	StringWriter_NS(Parallaction_ns *vm, Font *font) : WrappedLineFormatter(font), _vm(vm) { }
+	StringWriter_NS(Parallaction_ns *vm, Font *font) : WrappedLineFormatter(font), _vm(vm),
+		_width(0), _height(0), _color(0), _surf(NULL) { }
 
 	void write(const Common::String &text, uint maxWidth, byte color, Graphics::Surface *surf) {
 		StringExtent_NS	se(_font);
@@ -464,7 +465,7 @@ protected:
 	}
 
 public:
-	StringExtent_BR(Font *font) : WrappedLineFormatter(font) { }
+	StringExtent_BR(Font *font) : WrappedLineFormatter(font), _width(0), _height(0) { }
 
 	uint width() const { return _width; }
 	uint height() const { return _height; }
@@ -480,7 +481,8 @@ class StringWriter_BR : public WrappedLineFormatter {
 	Graphics::Surface	*_surf;
 
 protected:
-	StringWriter_BR(Font *font, byte color) : WrappedLineFormatter(font) {
+	StringWriter_BR(Font *font, byte color) : WrappedLineFormatter(font), _width(0), _height(0),
+			_color(color), _x(0), _y(0), _surf(NULL) {
 
 	}
 
@@ -504,7 +506,8 @@ protected:
 	}
 
 public:
-	StringWriter_BR(Font *font) : WrappedLineFormatter(font) { }
+	StringWriter_BR(Font *font) : WrappedLineFormatter(font), _width(0), _height(0),
+			_color(0), _x(0), _y(0), _surf(NULL) { }
 
 	void write(const Common::String &text, uint maxWidth, byte color, Graphics::Surface *surf) {
 		StringExtent_BR	se(_font);

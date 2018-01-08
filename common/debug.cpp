@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "common/debug.h"
@@ -29,6 +30,7 @@
 
 // TODO: Move gDebugLevel into namespace Common.
 int gDebugLevel = -1;
+bool gDebugChannelsOnly = false;
 
 namespace Common {
 
@@ -45,6 +47,11 @@ struct DebugLevelComperator {
 } // end of anonymous namespace
 
 bool DebugManager::addDebugChannel(uint32 channel, const String &name, const String &description) {
+	if (name.equalsIgnoreCase("all")) {
+		warning("Debug channel 'all' is reserved for internal use");
+		return false;
+	}
+
 	if (gDebugChannels.contains(name))
 		warning("Duplicate declaration of engine debug channel '%s'", name.c_str());
 
@@ -84,7 +91,6 @@ bool DebugManager::disableDebugChannel(const String &name) {
 	}
 }
 
-
 DebugManager::DebugChannelList DebugManager::listDebugChannels() {
 	DebugChannelList tmp;
 	for (DebugChannelMap::iterator i = gDebugChannels.begin(); i != gDebugChannels.end(); ++i)
@@ -94,15 +100,37 @@ DebugManager::DebugChannelList DebugManager::listDebugChannels() {
 	return tmp;
 }
 
-bool DebugManager::isDebugChannelEnabled(uint32 channel) {
+void DebugManager::enableAllDebugChannels() {
+	for (DebugChannelMap::iterator i = gDebugChannels.begin(); i != gDebugChannels.end(); ++i)
+		enableDebugChannel(i->_value.name);
+}
+
+void DebugManager::disableAllDebugChannels() {
+	for (DebugChannelMap::iterator i = gDebugChannels.begin(); i != gDebugChannels.end(); ++i)
+		disableDebugChannel(i->_value.name);
+}
+
+bool DebugManager::isDebugChannelEnabled(uint32 channel, bool enforce) {
 	// Debug level 11 turns on all special debug level messages
-	if (gDebugLevel == 11)
+	if (gDebugLevel == 11 && enforce == false)
 		return true;
 	else
 		return (gDebugChannelsEnabled & channel) != 0;
 }
 
 } // End of namespace Common
+
+bool debugLevelSet(int level) {
+	return level <= gDebugLevel;
+}
+
+bool debugChannelSet(int level, uint32 debugChannels) {
+	if (gDebugLevel != 11 || level == -1)
+		if ((level != -1 && level > gDebugLevel) || !(DebugMan.isDebugChannelEnabled(debugChannels, level == -1)))
+			return false;
+
+	return true;
+}
 
 
 #ifndef DISABLE_TEXT_CONSOLE
@@ -122,6 +150,9 @@ static void debugHelper(const char *s, va_list va, bool caret = true) {
 void debug(const char *s, ...) {
 	va_list va;
 
+	if (gDebugChannelsOnly)
+		return;
+
 	va_start(va, s);
 	debugHelper(s, va);
 	va_end(va);
@@ -130,7 +161,7 @@ void debug(const char *s, ...) {
 void debug(int level, const char *s, ...) {
 	va_list va;
 
-	if (level > gDebugLevel)
+	if (level > gDebugLevel || gDebugChannelsOnly)
 		return;
 
 	va_start(va, s);
@@ -142,6 +173,9 @@ void debug(int level, const char *s, ...) {
 void debugN(const char *s, ...) {
 	va_list va;
 
+	if (gDebugChannelsOnly)
+		return;
+
 	va_start(va, s);
 	debugHelper(s, va, false);
 	va_end(va);
@@ -150,7 +184,7 @@ void debugN(const char *s, ...) {
 void debugN(int level, const char *s, ...) {
 	va_list va;
 
-	if (level > gDebugLevel)
+	if (level > gDebugLevel || gDebugChannelsOnly)
 		return;
 
 	va_start(va, s);

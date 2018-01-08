@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -24,16 +24,14 @@
 
 #include "kyra/kyra_rpg.h"
 #include "kyra/resource.h"
-#include "kyra/sound_intern.h"
+#include "engines/kyra/sound.h"
+#include "engines/kyra/sound_adlib.h"
 #include "kyra/script_eob.h"
 #include "kyra/timer.h"
 #include "kyra/debugger.h"
 
 #include "common/config-manager.h"
 #include "common/translation.h"
-
-#include "audio/mididrv.h"
-#include "audio/mixer.h"
 
 #include "backends/keymapper/keymapper.h"
 

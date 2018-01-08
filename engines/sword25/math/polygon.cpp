@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,8 +28,6 @@
  * Licensed under GNU GPL v2
  *
  */
-
-#include <math.h>
 
 #include "sword25/kernel/outputpersistenceblock.h"
 #include "sword25/kernel/inputpersistenceblock.h"
@@ -110,7 +108,7 @@ bool Polygon::computeIsCW() const {
 
 		// Cross product form
 		// If the cross product of the vertex lying fartherest bottom left is positive,
-		// the vertecies arrranged in a clockwise order. Otherwise counter-clockwise
+		// the vertecies arranged in a clockwise order. Otherwise counter-clockwise
 		if (crossProduct(vertices[v1Index], vertices[v2Index], vertices[v3Index]) >= 0)
 			return true;
 	}

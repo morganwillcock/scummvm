@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -27,6 +27,8 @@
 #include "common/file.h"
 #include "common/str.h"
 
+#include "engines/savestate.h"
+
 namespace Common {
 class Serializer;
 }
@@ -35,15 +37,33 @@ namespace Mohawk {
 
 class MohawkEngine_Myst;
 
+struct MystSaveMetadata {
+	uint8 saveDay;
+	uint8 saveMonth;
+	uint16 saveYear;
+
+	uint8 saveHour;
+	uint8 saveMinute;
+
+	uint32 totalPlayTime;
+
+	Common::String saveDescription;
+
+	MystSaveMetadata();
+	bool sync(Common::Serializer &s);
+};
+
 class MystGameState {
 public:
 	MystGameState(MohawkEngine_Myst*, Common::SaveFileManager*);
 	~MystGameState();
 
-	Common::StringArray generateSaveGameList();
-	bool load(const Common::String &);
-	bool save(const Common::String &);
-	void deleteSave(const Common::String &);
+	static SaveStateDescriptor querySaveMetaInfos(int slot);
+	static Common::String querySaveDescription(int slot);
+
+	bool load(int slot);
+	bool save(int slot, const Common::String &desc);
+	static void deleteSave(int slot);
 
 	void addZipDest(uint16 stack, uint16 view);
 	bool isReachableZipDest(uint16 stack, uint16 view);
@@ -268,8 +288,17 @@ public:
 		uint32 generatorDepletionTime;
 	} _stoneship;
 
+	MystSaveMetadata _metadata;
+
 private:
 	void syncGameState(Common::Serializer &s, bool isME);
+	static Common::String buildSaveFilename(int slot);
+	static Common::String buildMetadataFilename(int slot);
+	bool loadState(int slot);
+	void loadMetadata(int slot);
+	bool saveState(int slot);
+	void updateMetadateForSaving(const Common::String &desc);
+	bool saveMetadata(int slot);
 
 	// The values in these regions are lists of VIEW resources
 	// which correspond to visited zip destinations

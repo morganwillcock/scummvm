@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -71,7 +71,7 @@ void scene15_initScene(Scene *sc) {
 		grandma->hide();
 		g_fp->setObjectState(sO_LeftPipe_15, g_fp->getObjectEnumState(sO_LeftPipe_15, sO_IsOpened));
 	}
-	
+
 	g_vars->scene15_plusminus = sc->getStaticANIObject1ById(ANI_PLUSMINUS, -1);
 
 	if (g_fp->getObjectState(sO_Guard_2) == g_fp->getObjectEnumState(sO_Guard_2, sO_Off))
@@ -128,7 +128,7 @@ int sceneHandler15(ExCommand *cmd) {
 		break;
 
 	case MSG_SC15_ASSDRYG:
-		if (g_fp->_rnd->getRandomNumber(1))
+		if (g_fp->_rnd.getRandomNumber(1))
 			g_fp->playSound(SND_15_011, 0);
 		else
 			g_fp->playSound(SND_15_006, 0);
@@ -162,7 +162,7 @@ int sceneHandler15(ExCommand *cmd) {
 	case 29:
 		{
 			if (g_fp->_currentScene->getPictureObjectIdAtPos(cmd->_sceneClickX, cmd->_sceneClickY) == PIC_SC15_LADDER) {
-				handleObjectInteraction(g_fp->_aniMan, g_fp->_currentScene->getPictureObjectById(PIC_SC15_DTRUBA, 0), cmd->_keyCode);
+				handleObjectInteraction(g_fp->_aniMan, g_fp->_currentScene->getPictureObjectById(PIC_SC15_DTRUBA, 0), cmd->_param);
 				cmd->_messageKind = 0;
 
 				return 0;

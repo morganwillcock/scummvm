@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "gui/console.h"
@@ -352,6 +353,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_DELETE:
 		if (_currentPos < _promptEndPos) {
 			killChar();
@@ -364,6 +366,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_END:
 		if (state.hasFlags(Common::KBD_SHIFT)) {
 			_scrollLine = _promptEndPos / kCharsPerLine;
@@ -381,6 +384,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_DOWN:
 		historyScroll(-1);
 		break;
@@ -390,6 +394,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_PAGEDOWN:
 		if (state.hasFlags(Common::KBD_SHIFT)) {
 			_scrollLine += _linesPerPage - 1;
@@ -408,6 +413,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_LEFT:
 		if (_currentPos > _promptStartPos)
 			_currentPos--;
@@ -419,6 +425,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_RIGHT:
 		if (_currentPos < _promptEndPos)
 			_currentPos++;
@@ -430,6 +437,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_HOME:
 		if (state.hasFlags(Common::KBD_SHIFT)) {
 			_scrollLine = _firstLineInBuffer + _linesPerPage - 1;
@@ -445,6 +453,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_UP:
 		historyScroll(+1);
 		break;
@@ -454,6 +463,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 			defaultKeyDownHandler(state);
 			break;
 		}
+		// fall through
 	case Common::KEYCODE_PAGEUP:
 		if (state.hasFlags(Common::KBD_SHIFT)) {
 			_scrollLine -= _linesPerPage - 1;
@@ -470,9 +480,7 @@ void ConsoleDialog::handleKeyDown(Common::KeyState state) {
 }
 
 void ConsoleDialog::defaultKeyDownHandler(Common::KeyState &state) {
-	if (state.ascii == '~' || state.ascii == '#') {
-		slideUpAndClose();
-	} else if (state.hasFlags(Common::KBD_CTRL)) {
+	if (state.hasFlags(Common::KBD_CTRL)) {
 		specialKeys(state.keycode);
 	} else if ((state.ascii >= 32 && state.ascii <= 127) || (state.ascii >= 160 && state.ascii <= 255)) {
 		for (int i = _promptEndPos - 1; i >= _currentPos; i--)

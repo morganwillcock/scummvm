@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -32,7 +32,9 @@
 #include "engines/wintermute/base/scriptables/script_engine.h"
 #include "engines/wintermute/base/scriptables/script_stack.h"
 #include "common/memstream.h"
-
+#if EXTENDED_DEBUGGER_ENABLED
+#include "engines/wintermute/base/scriptables/debuggable/debuggable_script.h"
+#endif
 namespace Wintermute {
 
 IMPLEMENT_PERSISTENT(ScScript, false)
@@ -488,7 +490,8 @@ double ScScript::getFloat() {
 	SWAP(buffer[3], buffer[4]);
 #endif
 
-	double ret = *(double *)(buffer);
+	double ret;
+	memcpy(&ret, buffer, sizeof(double));
 	_iP += 8; // Hardcode the double-size used originally.
 	return ret;
 }
@@ -521,6 +524,9 @@ bool ScScript::executeInstruction() {
 	ScValue *op2;
 
 	uint32 inst = getDWORD();
+
+	preInstHook(inst);
+
 	switch (inst) {
 
 	case II_DEF_VAR:
@@ -1091,6 +1097,7 @@ bool ScScript::executeInstruction() {
 		ret = STATUS_FAILED;
 	} // switch(instruction)
 
+	postInstHook(inst);
 	//delete op;
 
 	return ret;
@@ -1313,8 +1320,15 @@ ScScript *ScScript::invokeEventHandler(const Common::String &eventName, bool unb
 	if (!pos) {
 		return nullptr;
 	}
-
+#if EXTENDED_DEBUGGER_ENABLED
+	// TODO: Not pretty
+	DebuggableScEngine* debuggableEngine;
+	debuggableEngine = dynamic_cast<DebuggableScEngine*>(_engine);
+	assert(debuggableEngine);
+	ScScript *thread = new DebuggableScript(_gameRef,  debuggableEngine);
+#else
 	ScScript *thread = new ScScript(_gameRef,  _engine);
+#endif
 	if (thread) {
 		bool ret = thread->createThread(this, pos, eventName);
 		if (DID_SUCCEED(ret)) {
@@ -1433,18 +1447,6 @@ bool ScScript::finishThreads() {
 	return STATUS_OK;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// IWmeDebugScript interface implementation
-int ScScript::dbgGetLine() {
-	return _currentLine;
-}
-
-//////////////////////////////////////////////////////////////////////////
-const char *ScScript::dbgGetFilename() {
-	return _filename;
-}
-
 //////////////////////////////////////////////////////////////////////////
 void ScScript::afterLoad() {
 	if (_buffer == nullptr) {
@@ -1464,5 +1466,9 @@ void ScScript::afterLoad() {
 		initTables();
 	}
 }
+
+void ScScript::preInstHook(uint32 inst) {}
+
+void ScScript::postInstHook(uint32 inst) {}
 
 } // End of namespace Wintermute

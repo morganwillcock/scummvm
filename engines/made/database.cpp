@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -40,6 +40,7 @@ namespace Made {
 */
 
 Object::Object() : _objData(NULL), _freeData(false) {
+	_objSize = 0;
 }
 
 Object::~Object() {
@@ -252,6 +253,10 @@ byte *ObjectV3::getData() {
 
 
 GameDatabase::GameDatabase(MadeEngine *vm) : _vm(vm) {
+	_gameState = nullptr;
+	_gameStateSize = 0;
+	_mainCodeObjectIndex = 0;
+	_isRedSource = false;
 }
 
 GameDatabase::~GameDatabase() {
@@ -456,7 +461,7 @@ void GameDatabaseV2::load(Common::SeekableReadStream &sourceS) {
 		for (int section = 0; section < 2; section++) {
 			while (!sourceS.eos()) {
 				int16 objIndex = sourceS.readUint16LE();
-				debug("objIndex = %04X; section = %d", objIndex, section);
+				debug(1, "objIndex = %04X; section = %d", objIndex, section);
 				if (objIndex == 0)
 					break;
 				Object *obj = new ObjectV1();
@@ -595,6 +600,8 @@ const char *GameDatabaseV2::getString(uint16 offset) {
 /* GameDatabaseV3 */
 
 GameDatabaseV3::GameDatabaseV3(MadeEngine *vm) : GameDatabase(vm) {
+	_gameText = nullptr;
+	_gameStateOffs = 0;
 }
 
 void GameDatabaseV3::load(Common::SeekableReadStream &sourceS) {

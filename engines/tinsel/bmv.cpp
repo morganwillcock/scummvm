@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -39,6 +39,7 @@
 #include "tinsel/tinlib.h"
 #include "tinsel/tinsel.h"
 
+#include "audio/audiostream.h"
 #include "audio/decoders/raw.h"
 
 #include "common/textconsole.h"
@@ -566,8 +567,8 @@ void BMVPlayer::PlayBMV(CORO_PARAM, SCNHANDLE hFileStem, int myEscape) {
 
 	assert(!bMovieOn);
 
-	strcpy(szMovieFile, (char *)LockMem(hFileStem));
-	strcat(szMovieFile, BMOVIE_EXTENSION);
+	Common::strlcpy(szMovieFile, (char *)LockMem(hFileStem), 14);
+	Common::strlcat(szMovieFile, BMOVIE_EXTENSION, 14);
 
 	assert(strlen(szMovieFile) <= 12);
 

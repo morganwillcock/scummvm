@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -55,9 +55,9 @@ struct PSPPixelFormat {
 	        PSPPixelFormat::Type &paletteType,
 	        bool &swapRedBlue);
 	static Graphics::PixelFormat convertToScummvmPixelFormat(PSPPixelFormat::Type type);
-	uint32 convertTo32BitColor(uint32 color);
+	uint32 convertTo32BitColor(uint32 color) const;
 
-	inline uint32 rgbaToColor(uint32 r, uint32 g, uint32 b, uint32 a) {
+	inline uint32 rgbaToColor(uint32 r, uint32 g, uint32 b, uint32 a) const {
 		uint32 color;
 
 		switch (format) {
@@ -80,7 +80,7 @@ struct PSPPixelFormat {
 		return color;
 	}
 
-	inline void colorToRgba(uint32 color, uint32 &r, uint32 &g, uint32 &b, uint32 &a) {
+	inline void colorToRgba(uint32 color, uint32 &r, uint32 &g, uint32 &b, uint32 &a) const {
 		switch (format) {
 		case Type_4444:
 			a = (color >> 12) & 0xF; // Interpolate to get true colors
@@ -140,7 +140,7 @@ struct PSPPixelFormat {
 		return color;
 	}
 
-	inline uint32 pixelsToBytes(uint32 pixels) {
+	inline uint32 pixelsToBytes(uint32 pixels) const {
 		switch (bitsPerPixel) {
 		case 4:
 			pixels >>= 1;
@@ -160,7 +160,7 @@ struct PSPPixelFormat {
 		return pixels;
 	}
 
-	inline uint16 swapRedBlue16(uint16 color) {
+	inline uint16 swapRedBlue16(uint16 color) const {
 		uint16 output;
 
 		switch (format) {
@@ -181,7 +181,7 @@ struct PSPPixelFormat {
 		return output;
 	}
 
-	inline uint32 swapRedBlue32(uint32 color) {
+	inline uint32 swapRedBlue32(uint32 color) const {
 		uint32 output;
 
 		switch (format) {
@@ -211,7 +211,7 @@ struct PSPPixelFormat {
 	}
 
 	// Return whatever color we point at
-	inline uint32 getColorValueAt(byte *pointer) {
+	inline uint32 getColorValueAt(byte *pointer) const {
 		uint32 result;
 
 		switch (bitsPerPixel) {

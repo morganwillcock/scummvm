@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -38,7 +38,11 @@ Sprite::Sprite(ScummEngine_v90he *vm)
 	_vm(vm),
 	_spriteGroups(0),
 	_spriteTable(0),
-	_activeSpritesTable(0) {
+	_activeSpritesTable(0),
+	_numSpritesToProcess(0),
+	_varNumSpriteGroups(0),
+	_varNumSprites(0),
+	_varMaxSprites(0) {
 }
 
 Sprite::~Sprite() {
@@ -264,6 +268,13 @@ int Sprite::getSpriteFlagRemapPalette(int spriteId) {
 int Sprite::getSpriteFlagAutoAnim(int spriteId) {
 	assertRange(1, spriteId, _varNumSprites, "sprite");
 
+	// WORKAROUND: Two scripts (room 2 script 2070/2071) compare against
+	// a return value of one, but the original game returned the flag value
+	// (0x200000) for true. These scripts bugs caused problems (infinite loop
+	// and beans not appearing) in the Jumping Beans mini games under ScummVM.
+	if (_vm->_game.id == GID_PJGAMES)
+		return 0;
+
 	return ((_spriteTable[spriteId].flags & kSFAutoAnim) != 0) ? 1 : 0;
 }
 
@@ -379,7 +390,7 @@ int Sprite::getSpriteGeneralProperty(int spriteId, int type) {
 	case 0x7B:
 		return _spriteTable[spriteId].imgFlags;
 	case 0x7D:
-		return _spriteTable[spriteId].field_90;
+		return _spriteTable[spriteId].conditionBits;
 	case 0x7E:
 		return _spriteTable[spriteId].animProgress;
 	default:
@@ -732,18 +743,16 @@ void Sprite::setSpriteResetClass(int spriteId) {
 	_spriteTable[spriteId].classFlags = 0;
 }
 
-void Sprite::setSpriteField84(int spriteId, int value) {
+void Sprite::setSpriteZBuffer(int spriteId, int value) {
 	assertRange(1, spriteId, _varNumSprites, "sprite");
 
-	_spriteTable[spriteId].field_84 = value;
+	_spriteTable[spriteId].zbufferImage = value;
 }
 
 void Sprite::setSpriteGeneralProperty(int spriteId, int type, int value) {
-	debug(0, "setSpriteGeneralProperty: spriteId %d type 0x%x", spriteId, type);
+	debug(6, "setSpriteGeneralProperty: spriteId %d type 0x%x value 0x%x", spriteId, type, value);
 	assertRange(1, spriteId, _varNumSprites, "sprite");
 	int32 delay;
-
-	// XXX U32 related check
 
 	switch (type) {
 	case 0x7B:
@@ -751,7 +760,7 @@ void Sprite::setSpriteGeneralProperty(int spriteId, int type, int value) {
 		_spriteTable[spriteId].flags |= kSFChanged | kSFNeedRedraw;
 		break;
 	case 0x7D:
-		_spriteTable[spriteId].field_90 = value;
+		_spriteTable[spriteId].conditionBits = value;
 		_spriteTable[spriteId].flags |= kSFChanged | kSFNeedRedraw;
 		break;
 	case 0x7E:
@@ -790,9 +799,14 @@ void Sprite::resetSprite(int spriteId) {
 	_spriteTable[spriteId].sourceImage = 0;
 	_spriteTable[spriteId].maskImage = 0;
 	_spriteTable[spriteId].priority = 0;
-	_spriteTable[spriteId].field_84 = 0;
+	_spriteTable[spriteId].zbufferImage = 0;
 	_spriteTable[spriteId].imgFlags = 0;
-	_spriteTable[spriteId].field_90 = 0;
+	_spriteTable[spriteId].conditionBits = 0;
+
+	if (_vm->_game.heversion >= 100) {
+		_spriteTable[spriteId].flags &= ~kSFMarkDirty;
+		_spriteTable[spriteId].flags |= kSFAutoAnim | kSFBlitDirectly;
+	}
 }
 
 void Sprite::setSpriteImage(int spriteId, int imageNum) {
@@ -804,7 +818,7 @@ void Sprite::setSpriteImage(int spriteId, int imageNum) {
 	origResWizStates = _spriteTable[spriteId].imageStateCount;
 
 	_spriteTable[spriteId].image = imageNum;
-	_spriteTable[spriteId].field_74 = 0;
+	_spriteTable[spriteId].animIndex = 0;
 	_spriteTable[spriteId].imageState = 0;
 
 	if (_spriteTable[spriteId].image) {
@@ -820,6 +834,8 @@ void Sprite::setSpriteImage(int spriteId, int imageNum) {
 	} else {
 		if (_vm->VAR(139))
 			_spriteTable[spriteId].flags &= ~kSFActive;
+		else if (_vm->_game.heversion >= 100 && origResId == 0)
+			_spriteTable[spriteId].flags = 0;
 		else if (_spriteTable[spriteId].flags & kSFImageless)
 			_spriteTable[spriteId].flags = 0;
 		else
@@ -1278,7 +1294,7 @@ void Sprite::processImages(bool arg) {
 
 		wiz.spriteId = spi->id;
 		wiz.spriteGroup = spi->group;
-		wiz.field_23EA = spi->field_90;
+		wiz.conditionBits = spi->conditionBits;
 		spi->curImageState = wiz.img.state = imageState;
 		spi->curImage = wiz.img.resNum = image;
 		wiz.processFlags = kWPFNewState | kWPFSetPos;
@@ -1325,9 +1341,9 @@ void Sprite::processImages(bool arg) {
 		}
 		if (spr_flags & kSFRemapPalette)
 			wiz.img.flags |= kWIFRemapPalette;
-		if (spi->field_84) {
+		if (spi->zbufferImage) {
 			wiz.processFlags |= 0x200000;
-			wiz.img.field_390 = spi->field_84;
+			wiz.img.zbuffer = spi->zbufferImage;
 			wiz.img.zorder = spi->priority;
 		}
 		if (spi->sourceImage) {
@@ -1405,14 +1421,14 @@ void Sprite::saveOrLoadSpriteData(Serializer *s) {
 		MKLINE(SpriteInfo, curAngle, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, curScale, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, curImgFlags, sleInt32, VER(48)),
-		MKLINE(SpriteInfo, field_74, sleInt32, VER(48)),
+		MKLINE(SpriteInfo, animIndex, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, animSpeed, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, sourceImage, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, maskImage, sleInt32, VER(48)),
-		MKLINE(SpriteInfo, field_84, sleInt32, VER(48)),
+		MKLINE(SpriteInfo, zbufferImage, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, classFlags, sleInt32, VER(48)),
 		MKLINE(SpriteInfo, imgFlags, sleInt32, VER(48)),
-		MKLINE(SpriteInfo, field_90, sleInt32, VER(48)),
+		MKLINE(SpriteInfo, conditionBits, sleInt32, VER(48)),
 		MKEND()
 	};
 

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -497,12 +497,12 @@ int Logic::interpretScript(Object *compact, int id, Header *scriptModule, int sc
 			mCodeNumber = scriptCode[pc++];
 			mCodeArguments = scriptCode[pc++];
 			switch (mCodeArguments) {
-			case 6: f = stack[--stackIdx];
-			case 5: e = stack[--stackIdx];
-			case 4: d = stack[--stackIdx];
-			case 3: c = stack[--stackIdx];
-			case 2: b = stack[--stackIdx];
-			case 1: a = stack[--stackIdx];
+			case 6: f = stack[--stackIdx]; // fall through
+			case 5: e = stack[--stackIdx]; // fall through
+			case 4: d = stack[--stackIdx]; // fall through
+			case 3: c = stack[--stackIdx]; // fall through
+			case 2: b = stack[--stackIdx]; // fall through
+			case 1: a = stack[--stackIdx]; // fall through
 			case 0:
 				Debug::callMCode(mCodeNumber, mCodeArguments, a, b, c, d, e, f);
 				mCodeReturn = (this->*_mcodeTable[mCodeNumber])(compact, id, a, b, c, d, e, f);

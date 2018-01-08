@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -46,7 +46,7 @@ Vassili::Vassili(LastExpressEngine *engine) : Entity(engine, kEntityVassili) {
 	ADD_CALLBACK_FUNCTION(Vassili, savegame);
 	ADD_CALLBACK_FUNCTION(Vassili, chapter1);
 	ADD_CALLBACK_FUNCTION(Vassili, chapter1Handler);
-	ADD_CALLBACK_FUNCTION(Vassili, function6);
+	ADD_CALLBACK_FUNCTION(Vassili, inBed);
 	ADD_CALLBACK_FUNCTION(Vassili, function7);
 	ADD_CALLBACK_FUNCTION(Vassili, function8);
 	ADD_CALLBACK_FUNCTION(Vassili, function9);
@@ -126,7 +126,7 @@ IMPLEMENT_FUNCTION(5, Vassili, chapter1Handler)
 		break;
 
 	case kAction122732000:
-		setup_function6();
+		setup_inBed();
 		break;
 
 	case kAction168459827:
@@ -137,7 +137,7 @@ IMPLEMENT_FUNCTION(5, Vassili, chapter1Handler)
 IMPLEMENT_FUNCTION_END
 
 //////////////////////////////////////////////////////////////////////////
-IMPLEMENT_FUNCTION(6, Vassili, function6)
+IMPLEMENT_FUNCTION(6, Vassili, inBed)
 	switch (savepoint.action) {
 	default:
 		break;

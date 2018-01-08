@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #include "teenagent/font.h"
@@ -24,6 +25,7 @@
 #include "teenagent/pack.h"
 #include "teenagent/teenagent.h"
 
+#include "common/debug.h"
 #include "common/endian.h"
 #include "common/stream.h"
 #include "common/textconsole.h"

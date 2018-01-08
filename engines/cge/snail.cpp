@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -497,7 +497,7 @@ void CGEEngine::snGame(Sprite *spr, int num) {
 		// the test has been restricted to some specific OSes
 		// in order to avoid some obvious issues (like Android, iOS, NDS, N64...)
 		// Not perfect, but at least better than nothing.
-#if defined(WIN32) || defined(UNIX) || defined(MACOSX) || defined(MOTOEZX) || defined(LINUPY) || defined(LINUXMOTO_SDL)
+#if defined(WIN32) || defined(UNIX) || defined(MACOSX) || defined(MOTOEZX) || defined(LINUXMOTO_SDL)
 		if (spr->_ref == 1 && _keyboard->_keyAlt) {
 #else
 		if (spr->_ref == 1 && _gameCase2Cpt > 1) {
@@ -550,7 +550,7 @@ void CGEEngine::snGame(Sprite *spr, int num) {
 		switch (spr->_ref) {
 		case 1:
 			_commandHandler->addCommand(kCmdSay,   20001, 20011, NULL);        // Say "It'a my turn"
-			_commandHandler->addCommand(kCmdSeq,   20001,     1, NULL);        // Throw dice
+			_commandHandler->addCommand(kCmdSeq,   20001,     1, NULL);        // Throw dice
 			_commandHandler->addCommand(kCmdWait,  20001,     1, NULL);        // wait
 			_commandHandler->addCommand(kCmdSetZ,  20700,     2, NULL);        // hide dice
 			_commandHandler->addCommand(kCmdHide,  20007,     1, NULL);        // hide dice
@@ -564,7 +564,7 @@ void CGEEngine::snGame(Sprite *spr, int num) {
 
 		case 20001:
 			_commandHandler->addCommand(kCmdSay,   20002, 20012, NULL);        // Say "Now it's mine"
-			_commandHandler->addCommand(kCmdSeq,   20002,     1, NULL);        // Throw dice
+			_commandHandler->addCommand(kCmdSeq,   20002,     1, NULL);        // Throw dice
 			_commandHandler->addCommand(kCmdWait,  20002,     3, NULL);        // wait
 			_commandHandler->addCommand(kCmdSetZ,  20700,     2, NULL);        // hide dice
 			_commandHandler->addCommand(kCmdHide,  20007,     1, NULL);        // hide dice
@@ -581,7 +581,7 @@ void CGEEngine::snGame(Sprite *spr, int num) {
 			_commandHandler->addCommand(kCmdWalk,  20005,    -1, NULL);        // Walk to table
 			_commandHandler->addCommand(kCmdWait,      1,    -1, NULL);        // Wait
 			_commandHandler->addCommand(kCmdCover,     1, 20101, NULL);        // grasol ??
-			_commandHandler->addCommand(kCmdSeq,   20101,     1, NULL);        // Start Chief animation (20solgra)
+			_commandHandler->addCommand(kCmdSeq,   20101,     1, NULL);        // Start Chief animation (20solgra)
 			_commandHandler->addCommand(kCmdWait,  20101,     5, NULL);        // Wait
 			_commandHandler->addCommand(kCmdSetZ,  20700,     2, NULL);        // Hide dice
 			_commandHandler->addCommand(kCmdHide,  20007,     1, NULL);        // Hide dice
@@ -657,6 +657,9 @@ void CGEEngine::selectPocket(int n) {
  */
 void CGEEngine::pocFul() {
 	debugC(1, kCGEDebugEngine, "CGEEngine::pocFul()");
+
+	if (!_hero)
+		error("pocFul - Unexpected null _hero");
 
 	_hero->park();
 	_commandHandler->addCommand(kCmdWait, -1, -1, _hero);
@@ -1189,7 +1192,7 @@ void CGEEngine::snFlash(bool on) {
 		if (pal) {
 			memcpy(pal, _vga->_sysPal, kPalSize);
 			for (int i = 0; i < kPalCount; i++) {
-				register int c;
+				int c;
 				c = pal[i]._r << 1;
 				pal[i]._r = (c < 64) ? c : 63;
 				c = pal[i]._g << 1;

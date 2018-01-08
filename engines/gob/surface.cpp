@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,7 +31,8 @@
 #include "graphics/primitives.h"
 #include "graphics/pixelformat.h"
 #include "graphics/surface.h"
-#include "graphics/decoders/iff.h"
+
+#include "image/iff.h"
 
 namespace Gob {
 
@@ -469,7 +470,7 @@ void Surface::blitScaled(const Surface &from, Common::Rational scale, int32 tran
 	blitScaled(from, 0, 0, from._width - 1, from._height - 1, 0, 0, scale, transp);
 }
 
-void Surface::fillRect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint32 color) {
+void Surface::fillRect(int16 left, int16 top, int16 right, int16 bottom, uint32 color) {
 	// Just in case those are swapped
 	if (left > right)
 		SWAP(left, right);
@@ -479,6 +480,11 @@ void Surface::fillRect(uint16 left, uint16 top, uint16 right, uint16 bottom, uin
 	if ((left >= _width) || (top >= _height))
 		// Nothing to do
 		return;
+
+	left   = CLIP<int32>(left  , 0, _width  - 1);
+	top    = CLIP<int32>(top   , 0, _height - 1);
+	right  = CLIP<int32>(right , 0, _width  - 1);
+	bottom = CLIP<int32>(bottom, 0, _height - 1);
 
 	// Area to actually fill
 	uint16 width  = CLIP<int32>(right  - left + 1, 0, _width  - left);
@@ -814,7 +820,7 @@ bool Surface::loadTGA(Common::SeekableReadStream &stream) {
 }
 
 bool Surface::loadIFF(Common::SeekableReadStream &stream) {
-	Graphics::IFFDecoder decoder;
+	Image::IFFDecoder decoder;
 	decoder.loadStream(stream);
 
 	if (!decoder.getSurface())

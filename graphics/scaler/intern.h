@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -46,8 +46,8 @@ static inline uint32 interpolate32_1_1(uint32 p1, uint32 p2) {
  */
 template<typename ColorMask>
 static inline uint32 interpolate32_3_1(uint32 p1, uint32 p2) {
-	register uint32 x = ((p1 & ColorMask::qhighBits) >> 2) * 3 + ((p2 & ColorMask::qhighBits) >> 2);
-	register uint32 y = ((p1 & ColorMask::qlowBits) * 3 + (p2 & ColorMask::qlowBits)) >> 2;
+	uint32 x = ((p1 & ColorMask::qhighBits) >> 2) * 3 + ((p2 & ColorMask::qhighBits) >> 2);
+	uint32 y = ((p1 & ColorMask::qlowBits) * 3 + (p2 & ColorMask::qlowBits)) >> 2;
 
 	y &= ColorMask::qlowBits;
 	return x + y;

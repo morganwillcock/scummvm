@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
  */
 
 #ifndef SCUMM_IMUSE_DIGI_SNDMGR_H
@@ -24,13 +25,20 @@
 
 
 #include "common/scummsys.h"
-#include "audio/audiostream.h"
-#include "scumm/imuse_digi/dimuse_bndmgr.h"
+
+namespace Audio {
+class SeekableAudioStream;
+}
+
+namespace Common {
+class SeekableReadStream;
+}
 
 namespace Scumm {
 
 class ScummEngine;
 class BundleMgr;
+class BundleDirCache;
 
 class ImuseDigiSndMgr {
 public:

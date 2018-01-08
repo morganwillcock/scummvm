@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -383,7 +383,7 @@ bool AGOSEngine::loadRoomItems(uint16 room) {
 			 for (uint16 z = minNum; z <= maxNum; z++) {
 				uint16 itemNum = z + 2;
 				item = derefItem(itemNum);
-				item->parent = 0;
+				_itemArrayPtr[itemNum] = 0;
 
 				uint16 num = (itemNum - _itemArrayInited);
 				_roomStates[num].state = item->state;
@@ -453,6 +453,7 @@ bool AGOSEngine::loadRoomItems(uint16 room) {
 					item->classFlags = _roomStates[num].classFlags;
 					SubRoom *subRoom = (SubRoom *)findChildOfType(item, kRoomType);
 					subRoom->roomExitStates = _roomStates[num].roomExitStates;
+
 				}
 				in.close();
 

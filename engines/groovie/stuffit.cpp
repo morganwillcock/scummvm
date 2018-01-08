@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -71,7 +71,7 @@ private:
 
 	// Decompression Helpers
 	void update14(uint16 first, uint16 last, byte *code, uint16 *freq) const;
-	void readTree14(Common::BitStream *bits, SIT14Data *dat, uint16 codesize, uint16 *result) const;
+	void readTree14(Common::BitStream8LSB *bits, SIT14Data *dat, uint16 codesize, uint16 *result) const;
 };
 
 StuffItArchive::StuffItArchive() : Common::Archive() {
@@ -302,7 +302,7 @@ struct SIT14Data {
 	if (b->pos() & 7) \
 		b->skip(8 - (b->pos() & 7))
 
-void StuffItArchive::readTree14(Common::BitStream *bits, SIT14Data *dat, uint16 codesize, uint16 *result) const {
+void StuffItArchive::readTree14(Common::BitStream8LSB *bits, SIT14Data *dat, uint16 codesize, uint16 *result) const {
 	uint32 i, l, n;
 	uint32 k = bits->getBit();
 	uint32 j = bits->getBits(2) + 2;
@@ -429,7 +429,7 @@ Common::SeekableReadStream *StuffItArchive::decompress14(Common::SeekableReadStr
 	byte *dst = (byte *)malloc(uncompressedSize);
 	Common::MemoryWriteStream out(dst, uncompressedSize);
 
-	Common::BitStream *bits = new Common::BitStream8LSB(src);
+	Common::BitStream8LSB *bits = new Common::BitStream8LSB(src);
 
 	uint32 i, j, k, l, m, n;
 

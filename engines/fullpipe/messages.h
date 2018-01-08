@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,26 +31,28 @@
 
 namespace Fullpipe {
 
+enum QueueFlags {
+	kInGlobalQueue = 2
+};
+
 class Message : public CObject {
  public:
 	int _messageKind;
 	int16 _parentId;
 	int _x;
 	int _y;
-	int _field_14;
+	int _z;
 	int _sceneClickX;
 	int _sceneClickY;
 	int _field_20;
 	int _field_24;
-	int _keyCode;
+	int _param;
 	int _field_2C;
 	int _field_30;
 	int _field_34;
 
  public:
 	Message();
-	Message(Message *src);
-	virtual ~Message() {}
 
 	Message(int16 parentId, int messageKind, int x, int y, int a6, int a7, int sceneClickX, int sceneClickY, int a10);
 };
@@ -82,25 +84,22 @@ class ExCommand : public Message {
 
 class ExCommand2 : public ExCommand {
  public:
-	Common::Point **_points;
-	int _pointsSize;
+	PointList _points;
 
-	ExCommand2(int messageKind, int parentId, Common::Point **points, int pointsSize);
+	ExCommand2(int messageKind, int parentId, const PointList &points);
 	ExCommand2(ExCommand2 *src);
-	virtual ~ExCommand2();
 
 	virtual ExCommand2 *createClone();
 };
 
 class ObjstateCommand : public ExCommand {
  public:
-	char *_objCommandName;
+	Common::String _objCommandName;
 	int _value;
 
  public:
 	ObjstateCommand();
 	ObjstateCommand(ObjstateCommand *src);
-	virtual ~ObjstateCommand();
 
 	virtual bool load(MfcArchive &file);
 
@@ -111,7 +110,7 @@ class MessageQueue : public CObject {
   public:
 	int _id;
 	int _flags;
-	char *_queueName;
+	Common::String _queueName;
 	int16 _dataId;
 	CObject *_field_14;
 	int _counter;
@@ -142,10 +141,11 @@ class MessageQueue : public CObject {
 	ExCommand *getExCommandByIndex(uint idx);
 	void deleteExCommandByIndex(uint idx, bool doFree);
 
-	void transferExCommands(MessageQueue *mq);
+	void mergeQueue(MessageQueue *mq);
 
-	void replaceKeyCode(int key1, int key2);
+	void setParamInt(int key1, int key2);
 
+	/** `ani` will own `this` if `chain` returns true */
 	bool chain(StaticANIObject *ani);
 	void update();
 	void sendNextCommand();
@@ -163,12 +163,14 @@ class MessageQueue : public CObject {
 };
 
 class GlobalMessageQueueList : public Common::Array<MessageQueue *> {
-  public:
+public:
 	MessageQueue *getMessageQueueById(int id);
 	void deleteQueueById(int id);
 	void removeQueueById(int id);
 	void disableQueueById(int id);
+	/** `msg` becomes owned by `this` */
 	void addMessageQueue(MessageQueue *msg);
+	void clear();
 
 	int compact();
 };
@@ -193,6 +195,7 @@ void clearMessageHandlers();
 void processMessages();
 void updateGlobalMessageQueue(int id, int objid);
 void clearMessages();
+void clearGlobalMessageQueueList();
 void clearGlobalMessageQueueList1();
 
 bool chainQueue(int queueId, int flags);

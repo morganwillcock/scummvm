@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -161,7 +161,7 @@ void LoLEngine::snd_playSoundEffect(int track, int volume) {
 		return;
 
 	_lastSfxTrack = track;
-	if (track == -1 || track >= _ingameSoundListSize)
+	if (track == -1 || track >= _ingameSoundIndexSize)
 		return;
 
 	volume &= 0xFF;
@@ -216,10 +216,10 @@ bool LoLEngine::snd_processEnvironmentalSoundEffect(int soundId, int block) {
 		for (int i = 3; i > 0; i--) {
 			int dir = calcMonsterDirection(cbl & 0x1F, cbl >> 5, block & 0x1F, block >> 5);
 			cbl = (cbl + blockShiftTable[dir]) & 0x3FF;
-			if (cbl != block) {
-				if (testWallFlag(cbl, 0, 1))
-					_environmentSfxVol >>= 1;
-			}
+			if (cbl == block)
+				break;
+			if (testWallFlag(cbl, 0, 1))
+				_environmentSfxVol >>= 1;
 		}
 	}
 

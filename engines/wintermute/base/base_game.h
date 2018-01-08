@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -34,7 +34,11 @@
 #include "engines/wintermute/persistent.h"
 #include "engines/wintermute/coll_templ.h"
 #include "engines/wintermute/math/rect32.h"
+#include "engines/wintermute/debugger.h"
 #include "common/events.h"
+#if EXTENDED_DEBUGGER_ENABLED
+#include "engines/wintermute/base/scriptables/debuggable/debuggable_script_engine.h"
+#endif
 
 namespace Wintermute {
 
@@ -97,7 +101,7 @@ public:
 	virtual bool displayDebugInfo();
 
 	void setShowFPS(bool enabled) { _debugShowFPS = enabled; }
-
+	bool getBilinearFiltering() { return _bilinearFiltering; }
 	bool getSuspendedRendering() const { return _suspendedRendering; }
 
 	TTextEncoding _textEncoding;
@@ -123,6 +127,7 @@ public:
 
 	inline BaseObject *getMainObject() { return _mainObject; }
 	inline BaseFont *getSystemFont() { return _systemFont; }
+	inline BaseFont *getVideoFont() { return _videoFont; }
 
 	bool initInput();
 	bool initLoop();
@@ -140,13 +145,18 @@ public:
 
 	// String Table
 	void expandStringByStringTable(char **str) const;
+	void expandStringByStringTable(Common::String &str) const;
 	char *getKeyFromStringTable(const char *str) const;
 
 	void LOG(bool res, const char *fmt, ...);
 
 	BaseRenderer *_renderer;
 	BaseSoundMgr *_soundMgr;
+#if EXTENDED_DEBUGGER_ENABLED
+	DebuggableScEngine *_scEngine;
+#else
 	ScEngine *_scEngine;
+#endif
 	BaseScriptable *_mathClass;
 	BaseSurfaceStorage *_surfaceStorage;
 	BaseFontStorage *_fontStorage;
@@ -269,6 +279,7 @@ protected:
 	VideoTheoraPlayer *_theoraPlayer;
 private:
 	bool _debugShowFPS;
+	bool _bilinearFiltering;
 	void *_debugLogFile;
 	void DEBUG_DebugDisable();
 	void DEBUG_DebugEnable(const char *filename = nullptr);

@@ -9,12 +9,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -33,7 +33,7 @@
 
 // These instructions don't generate automatically but are faster then copying byte by byte
 inline void lwl_copy(byte *dst, const byte *src) {
-	register uint32 data;
+	uint32 data;
 	asm volatile ("lwr %0,0(%1)\n\t"
 		 "lwl %0,3(%1)\n\t"
 		 : "=&r" (data) : "r" (src), "m" (*src));

@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -58,18 +58,29 @@ MadeEngine::MadeEngine(OSystem *syst, const MadeGameDescription *gameDesc) : Eng
 
 	const GameSettings *g;
 
+	_eventNum = 0;
+	_eventMouseX = _eventMouseY = 0;
+	_eventKey = 0;
+	_autoStopSound = false;
+	_soundEnergyIndex = 0;
+	_soundEnergyArray = 0;
+	_musicBeatStart = 0;
+	_cdTimeStart = 0;
+
+	_gameId = -1;
+
 	const char *gameid = ConfMan.get("gameid").c_str();
 	for (g = madeSettings; g->gameid; ++g)
 		if (!scumm_stricmp(g->gameid, gameid))
 			_gameId = g->id;
 
+	assert(_gameId != -1);
+
 	_rnd = new Common::RandomSource("made");
 
 	_console = new MadeConsole(this);
 
-	int cd_num = ConfMan.getInt("cdrom");
-	if (cd_num >= 0)
-		_system->getAudioCDManager()->openCD(cd_num);
+	_system->getAudioCDManager()->open();
 
 	_pmvPlayer = new PmvPlayer(this, _mixer);
 	_res = new ResourceReader();
@@ -86,6 +97,8 @@ MadeEngine::MadeEngine(OSystem *syst, const MadeGameDescription *gameDesc) : Eng
 	_script = new ScriptInterpreter(this);
 
 	_music = nullptr;
+
+	_soundRate = 0;
 
 	// Set default sound frequency
 	switch (getGameID()) {
@@ -270,16 +283,16 @@ void MadeEngine::handleEvents() {
 		}
 	}
 
-	_system->getAudioCDManager()->updateCD();
+	_system->getAudioCDManager()->update();
 
 }
 
 Common::Error MadeEngine::run() {
-	_music = new MusicPlayer();
+	_music = new MusicPlayer(getGameID() == GID_RTZ);
 	syncSoundSettings();
 
 	// Initialize backend
-	initGraphics(320, 200, false);
+	initGraphics(320, 200);
 
 	resetAllTimers();
 

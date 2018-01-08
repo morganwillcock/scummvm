@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -420,7 +420,7 @@ void OSystem_WINCE3::initBackend() {
 	}
 
 	if (_graphicsManager == 0)
-		_graphicsManager = new WINCESdlGraphicsManager(_eventSource);
+		_graphicsManager = new WINCESdlGraphicsManager(_eventSource, _window);
 
 	((WINCESdlEventSource *)_eventSource)->init(dynamic_cast<WINCESdlGraphicsManager *>(_graphicsManager));
 
@@ -645,7 +645,7 @@ Common::String OSystem_WINCE3::getSystemLanguage() const {
 	const char *posixMappingTable[][3] = {
 		{"CAT", "ESP", "ca_ES"},
 		{"CSY", "CZE", "cs_CZ"},
-		{"DAN", "DNK", "da_DA"},
+		{"DAN", "DNK", "da_DK"},
 		{"DEU", "DEU", "de_DE"},
 		{"ESN", "ESP", "es_ES"},
 		{"ESP", "ESP", "es_ES"},
@@ -657,7 +657,7 @@ Common::String OSystem_WINCE3::getSystemLanguage() const {
 		{"PLK", "POL", "pl_PL"},
 		{"PTB", "BRA", "pt_BR"},
 		{"RUS", "RUS", "ru_RU"},
-		{"SVE", "SWE", "se_SE"},
+		{"SVE", "SWE", "sv_SE"},
 		{"UKR", "UKR", "uk_UA"},
 		{NULL, NULL, NULL}
 	};
